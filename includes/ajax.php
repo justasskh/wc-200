@@ -98,7 +98,7 @@ function wcflow_get_addons_data() {
 add_action('wp_ajax_wcflow_get_addons', 'wcflow_get_addons_data');
 add_action('wp_ajax_nopriv_wcflow_get_addons', 'wcflow_get_addons_data');
 
-// Get cards data
+// FIXED: Get cards data with proper categories
 function wcflow_get_cards_data() {
     check_ajax_referer('wcflow_nonce', 'nonce');
     
@@ -111,7 +111,7 @@ function wcflow_get_cards_data() {
     $cards_by_category = [];
     foreach ($cards as $card) {
         $terms = get_the_terms($card->ID, 'wcflow_card_category');
-        $category = $terms && !is_wp_error($terms) ? $terms[0]->name : 'Birthday';
+        $category = $terms && !is_wp_error($terms) ? $terms[0]->name : 'Gimtadienio ir švenčių atvirukai';
         
         $price_value = get_post_meta($card->ID, '_wcflow_price', true);
         $image_id = get_post_thumbnail_id($card->ID);
@@ -124,34 +124,81 @@ function wcflow_get_cards_data() {
         $cards_by_category[$category][] = [
             'id' => $card->ID,
             'title' => $card->post_title,
-            'price' => $price_value > 0 ? wc_price($price_value) : 'FREE',
+            'price' => $price_value > 0 ? wc_price($price_value) : 'NEMOKAMA',
             'price_value' => floatval($price_value),
             'img' => $image_url
         ];
     }
     
-    // If no cards exist, create sample data
+    // FIXED: Create proper sample data with Lithuanian categories
     if (empty($cards_by_category)) {
-        $cards_by_category['Birthday'] = [
+        // First category: Populiariausi atvirukai
+        $cards_by_category['Populiariausi atvirukai'] = [
             [
-                'id' => 'sample-1',
-                'title' => 'Birthday Hugs',
-                'price' => 'FREE',
+                'id' => 'sample-pop-1',
+                'title' => 'Gimtadienio apkabinimai',
+                'price' => 'NEMOKAMA',
                 'price_value' => 0,
                 'img' => 'https://images.pexels.com/photos/1666065/pexels-photo-1666065.jpeg?auto=compress&cs=tinysrgb&w=400'
             ],
             [
-                'id' => 'sample-2',
-                'title' => 'June Birth Flower',
+                'id' => 'sample-pop-2',
+                'title' => 'Birželio gimimo gėlė',
                 'price' => wc_price(1.50),
                 'price_value' => 1.50,
                 'img' => 'https://images.pexels.com/photos/1040173/pexels-photo-1040173.jpeg?auto=compress&cs=tinysrgb&w=400'
             ],
             [
-                'id' => 'sample-3',
-                'title' => 'Happy Birthday',
+                'id' => 'sample-pop-3',
+                'title' => 'Su gimtadieniu!',
                 'price' => wc_price(2.50),
                 'price_value' => 2.50,
+                'img' => 'https://images.pexels.com/photos/1729931/pexels-photo-1729931.jpeg?auto=compress&cs=tinysrgb&w=400'
+            ],
+            [
+                'id' => 'sample-pop-4',
+                'title' => 'Šventinis sveikinimas',
+                'price' => wc_price(1.75),
+                'price_value' => 1.75,
+                'img' => 'https://images.pexels.com/photos/1040173/pexels-photo-1040173.jpeg?auto=compress&cs=tinysrgb&w=400'
+            ]
+        ];
+        
+        // Second category: Gimtadienio ir švenčių atvirukai
+        $cards_by_category['Gimtadienio ir švenčių atvirukai'] = [
+            [
+                'id' => 'sample-bday-1',
+                'title' => 'Linksmų gimtadienio',
+                'price' => wc_price(1.50),
+                'price_value' => 1.50,
+                'img' => 'https://images.pexels.com/photos/1666065/pexels-photo-1666065.jpeg?auto=compress&cs=tinysrgb&w=400'
+            ],
+            [
+                'id' => 'sample-bday-2',
+                'title' => 'Šventinis tortas',
+                'price' => wc_price(2.00),
+                'price_value' => 2.00,
+                'img' => 'https://images.pexels.com/photos/1729931/pexels-photo-1729931.jpeg?auto=compress&cs=tinysrgb&w=400'
+            ],
+            [
+                'id' => 'sample-bday-3',
+                'title' => 'Gėlių puokštė',
+                'price' => wc_price(1.75),
+                'price_value' => 1.75,
+                'img' => 'https://images.pexels.com/photos/1040173/pexels-photo-1040173.jpeg?auto=compress&cs=tinysrgb&w=400'
+            ],
+            [
+                'id' => 'sample-bday-4',
+                'title' => 'Šventinis balionas',
+                'price' => wc_price(1.25),
+                'price_value' => 1.25,
+                'img' => 'https://images.pexels.com/photos/1666065/pexels-photo-1666065.jpeg?auto=compress&cs=tinysrgb&w=400'
+            ],
+            [
+                'id' => 'sample-bday-5',
+                'title' => 'Gimtadienio linkėjimai',
+                'price' => wc_price(1.50),
+                'price_value' => 1.50,
                 'img' => 'https://images.pexels.com/photos/1729931/pexels-photo-1729931.jpeg?auto=compress&cs=tinysrgb&w=400'
             ]
         ];

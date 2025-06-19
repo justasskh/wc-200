@@ -292,17 +292,29 @@ body.wcflow-modal-open {
     margin: 0;
 }
 
-/* FIXED: Greeting Cards Slider Styles */
+/* FIXED: Greeting Cards Slider Styles with proper alignment */
 .greeting-cards-section {
     margin: 60px 0;
     position: relative;
+    /* FIXED: Remove container constraints to allow full-width extension */
 }
 
 .greeting-cards-container {
-    max-width: 1200px;
-    margin: 0 auto;
+    /* FIXED: Left-aligned with content, extends to right edge */
+    max-width: none;
+    margin: 0;
     padding-left: 20px;
     position: relative;
+    /* Calculate left margin to align with content wrapper */
+    margin-left: calc((100vw - 1200px) / 2);
+}
+
+/* Ensure proper alignment on smaller screens */
+@media (max-width: 1240px) {
+    .greeting-cards-container {
+        margin-left: 0;
+        padding-left: 20px;
+    }
 }
 
 .greeting-cards-header {
@@ -310,7 +322,8 @@ body.wcflow-modal-open {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 16px;
-    padding-right: 20px;
+    /* FIXED: Constrain header to content width */
+    max-width: 1160px; /* 1200px - 40px padding */
 }
 
 .greeting-cards-title {
@@ -338,12 +351,26 @@ body.wcflow-modal-open {
     font-size: 16px;
     line-height: 1.5;
     margin: 0 0 32px 0;
-    padding-right: 20px;
+    /* FIXED: Constrain description to content width */
+    max-width: 1160px; /* 1200px - 40px padding */
 }
 
 .greeting-cards-slider-wrapper {
     position: relative;
     overflow: hidden;
+    /* FIXED: Full width extension to right edge */
+    width: 100vw;
+    margin-left: calc(-1 * ((100vw - 1200px) / 2));
+    padding-left: calc((100vw - 1200px) / 2 + 20px);
+}
+
+/* Adjust for smaller screens */
+@media (max-width: 1240px) {
+    .greeting-cards-slider-wrapper {
+        width: 100vw;
+        margin-left: -20px;
+        padding-left: 20px;
+    }
 }
 
 .greeting-cards-slider {
@@ -351,8 +378,8 @@ body.wcflow-modal-open {
     gap: 20px;
     transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     padding-bottom: 20px;
-    /* Extend to right edge of page */
-    padding-right: calc(50vw - 600px + 20px);
+    /* FIXED: Extend to right edge with proper padding */
+    padding-right: 20px;
     min-width: 100%;
 }
 
@@ -467,7 +494,8 @@ body.wcflow-modal-open {
 /* Progress Bar */
 .slider-progress-container {
     margin-top: 24px;
-    padding-right: 20px;
+    /* FIXED: Constrain progress bar to content width */
+    max-width: 1160px; /* 1200px - 40px padding */
 }
 
 .slider-progress-bar {
@@ -920,12 +948,6 @@ body.wcflow-modal-open {
 }
 
 /* Responsive Design */
-@media (max-width: 1240px) {
-    .greeting-cards-slider {
-        padding-right: 20px;
-    }
-}
-
 @media (max-width: 768px) {
     .wcflow-content-wrapper {
         padding: 0 16px;
@@ -949,10 +971,12 @@ body.wcflow-modal-open {
     }
     
     .greeting-cards-header {
+        max-width: none;
         padding-right: 16px;
     }
     
     .greeting-cards-description {
+        max-width: none;
         padding-right: 16px;
     }
     
@@ -987,6 +1011,7 @@ body.wcflow-modal-open {
     }
     
     .slider-progress-container {
+        max-width: none;
         padding-right: 16px;
     }
     

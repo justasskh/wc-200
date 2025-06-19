@@ -272,7 +272,7 @@ jQuery(function($) {
         });
     }
     
-    // FIXED: Render cards in slider format
+    // FIXED: Render cards in slider format with proper categories
     function renderCardsInSlider(cardsByCategory) {
         const $slider = $('#wcflow-cards-slider');
         $slider.empty();
@@ -282,10 +282,22 @@ jQuery(function($) {
             return;
         }
         
-        // Flatten all cards into single array for slider
+        // FIXED: Render cards by category priority
+        const categoryOrder = ['Populiariausi atvirukai', 'Gimtadienio ir švenčių atvirukai'];
         let allCards = [];
+        
+        // Add cards in category order
+        categoryOrder.forEach(function(category) {
+            if (cardsByCategory[category]) {
+                allCards = allCards.concat(cardsByCategory[category]);
+            }
+        });
+        
+        // Add any remaining categories
         Object.entries(cardsByCategory).forEach(function([category, cards]) {
-            allCards = allCards.concat(cards);
+            if (!categoryOrder.includes(category)) {
+                allCards = allCards.concat(cards);
+            }
         });
         
         allCards.forEach(function(card) {
