@@ -1,6 +1,6 @@
 /**
- * Greeting Cards Slider Component - Updated to match design
- * Responsive horizontal slider with navigation arrows
+ * Greeting Cards Slider Component - Complete with grid view and selection toggle
+ * Responsive horizontal slider with navigation arrows, progress bar, and grid view
  */
 
 class GreetingCardsSlider {
@@ -10,11 +10,17 @@ class GreetingCardsSlider {
         this.cards = container.querySelectorAll('.greeting-card');
         this.prevBtn = container.querySelector('.slider-nav-prev');
         this.nextBtn = container.querySelector('.slider-nav-next');
+        this.progressFill = container.querySelector('.slider-progress-fill');
+        this.seeAllBtn = container.querySelector('.greeting-cards-see-all');
+        this.controlsPrevBtn = container.querySelector('.slider-nav-controls .slider-nav-prev');
+        this.controlsNextBtn = container.querySelector('.slider-nav-controls .slider-nav-next');
         
         this.currentIndex = 0;
         this.cardWidth = 256; // 240px + 16px gap
         this.visibleCards = this.calculateVisibleCards();
         this.maxIndex = Math.max(0, this.cards.length - this.visibleCards);
+        this.isGridView = false;
+        this.selectedCard = null;
         
         this.init();
     }
@@ -22,6 +28,7 @@ class GreetingCardsSlider {
     init() {
         this.updateCardWidth();
         this.updateNavigation();
+        this.updateProgress();
         this.bindEvents();
         this.updateSliderPosition();
     }
@@ -53,6 +60,14 @@ class GreetingCardsSlider {
         // Navigation buttons
         this.prevBtn?.addEventListener('click', () => this.prev());
         this.nextBtn?.addEventListener('click', () => this.next());
+        this.controlsPrevBtn?.addEventListener('click', () => this.prev());
+        this.controlsNextBtn?.addEventListener('click', () => this.next());
+        
+        // See All / See Less toggle
+        this.seeAllBtn?.addEventListener('click', (e) => {
+            e.preventDefault();
+            this.toggleView();
+        });
         
         // Keyboard navigation
         this.container.addEventListener('keydown', (e) => this.handleKeydown(e));
@@ -63,7 +78,7 @@ class GreetingCardsSlider {
         // Window resize
         window.addEventListener('resize', () => this.handleResize());
         
-        // Card click events
+        // Card click events with toggle selection
         this.cards.forEach((card, index) => {
             card.addEventListener('click', () => this.handleCardClick(card, index));
             
@@ -79,6 +94,8 @@ class GreetingCardsSlider {
     }
     
     bindTouchEvents() {
+        if (this.isGridView) return; // No touch events in grid view
+        
         let startX = 0;
         let currentX = 0;
         let isDragging = false;
@@ -112,6 +129,8 @@ class GreetingCardsSlider {
     }
     
     handleKeydown(e) {
+        if (this.isGridView) return; // No keyboard navigation in grid view
+        
         switch (e.key) {
             case 'ArrowLeft':
                 e.preventDefault();
@@ -136,25 +155,50 @@ class GreetingCardsSlider {
         // Debounce resize events
         clearTimeout(this.resizeTimeout);
         this.resizeTimeout = setTimeout(() => {
-            this.updateCardWidth();
-            this.updateSliderPosition();
-            this.updateNavigation();
+            if (!this.isGridView) {
+                this.updateCardWidth();
+                this.updateSliderPosition();
+                this.updateNavigation();
+                this.updateProgress();
+            }
         }, 150);
     }
     
     handleCardClick(card, index) {
-        // Emit custom event for card selection
+        // Toggle selection
+        if (this.selectedCard === card) {
+            // Deselect current card
+            card.classList.remove('selected');
+            this.selectedCard = null;
+        } else {
+            // Remove previous selection
+            if (this.selectedCard) {
+                this.selectedCard.classList.remove('selected');
+            }
+            
+            // Select new card
+            card.classList.add('selected');
+            this.selectedCard = card;
+            
+            // Ensure selected card is visible in slider view
+            if (!this.isGridView) {
+                if (index < this.currentIndex || index >= this.currentIndex + this.visibleCards) {
+                    const targetIndex = Math.max(0, Math.min(index - Math.floor(this.visibleCards / 2), this.maxIndex));
+                    this.goToSlide(targetIndex);
+                }
+            }
+        }
+        
+        // Emit custom event for card selection/deselection
         const event = new CustomEvent('cardSelected', {
             detail: {
                 card: card,
                 index: index,
+                selected: this.selectedCard === card,
                 cardData: this.getCardData(card)
             }
         });
         this.container.dispatchEvent(event);
-        
-        // Add visual feedback
-        this.selectCard(card);
     }
     
     getCardData(card) {
@@ -166,49 +210,64 @@ class GreetingCardsSlider {
         };
     }
     
-    selectCard(selectedCard) {
-        // Remove previous selection
-        this.cards.forEach(card => card.classList.remove('selected'));
+    toggleView() {
+        this.isGridView = !this.isGridView;
         
-        // Add selection to clicked card
-        selectedCard.classList.add('selected');
-        
-        // Ensure selected card is visible
-        const cardIndex = Array.from(this.cards).indexOf(selectedCard);
-        if (cardIndex < this.currentIndex || cardIndex >= this.currentIndex + this.visibleCards) {
-            const targetIndex = Math.max(0, Math.min(cardIndex - Math.floor(this.visibleCards / 2), this.maxIndex));
-            this.goToSlide(targetIndex);
+        if (this.isGridView) {
+            this.container.classList.add('grid-view');
+            this.seeAllBtn.textContent = 'See less';
+        } else {
+            this.container.classList.remove('grid-view');
+            this.seeAllBtn.textContent = 'See all';
+            // Restore slider functionality
+            this.updateSliderPosition();
+            this.updateNavigation();
+            this.updateProgress();
         }
     }
     
     prev() {
+        if (this.isGridView) return;
+        
         if (this.currentIndex > 0) {
             this.currentIndex--;
             this.updateSliderPosition();
             this.updateNavigation();
+            this.updateProgress();
         }
     }
     
     next() {
+        if (this.isGridView) return;
+        
         if (this.currentIndex < this.maxIndex) {
             this.currentIndex++;
             this.updateSliderPosition();
             this.updateNavigation();
+            this.updateProgress();
         }
     }
     
     goToSlide(index) {
+        if (this.isGridView) return;
+        
         this.currentIndex = Math.max(0, Math.min(index, this.maxIndex));
         this.updateSliderPosition();
         this.updateNavigation();
+        this.updateProgress();
     }
     
     updateSliderPosition() {
+        if (this.isGridView) return;
+        
         const translateX = -this.currentIndex * this.cardWidth;
         this.slider.style.transform = `translateX(${translateX}px)`;
     }
     
     updateNavigation() {
+        if (this.isGridView) return;
+        
+        // Update main navigation arrows
         if (this.prevBtn) {
             this.prevBtn.classList.toggle('disabled', this.currentIndex === 0);
             this.prevBtn.setAttribute('aria-disabled', this.currentIndex === 0);
@@ -217,6 +276,28 @@ class GreetingCardsSlider {
         if (this.nextBtn) {
             this.nextBtn.classList.toggle('disabled', this.currentIndex >= this.maxIndex);
             this.nextBtn.setAttribute('aria-disabled', this.currentIndex >= this.maxIndex);
+        }
+        
+        // Update controls navigation arrows
+        if (this.controlsPrevBtn) {
+            this.controlsPrevBtn.classList.toggle('disabled', this.currentIndex === 0);
+            this.controlsPrevBtn.setAttribute('aria-disabled', this.currentIndex === 0);
+        }
+        
+        if (this.controlsNextBtn) {
+            this.controlsNextBtn.classList.toggle('disabled', this.currentIndex >= this.maxIndex);
+            this.controlsNextBtn.setAttribute('aria-disabled', this.currentIndex >= this.maxIndex);
+        }
+    }
+    
+    updateProgress() {
+        if (this.isGridView) return;
+        
+        if (this.progressFill && this.maxIndex > 0) {
+            const progress = (this.currentIndex / this.maxIndex) * 100;
+            this.progressFill.style.width = `${progress}%`;
+        } else if (this.progressFill) {
+            this.progressFill.style.width = '100%';
         }
     }
     
@@ -227,6 +308,7 @@ class GreetingCardsSlider {
         this.cards = this.container.querySelectorAll('.greeting-card');
         this.updateCardWidth();
         this.updateNavigation();
+        this.updateProgress();
     }
     
     removeCard(index) {
@@ -235,6 +317,7 @@ class GreetingCardsSlider {
             this.cards = this.container.querySelectorAll('.greeting-card');
             this.updateCardWidth();
             this.updateNavigation();
+            this.updateProgress();
         }
     }
     

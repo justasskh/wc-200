@@ -1,6 +1,6 @@
 /**
- * WooCommerce Gifting Flow - SHIPPING METHODS FIX
- * 2025-01-27 - Real WooCommerce shipping methods with Lithuania default
+ * WooCommerce Gifting Flow - Updated with toggle selection and grid view
+ * 2025-01-27 - Complete functionality with category management
  */
 
 jQuery(function($) {
@@ -21,7 +21,7 @@ jQuery(function($) {
         }
     }
     
-    // FIXED: Enhanced price calculation with real WooCommerce shipping
+    // Enhanced price calculation with real WooCommerce shipping
     function updatePricing() {
         let basePrice = parseFloat(wcflow_params.base_product_price || 0);
         let addonsTotal = 0;
@@ -161,7 +161,7 @@ jQuery(function($) {
         setTimeout(updatePricing, 500);
     }
     
-    // FIXED: Step 2 initialization with proper shipping methods loading
+    // Step 2 initialization with proper shipping methods loading
     function initStep2() {
         debug('Initializing step 2');
         
@@ -174,7 +174,7 @@ jQuery(function($) {
         // Load delivery options
         loadDeliveryOptions();
         
-        // FIXED: Load shipping methods immediately with proper error handling
+        // Load shipping methods immediately with proper error handling
         loadShippingMethodsForStep2();
     }
     
@@ -288,36 +288,39 @@ jQuery(function($) {
         debug('Rendering fallback cards');
         
         const fallbackCards = {
-            'Populiariausi atvirukai': [
-                {
-                    id: 'fallback-1',
-                    title: 'Gimtadienio apkabinimai',
-                    price: 'NEMOKAMA',
-                    price_value: 0,
-                    img: 'https://images.pexels.com/photos/1666065/pexels-photo-1666065.jpeg?auto=compress&cs=tinysrgb&w=400'
-                },
-                {
-                    id: 'fallback-2',
-                    title: 'Birželio gimimo gėlė',
-                    price: '€1.50',
-                    price_value: 1.50,
-                    img: 'https://images.pexels.com/photos/1040173/pexels-photo-1040173.jpeg?auto=compress&cs=tinysrgb&w=400'
-                },
-                {
-                    id: 'fallback-3',
-                    title: 'Su gimtadieniu!',
-                    price: '€2.50',
-                    price_value: 2.50,
-                    img: 'https://images.pexels.com/photos/1729931/pexels-photo-1729931.jpeg?auto=compress&cs=tinysrgb&w=400'
-                }
-            ]
+            'Birthday': {
+                'description': "Because it wouldn't be a birthday without a card. Pick your fave design, and add your own celebratory note.",
+                'cards': [
+                    {
+                        id: 'fallback-1',
+                        title: 'Birthday Hugs',
+                        price: 'FREE',
+                        price_value: 0,
+                        img: 'https://images.pexels.com/photos/1666065/pexels-photo-1666065.jpeg?auto=compress&cs=tinysrgb&w=400'
+                    },
+                    {
+                        id: 'fallback-2',
+                        title: 'June Birth Flower',
+                        price: '€1.50',
+                        price_value: 1.50,
+                        img: 'https://images.pexels.com/photos/1040173/pexels-photo-1040173.jpeg?auto=compress&cs=tinysrgb&w=400'
+                    },
+                    {
+                        id: 'fallback-3',
+                        title: 'Happy Birthday by Lucy Sherston',
+                        price: '€2.50',
+                        price_value: 2.50,
+                        img: 'https://images.pexels.com/photos/1729931/pexels-photo-1729931.jpeg?auto=compress&cs=tinysrgb&w=400'
+                    }
+                ]
+            }
         };
         
         renderCardsInSlider(fallbackCards);
         setTimeout(initializeSlider, 200);
     }
     
-    // Render cards in slider format
+    // Render cards in slider format with categories
     function renderCardsInSlider(cardsByCategory) {
         const $slider = $('#wcflow-cards-slider');
         $slider.empty();
@@ -329,64 +332,77 @@ jQuery(function($) {
             return;
         }
         
-        // Render cards by category priority
-        const categoryOrder = ['Populiariausi atvirukai', 'Gimtadienio ir švenčių atvirukai'];
-        let allCards = [];
+        // Get the first category (should be ordered by priority)
+        const firstCategory = Object.keys(cardsByCategory)[0];
+        const categoryData = cardsByCategory[firstCategory];
         
-        // Add cards in category order
-        categoryOrder.forEach(function(category) {
-            if (cardsByCategory[category]) {
-                allCards = allCards.concat(cardsByCategory[category]);
-            }
-        });
-        
-        // Add any remaining categories
-        Object.entries(cardsByCategory).forEach(function([category, cards]) {
-            if (!categoryOrder.includes(category)) {
-                allCards = allCards.concat(cards);
-            }
-        });
-        
-        if (allCards.length === 0) {
-            $slider.html('<p style="text-align:center;color:#666;padding:40px;">No cards found.</p>');
-            return;
+        // Update category title and description
+        $('.greeting-cards-title').text(firstCategory);
+        if (categoryData.description) {
+            $('.greeting-cards-description').text(categoryData.description);
         }
         
-        allCards.forEach(function(card) {
-            const $cardItem = $(`
-                <div class="greeting-card" data-card-id="${card.id}" data-price-value="${card.price_value}" role="listitem" tabindex="0">
-                    ${card.img ? `<img src="${card.img}" alt="${card.title}" class="greeting-card-image" loading="lazy">` : ''}
-                    <div class="greeting-card-content">
-                        <h4 class="greeting-card-title">${card.title}</h4>
-                        <p class="greeting-card-price ${card.price_value == 0 ? 'free' : ''}">${card.price}</p>
-                    </div>
-                </div>
-            `);
-            $slider.append($cardItem);
-        });
+        // Render cards from the first category
+        const cards = categoryData.cards || categoryData; // Handle both formats
         
-        // Handle card selection
+        if (Array.isArray(cards)) {
+            cards.forEach(function(card) {
+                const $cardItem = $(`
+                    <div class="greeting-card" data-card-id="${card.id}" data-price-value="${card.price_value}" role="listitem" tabindex="0">
+                        ${card.img ? `<img src="${card.img}" alt="${card.title}" class="greeting-card-image" loading="lazy">` : ''}
+                        <div class="greeting-card-content">
+                            <h4 class="greeting-card-title">${card.title}</h4>
+                            <p class="greeting-card-price ${card.price_value == 0 ? 'free' : ''}">${card.price}</p>
+                        </div>
+                    </div>
+                `);
+                $slider.append($cardItem);
+            });
+        }
+        
+        // Handle card selection with toggle functionality
         $(document).off('click', '.greeting-card').on('click', '.greeting-card', function() {
-            $('.greeting-card').removeClass('selected');
-            $(this).addClass('selected');
+            const $card = $(this);
             
-            // Enable message textarea
-            $('#wcflow-card-message').prop('disabled', false);
-            $('.wcflow-message-note').hide();
+            // Toggle selection
+            if ($card.hasClass('selected')) {
+                // Deselect current card
+                $card.removeClass('selected');
+                
+                // Disable message textarea
+                $('#wcflow-card-message').prop('disabled', true).val('');
+                $('.wcflow-message-note').show();
+                $('#wcflow-message-count').text('0');
+                
+                // Clear card from order state
+                delete orderState.card_id;
+                delete orderState.card_message;
+            } else {
+                // Remove previous selection
+                $('.greeting-card').removeClass('selected');
+                
+                // Select new card
+                $card.addClass('selected');
+                
+                // Enable message textarea
+                $('#wcflow-card-message').prop('disabled', false);
+                $('.wcflow-message-note').hide();
+            }
             
             updateOrderState();
             updatePricing();
             
-            debug('Card selected', {
-                id: $(this).data('card-id'),
-                price: $(this).data('price-value')
+            debug('Card selection toggled', {
+                id: $card.data('card-id'),
+                selected: $card.hasClass('selected'),
+                price: $card.data('price-value')
             });
         });
         
-        debug('Cards rendered successfully', {total: allCards.length});
+        debug('Cards rendered successfully', {total: cards.length});
     }
     
-    // Initialize slider functionality
+    // Initialize slider functionality with enhanced features
     function initializeSlider() {
         const $sliderWrapper = $('.greeting-cards-slider-wrapper');
         const $slider = $('#wcflow-cards-slider');
@@ -400,7 +416,7 @@ jQuery(function($) {
         }
         
         let currentIndex = 0;
-        const cardWidth = 220; // 200px + 20px gap
+        const cardWidth = 256; // 240px + 16px gap
         const containerWidth = $sliderWrapper.width();
         const visibleCards = Math.floor(containerWidth / cardWidth);
         const totalCards = $slider.find('.greeting-card').length;
@@ -449,6 +465,17 @@ jQuery(function($) {
         
         // Initial update
         updateSlider();
+        
+        // Store slider instance
+        sliderInstance = {
+            currentIndex: currentIndex,
+            maxIndex: maxIndex,
+            updateSlider: updateSlider,
+            goToSlide: function(index) {
+                currentIndex = Math.max(0, Math.min(index, maxIndex));
+                updateSlider();
+            }
+        };
         
         debug('Slider fully initialized and ready');
     }
@@ -546,7 +573,7 @@ jQuery(function($) {
         });
     }
     
-    // FIXED: Load shipping methods for Step 2 with comprehensive error handling
+    // Load shipping methods for Step 2 with comprehensive error handling
     function loadShippingMethodsForStep2() {
         const $selector = $('#wcflow-shipping-method-selector');
         const $valueSpan = $selector.find('.selectable-box-value');
@@ -894,7 +921,7 @@ jQuery(function($) {
         }
     });
     
-    // FIXED: Start flow with proper base price and shipping calculation
+    // Start flow with proper base price and shipping calculation
     $(document).on('click', '.wcflow-start-btn', function(e) {
         e.preventDefault();
         
@@ -914,7 +941,7 @@ jQuery(function($) {
             },
             success: function(response) {
                 if (response.success) {
-                    // FIXED: Set base product price and real shipping cost from WooCommerce
+                    // Set base product price and real shipping cost from WooCommerce
                     wcflow_params.base_product_price = response.data.product_price || 0;
                     orderState.base_price = response.data.product_price || 0;
                     orderState.shipping_cost = response.data.shipping_cost || 0;
@@ -1028,5 +1055,5 @@ jQuery(function($) {
         }
     });
     
-    debug('WCFlow JavaScript initialized with real WooCommerce shipping methods');
+    debug('WCFlow JavaScript initialized with complete functionality');
 });

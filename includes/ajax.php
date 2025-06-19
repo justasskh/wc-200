@@ -1,6 +1,6 @@
 <?php
 /**
- * WooCommerce Gifting Flow AJAX Handlers - SHIPPING METHODS FIX
+ * WooCommerce Gifting Flow AJAX Handlers - Updated with category management
  * FIXED: 2025-01-27 - Real WooCommerce shipping methods with Lithuania default
  */
 
@@ -302,7 +302,9 @@ function wcflow_get_addons_data() {
         $addons = get_posts([
             'post_type' => 'wcflow_addon',
             'numberposts' => 10, // Limit to prevent memory issues
-            'post_status' => 'publish'
+            'post_status' => 'publish',
+            'orderby' => 'menu_order',
+            'order' => 'ASC'
         ]);
         
         $addons_data = [];
@@ -338,7 +340,7 @@ function wcflow_get_addons_data() {
 add_action('wp_ajax_wcflow_get_addons', 'wcflow_get_addons_data');
 add_action('wp_ajax_nopriv_wcflow_get_addons', 'wcflow_get_addons_data');
 
-// FIXED: Get cards data using category IDs 814 and 815
+// FIXED: Get cards data organized by categories with proper ordering
 function wcflow_get_cards_data() {
     try {
         check_ajax_referer('wcflow_nonce', 'nonce');
@@ -347,59 +349,45 @@ function wcflow_get_cards_data() {
         
         $cards_by_category = [];
         
-        // FIXED: Use specific category IDs as requested
-        $category_mapping = [
-            814 => 'Populiariausi atvirukai',
-            815 => 'Gimtadienio ir švenčių atvirukai'
-        ];
+        // Get all card categories ordered by display order
+        $categories = get_terms([
+            'taxonomy' => 'wcflow_card_category',
+            'hide_empty' => false,
+            'meta_key' => '_wcflow_category_order',
+            'orderby' => 'meta_value_num',
+            'order' => 'ASC'
+        ]);
         
-        // Check if post type exists and try to load from database
-        if (post_type_exists('wcflow_card')) {
-            wcflow_log('wcflow_card post type exists, checking for cards...');
-            
-            foreach ($category_mapping as $cat_id => $cat_name) {
-                wcflow_log('Checking category ID: ' . $cat_id . ' (' . $cat_name . ')');
+        if (!empty($categories) && !is_wp_error($categories)) {
+            foreach ($categories as $category) {
+                wcflow_log('Processing category: ' . $category->name . ' (ID: ' . $category->term_id . ')');
                 
-                // First, check if the category exists
-                $category = get_term($cat_id, 'category');
-                if (is_wp_error($category) || !$category) {
-                    wcflow_log('Category ID ' . $cat_id . ' not found in category taxonomy');
-                    
-                    // Try wcflow_card_category taxonomy
-                    $category = get_term($cat_id, 'wcflow_card_category');
-                    if (is_wp_error($category) || !$category) {
-                        wcflow_log('Category ID ' . $cat_id . ' not found in wcflow_card_category taxonomy either');
-                        continue;
-                    }
-                }
-                
-                wcflow_log('Found category: ' . $category->name . ' (ID: ' . $cat_id . ')');
-                
-                // Get cards by category ID - try both taxonomies
-                $cards_query_args = [
+                // Get cards in this category
+                $cards = get_posts([
                     'post_type' => 'wcflow_card',
-                    'numberposts' => 10,
+                    'numberposts' => -1,
                     'post_status' => 'publish',
+                    'orderby' => 'menu_order',
+                    'order' => 'ASC',
                     'tax_query' => [
-                        'relation' => 'OR',
-                        [
-                            'taxonomy' => 'category',
-                            'field'    => 'term_id',
-                            'terms'    => $cat_id,
-                        ],
                         [
                             'taxonomy' => 'wcflow_card_category',
-                            'field'    => 'term_id',
-                            'terms'    => $cat_id,
+                            'field' => 'term_id',
+                            'terms' => $category->term_id,
                         ],
                     ],
-                ];
-                
-                $cards = get_posts($cards_query_args);
-                wcflow_log('Found ' . count($cards) . ' cards for category ' . $cat_id);
+                ]);
                 
                 if (!empty($cards)) {
-                    $cards_by_category[$cat_name] = [];
+                    $category_description = get_term_meta($category->term_id, '_wcflow_category_description', true);
+                    if (empty($category_description)) {
+                        $category_description = $category->description;
+                    }
+                    
+                    $cards_by_category[$category->name] = [
+                        'description' => $category_description,
+                        'cards' => []
+                    ];
                     
                     foreach ($cards as $card) {
                         $price_value = get_post_meta($card->ID, '_wcflow_price', true);
@@ -412,106 +400,62 @@ function wcflow_get_cards_data() {
                             $image_url = $image_data ? $image_data[0] : $image_url;
                         }
                         
-                        $cards_by_category[$cat_name][] = [
+                        $cards_by_category[$category->name]['cards'][] = [
                             'id' => $card->ID,
                             'title' => $card->post_title,
-                            'price' => $price_value > 0 ? wc_price($price_value) : 'NEMOKAMA',
+                            'price' => $price_value > 0 ? wc_price($price_value) : 'FREE',
                             'price_value' => $price_value,
                             'img' => $image_url
                         ];
                     }
+                    
+                    wcflow_log('Added ' . count($cards) . ' cards to category: ' . $category->name);
                 }
             }
-        } else {
-            wcflow_log('wcflow_card post type does not exist');
         }
         
         // FIXED: Always provide sample data to ensure cards display
         if (empty($cards_by_category)) {
-            wcflow_log('No cards found in database, providing sample data with correct categories');
+            wcflow_log('No cards found in database, providing sample data');
             
-            // First category: Populiariausi atvirukai (Category ID 814)
-            $cards_by_category['Populiariausi atvirukai'] = [
-                [
-                    'id' => 'sample-pop-1',
-                    'title' => 'Gimtadienio apkabinimai',
-                    'price' => 'NEMOKAMA',
-                    'price_value' => 0,
-                    'img' => 'https://images.pexels.com/photos/1666065/pexels-photo-1666065.jpeg?auto=compress&cs=tinysrgb&w=400'
-                ],
-                [
-                    'id' => 'sample-pop-2',
-                    'title' => 'Birželio gimimo gėlė',
-                    'price' => wc_price(1.50),
-                    'price_value' => 1.50,
-                    'img' => 'https://images.pexels.com/photos/1040173/pexels-photo-1040173.jpeg?auto=compress&cs=tinysrgb&w=400'
-                ],
-                [
-                    'id' => 'sample-pop-3',
-                    'title' => 'Su gimtadieniu!',
-                    'price' => wc_price(2.50),
-                    'price_value' => 2.50,
-                    'img' => 'https://images.pexels.com/photos/1729931/pexels-photo-1729931.jpeg?auto=compress&cs=tinysrgb&w=400'
-                ],
-                [
-                    'id' => 'sample-pop-4',
-                    'title' => 'Šventinis sveikinimas',
-                    'price' => wc_price(1.75),
-                    'price_value' => 1.75,
-                    'img' => 'https://images.pexels.com/photos/1040173/pexels-photo-1040173.jpeg?auto=compress&cs=tinysrgb&w=400'
-                ],
-                [
-                    'id' => 'sample-pop-5',
-                    'title' => 'Gėlių puokštė',
-                    'price' => wc_price(2.00),
-                    'price_value' => 2.00,
-                    'img' => 'https://images.pexels.com/photos/1666065/pexels-photo-1666065.jpeg?auto=compress&cs=tinysrgb&w=400'
-                ]
-            ];
-            
-            // Second category: Gimtadienio ir švenčių atvirukai (Category ID 815)
-            $cards_by_category['Gimtadienio ir švenčių atvirukai'] = [
-                [
-                    'id' => 'sample-bday-1',
-                    'title' => 'Linksmų gimtadienio',
-                    'price' => wc_price(1.50),
-                    'price_value' => 1.50,
-                    'img' => 'https://images.pexels.com/photos/1666065/pexels-photo-1666065.jpeg?auto=compress&cs=tinysrgb&w=400'
-                ],
-                [
-                    'id' => 'sample-bday-2',
-                    'title' => 'Šventinis tortas',
-                    'price' => wc_price(2.00),
-                    'price_value' => 2.00,
-                    'img' => 'https://images.pexels.com/photos/1729931/pexels-photo-1729931.jpeg?auto=compress&cs=tinysrgb&w=400'
-                ],
-                [
-                    'id' => 'sample-bday-3',
-                    'title' => 'Gėlių puokštė',
-                    'price' => wc_price(1.75),
-                    'price_value' => 1.75,
-                    'img' => 'https://images.pexels.com/photos/1040173/pexels-photo-1040173.jpeg?auto=compress&cs=tinysrgb&w=400'
-                ],
-                [
-                    'id' => 'sample-bday-4',
-                    'title' => 'Šventinis balionas',
-                    'price' => wc_price(1.25),
-                    'price_value' => 1.25,
-                    'img' => 'https://images.pexels.com/photos/1666065/pexels-photo-1666065.jpeg?auto=compress&cs=tinysrgb&w=400'
-                ],
-                [
-                    'id' => 'sample-bday-5',
-                    'title' => 'Gimtadienio linkėjimai',
-                    'price' => wc_price(1.50),
-                    'price_value' => 1.50,
-                    'img' => 'https://images.pexels.com/photos/1729931/pexels-photo-1729931.jpeg?auto=compress&cs=tinysrgb&w=400'
-                ],
-                [
-                    'id' => 'sample-bday-6',
-                    'title' => 'Spalvotas sveikinimas',
-                    'price' => wc_price(1.80),
-                    'price_value' => 1.80,
-                    'img' => 'https://images.pexels.com/photos/1040173/pexels-photo-1040173.jpeg?auto=compress&cs=tinysrgb&w=400'
+            $cards_by_category['Birthday'] = [
+                'description' => "Because it wouldn't be a birthday without a card. Pick your fave design, and add your own celebratory note.",
+                'cards' => [
+                    [
+                        'id' => 'sample-1',
+                        'title' => 'Birthday Hugs',
+                        'price' => 'FREE',
+                        'price_value' => 0,
+                        'img' => 'https://images.pexels.com/photos/1666065/pexels-photo-1666065.jpeg?auto=compress&cs=tinysrgb&w=400'
+                    ],
+                    [
+                        'id' => 'sample-2',
+                        'title' => 'June Birth Flower',
+                        'price' => wc_price(1.50),
+                        'price_value' => 1.50,
+                        'img' => 'https://images.pexels.com/photos/1040173/pexels-photo-1040173.jpeg?auto=compress&cs=tinysrgb&w=400'
+                    ],
+                    [
+                        'id' => 'sample-3',
+                        'title' => 'Happy Birthday by Lucy Sherston',
+                        'price' => wc_price(2.50),
+                        'price_value' => 2.50,
+                        'img' => 'https://images.pexels.com/photos/1729931/pexels-photo-1729931.jpeg?auto=compress&cs=tinysrgb&w=400'
+                    ],
+                    [
+                        'id' => 'sample-4',
+                        'title' => 'Happy Birthday',
+                        'price' => wc_price(1.50),
+                        'price_value' => 1.50,
+                        'img' => 'https://images.pexels.com/photos/1666065/pexels-photo-1666065.jpeg?auto=compress&cs=tinysrgb&w=400'
+                    ],
+                    [
+                        'id' => 'sample-5',
+                        'title' => 'Cheers to Another Year',
+                        'price' => wc_price(1.50),
+                        'price_value' => 1.50,
+                        'img' => 'https://images.pexels.com/photos/1040173/pexels-photo-1040173.jpeg?auto=compress&cs=tinysrgb&w=400'
+                    ]
                 ]
             ];
         }
@@ -523,13 +467,16 @@ function wcflow_get_cards_data() {
         wcflow_log('Error loading cards: ' . $e->getMessage());
         // Return sample data even on error
         $sample_cards = [
-            'Populiariausi atvirukai' => [
-                [
-                    'id' => 'error-sample-1',
-                    'title' => 'Gimtadienio sveikinimas',
-                    'price' => 'NEMOKAMA',
-                    'price_value' => 0,
-                    'img' => 'https://images.pexels.com/photos/1666065/pexels-photo-1666065.jpeg?auto=compress&cs=tinysrgb&w=400'
+            'Birthday' => [
+                'description' => "Because it wouldn't be a birthday without a card. Pick your fave design, and add your own celebratory note.",
+                'cards' => [
+                    [
+                        'id' => 'error-sample-1',
+                        'title' => 'Birthday Greeting',
+                        'price' => 'FREE',
+                        'price_value' => 0,
+                        'img' => 'https://images.pexels.com/photos/1666065/pexels-photo-1666065.jpeg?auto=compress&cs=tinysrgb&w=400'
+                    ]
                 ]
             ]
         ];

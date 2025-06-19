@@ -1,7 +1,7 @@
 <?php
 /**
- * WooCommerce Gifting Flow Step 1 - Updated design to match screenshot
- * Updated: 2025-01-27 - Modern greeting cards slider design
+ * WooCommerce Gifting Flow Step 1 - Complete with progress bar and controls
+ * Updated: 2025-01-27 - Exact design match with proper controls
  */
 ?>
 <div class="wcflow-modal wcflow-fullscreen" data-step="1">
@@ -46,7 +46,7 @@
             </div>
         </div>
         
-        <!-- Updated Greeting Cards Slider to match design -->
+        <!-- Complete Greeting Cards Slider with exact design match -->
         <section class="greeting-cards-section" role="region" aria-label="Greeting Cards">
             <div class="greeting-cards-container">
                 <div class="greeting-cards-header">
@@ -73,6 +73,27 @@
                     
                     <div id="wcflow-cards-slider" class="greeting-cards-slider" role="list">
                         <div class="wcflow-loader"></div>
+                    </div>
+                </div>
+                
+                <!-- Progress bar and navigation controls as shown in image -->
+                <div class="slider-controls">
+                    <div class="slider-progress-container">
+                        <div class="slider-progress-bar" role="progressbar" aria-label="Slider progress">
+                            <div class="slider-progress-fill"></div>
+                        </div>
+                    </div>
+                    <div class="slider-nav-controls">
+                        <button class="slider-nav slider-nav-prev" aria-label="Previous cards" type="button">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M15 18l-6-6 6-6"/>
+                            </svg>
+                        </button>
+                        <button class="slider-nav slider-nav-next" aria-label="Next cards" type="button">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M9 18l6-6-6-6"/>
+                            </svg>
+                        </button>
                     </div>
                 </div>
             </div>
