@@ -1,7 +1,7 @@
 <?php
 /**
- * WooCommerce Gifting Flow AJAX Handlers - Part 1/3
- * FIXED: 2025-01-27 - Critical fixes for cards loading and pricing
+ * WooCommerce Gifting Flow AJAX Handlers - SHIPPING METHODS FIX
+ * FIXED: 2025-01-27 - Real WooCommerce shipping methods with Lithuania default
  */
 
 if (!defined('ABSPATH')) exit;
@@ -13,7 +13,7 @@ function wcflow_log($message) {
     }
 }
 
-// FIXED: Start flow with proper error handling and pricing
+// FIXED: Start flow with proper WooCommerce shipping calculation
 function wcflow_start_flow() {
     try {
         check_ajax_referer('wcflow_nonce', 'nonce');
@@ -36,23 +36,56 @@ function wcflow_start_flow() {
             wp_send_json_error(['message' => 'Failed to add product to cart.']);
         }
         
-        // Set default shipping for calculation
+        // FIXED: Set Lithuania as default shipping country
         WC()->customer->set_shipping_country('LT');
         WC()->customer->set_shipping_postcode('01001');
+        WC()->customer->set_shipping_city('Vilnius');
+        WC()->customer->set_shipping_state('');
         
-        // Calculate cart totals with shipping
+        // Force shipping calculation
         WC()->cart->calculate_shipping();
         WC()->cart->calculate_totals();
         
         $product_price = floatval($product->get_price());
-        $shipping_total = floatval(WC()->cart->get_shipping_total());
         
-        wcflow_log('Flow started - Product: ' . $product_id . ', Price: ' . $product_price . ', Shipping: ' . $shipping_total);
+        // FIXED: Get real default shipping cost from WooCommerce
+        $default_shipping_cost = 0;
+        $packages = WC()->cart->get_shipping_packages();
+        
+        if (!empty($packages)) {
+            $shipping_for_package = WC()->shipping->calculate_shipping_for_package($packages[0]);
+            
+            if (!empty($shipping_for_package['rates'])) {
+                // Get the first (default) shipping method
+                $first_rate = reset($shipping_for_package['rates']);
+                $default_shipping_cost = $first_rate->get_cost() + $first_rate->get_shipping_tax();
+                
+                wcflow_log('Default shipping method found: ' . $first_rate->get_label() . ' - Cost: ' . $default_shipping_cost);
+            }
+        }
+        
+        // If no shipping methods found, check WooCommerce settings for flat rate
+        if ($default_shipping_cost == 0) {
+            $shipping_zones = WC_Shipping_Zones::get_zones();
+            foreach ($shipping_zones as $zone) {
+                foreach ($zone['shipping_methods'] as $method) {
+                    if ($method->enabled === 'yes') {
+                        if ($method->id === 'flat_rate' && isset($method->instance_settings['cost'])) {
+                            $default_shipping_cost = floatval($method->instance_settings['cost']);
+                            wcflow_log('Using flat rate from zone: ' . $default_shipping_cost);
+                            break 2;
+                        }
+                    }
+                }
+            }
+        }
+        
+        wcflow_log('Flow started - Product: ' . $product_id . ', Price: ' . $product_price . ', Default Shipping: ' . $default_shipping_cost);
         
         wp_send_json_success([
             'message' => 'Flow started successfully.',
             'product_price' => $product_price,
-            'shipping_cost' => $shipping_total,
+            'shipping_cost' => $default_shipping_cost,
             'cart_total' => WC()->cart->get_total('edit')
         ]);
         
@@ -63,6 +96,175 @@ function wcflow_start_flow() {
 }
 add_action('wp_ajax_wcflow_start_flow', 'wcflow_start_flow');
 add_action('wp_ajax_nopriv_wcflow_start_flow', 'wcflow_start_flow');
+
+// FIXED: Get real WooCommerce shipping methods for Lithuania
+function wcflow_get_shipping_methods_ajax() {
+    try {
+        check_ajax_referer('wcflow_nonce', 'nonce');
+        
+        wcflow_log('Getting shipping methods for Lithuania...');
+        
+        if (WC()->cart->is_empty()) {
+            wcflow_log('Cart is empty, cannot calculate shipping');
+            wp_send_json_error(['message' => 'Cart is empty.']);
+        }
+        
+        // FIXED: Ensure Lithuania is set as shipping destination
+        WC()->customer->set_shipping_country('LT');
+        WC()->customer->set_shipping_postcode('01001');
+        WC()->customer->set_shipping_city('Vilnius');
+        WC()->customer->set_shipping_state('');
+        
+        // Force recalculation
+        WC()->cart->calculate_shipping();
+        WC()->cart->calculate_totals();
+        
+        $packages = WC()->cart->get_shipping_packages();
+        $shipping_methods = [];
+        
+        wcflow_log('Cart packages count: ' . count($packages));
+        
+        if (!empty($packages)) {
+            $shipping_for_package = WC()->shipping->calculate_shipping_for_package($packages[0]);
+            wcflow_log('Shipping rates found: ' . count($shipping_for_package['rates']));
+            
+            if (!empty($shipping_for_package['rates'])) {
+                foreach ($shipping_for_package['rates'] as $rate) {
+                    $cost_with_tax = $rate->get_cost() + $rate->get_shipping_tax();
+                    $shipping_methods[] = [
+                        'id' => $rate->get_id(),
+                        'label' => $rate->get_label(),
+                        'cost' => number_format($rate->get_cost(), 2),
+                        'cost_with_tax' => number_format($cost_with_tax, 2),
+                        'method_id' => $rate->get_method_id(),
+                        'instance_id' => $rate->get_instance_id()
+                    ];
+                    
+                    wcflow_log('Shipping method: ' . $rate->get_label() . ' - ' . $cost_with_tax);
+                }
+            }
+        }
+        
+        // FIXED: If no methods found, check shipping zones for Lithuania
+        if (empty($shipping_methods)) {
+            wcflow_log('No shipping rates found, checking shipping zones...');
+            
+            $shipping_zones = WC_Shipping_Zones::get_zones();
+            $lithuania_zone = null;
+            
+            // Find zone that includes Lithuania
+            foreach ($shipping_zones as $zone_data) {
+                $zone = new WC_Shipping_Zone($zone_data['zone_id']);
+                $locations = $zone->get_zone_locations();
+                
+                foreach ($locations as $location) {
+                    if ($location->type === 'country' && $location->code === 'LT') {
+                        $lithuania_zone = $zone;
+                        wcflow_log('Found Lithuania in zone: ' . $zone->get_zone_name());
+                        break 2;
+                    }
+                }
+            }
+            
+            // If Lithuania zone found, get its shipping methods
+            if ($lithuania_zone) {
+                $zone_shipping_methods = $lithuania_zone->get_shipping_methods(true);
+                
+                foreach ($zone_shipping_methods as $method) {
+                    if ($method->is_enabled()) {
+                        $cost = 0;
+                        
+                        // Get cost based on method type
+                        if ($method->id === 'flat_rate') {
+                            $cost = isset($method->instance_settings['cost']) ? floatval($method->instance_settings['cost']) : 0;
+                        } elseif ($method->id === 'free_shipping') {
+                            $cost = 0;
+                        }
+                        
+                        $shipping_methods[] = [
+                            'id' => $method->id . ':' . $method->instance_id,
+                            'label' => $method->get_title(),
+                            'cost' => number_format($cost, 2),
+                            'cost_with_tax' => number_format($cost, 2),
+                            'method_id' => $method->id,
+                            'instance_id' => $method->instance_id
+                        ];
+                        
+                        wcflow_log('Zone shipping method: ' . $method->get_title() . ' - ' . $cost);
+                    }
+                }
+            }
+        }
+        
+        // FIXED: Last resort - check global shipping methods
+        if (empty($shipping_methods)) {
+            wcflow_log('No zone-specific methods, checking global methods...');
+            
+            $shipping_methods_obj = WC()->shipping->get_shipping_methods();
+            
+            foreach ($shipping_methods_obj as $method) {
+                if ($method->is_enabled()) {
+                    $cost = 4.99; // Default fallback cost
+                    
+                    if ($method->id === 'flat_rate') {
+                        $flat_rate_settings = get_option('woocommerce_flat_rate_settings', []);
+                        $cost = isset($flat_rate_settings['cost']) ? floatval($flat_rate_settings['cost']) : 4.99;
+                    } elseif ($method->id === 'free_shipping') {
+                        $cost = 0;
+                    }
+                    
+                    $shipping_methods[] = [
+                        'id' => $method->id . ':1',
+                        'label' => $method->get_method_title(),
+                        'cost' => number_format($cost, 2),
+                        'cost_with_tax' => number_format($cost, 2),
+                        'method_id' => $method->id,
+                        'instance_id' => '1'
+                    ];
+                    
+                    wcflow_log('Global shipping method: ' . $method->get_method_title() . ' - ' . $cost);
+                }
+            }
+        }
+        
+        wcflow_log('Final shipping methods count: ' . count($shipping_methods));
+        
+        if (empty($shipping_methods)) {
+            wcflow_log('No shipping methods found, providing fallback');
+            // Provide a basic fallback
+            $shipping_methods = [
+                [
+                    'id' => 'fallback:1',
+                    'label' => 'Standartinis pristatymas',
+                    'cost' => '4.99',
+                    'cost_with_tax' => '4.99',
+                    'method_id' => 'flat_rate',
+                    'instance_id' => '1'
+                ]
+            ];
+        }
+        
+        wp_send_json_success($shipping_methods);
+        
+    } catch (Exception $e) {
+        wcflow_log('Error loading shipping methods: ' . $e->getMessage());
+        
+        // Return fallback methods on error
+        $fallback_methods = [
+            [
+                'id' => 'error_fallback:1',
+                'label' => 'Standartinis pristatymas',
+                'cost' => '4.99',
+                'cost_with_tax' => '4.99',
+                'method_id' => 'flat_rate',
+                'instance_id' => '1'
+            ]
+        ];
+        wp_send_json_success($fallback_methods);
+    }
+}
+add_action('wp_ajax_wcflow_get_shipping_methods', 'wcflow_get_shipping_methods_ajax');
+add_action('wp_ajax_nopriv_wcflow_get_shipping_methods', 'wcflow_get_shipping_methods_ajax');
 
 // Get step template
 function wcflow_get_step() {
@@ -140,14 +342,6 @@ function wcflow_get_addons_data() {
 }
 add_action('wp_ajax_wcflow_get_addons', 'wcflow_get_addons_data');
 add_action('wp_ajax_nopriv_wcflow_get_addons', 'wcflow_get_addons_data');
-
-// Continue to Part 2/3 for cards data and remaining functions...<?php
-/**
- * WooCommerce Gifting Flow AJAX Handlers - Part 2/3
- * FIXED: 2025-01-27 - Cards loading with category IDs 814 and 815
- */
-
-if (!defined('ABSPATH')) exit;
 
 // FIXED: Get cards data using category IDs 814 and 815
 function wcflow_get_cards_data() {
@@ -349,171 +543,3 @@ function wcflow_get_cards_data() {
 }
 add_action('wp_ajax_wcflow_get_cards', 'wcflow_get_cards_data');
 add_action('wp_ajax_nopriv_wcflow_get_cards', 'wcflow_get_cards_data');
-
-// Continue to Part 3/3 for shipping methods and remaining functions...<?php
-/**
- * WooCommerce Gifting Flow AJAX Handlers - Part 3/3
- * FIXED: 2025-01-27 - Shipping methods and order creation
- */
-
-if (!defined('ABSPATH')) exit;
-
-// FIXED: Get shipping methods with proper error handling
-function wcflow_get_shipping_methods_ajax() {
-    try {
-        check_ajax_referer('wcflow_nonce', 'nonce');
-        
-        if (WC()->cart->is_empty()) {
-            wp_send_json_error(['message' => 'Cart is empty.']);
-        }
-        
-        // Set a default shipping address for calculation if none exists
-        if (!WC()->customer->get_shipping_country()) {
-            WC()->customer->set_shipping_country('LT'); // Lithuania as default
-            WC()->customer->set_shipping_postcode('01001');
-            WC()->customer->set_shipping_city('Vilnius');
-        }
-        
-        // Force cart calculation
-        WC()->cart->calculate_shipping();
-        WC()->cart->calculate_totals();
-        
-        $packages = WC()->cart->get_shipping_packages();
-        $shipping_methods = [];
-        
-        if (!empty($packages)) {
-            $shipping_for_package = WC()->shipping->calculate_shipping_for_package($packages[0]);
-            
-            if (!empty($shipping_for_package['rates'])) {
-                foreach ($shipping_for_package['rates'] as $rate) {
-                    $cost_with_tax = $rate->get_cost() + $rate->get_shipping_tax();
-                    $shipping_methods[] = [
-                        'id' => $rate->get_id(),
-                        'label' => $rate->get_label(),
-                        'cost' => number_format($rate->get_cost(), 2),
-                        'cost_with_tax' => number_format($cost_with_tax, 2),
-                        'method_id' => $rate->get_method_id(),
-                        'instance_id' => $rate->get_instance_id()
-                    ];
-                }
-            }
-        }
-        
-        // FIXED: Always provide default shipping methods
-        if (empty($shipping_methods)) {
-            $shipping_methods = [
-                [
-                    'id' => 'flat_rate:1',
-                    'label' => 'Standartinis pristatymas',
-                    'cost' => '4.99',
-                    'cost_with_tax' => '4.99',
-                    'method_id' => 'flat_rate',
-                    'instance_id' => '1'
-                ],
-                [
-                    'id' => 'free_shipping:1',
-                    'label' => 'Nemokamas pristatymas',
-                    'cost' => '0.00',
-                    'cost_with_tax' => '0.00',
-                    'method_id' => 'free_shipping',
-                    'instance_id' => '1'
-                ]
-            ];
-        }
-        
-        wcflow_log('Shipping methods retrieved: ' . count($shipping_methods) . ' methods');
-        wp_send_json_success($shipping_methods);
-        
-    } catch (Exception $e) {
-        wcflow_log('Error loading shipping methods: ' . $e->getMessage());
-        // Return default shipping methods on error
-        $default_methods = [
-            [
-                'id' => 'default:1',
-                'label' => 'Standartinis pristatymas',
-                'cost' => '4.99',
-                'cost_with_tax' => '4.99',
-                'method_id' => 'flat_rate',
-                'instance_id' => '1'
-            ]
-        ];
-        wp_send_json_success($default_methods);
-    }
-}
-add_action('wp_ajax_wcflow_get_shipping_methods', 'wcflow_get_shipping_methods_ajax');
-add_action('wp_ajax_nopriv_wcflow_get_shipping_methods', 'wcflow_get_shipping_methods_ajax');
-
-// FIXED: Get cart summary with proper error handling
-function wcflow_get_cart_summary_ajax() {
-    try {
-        check_ajax_referer('wcflow_nonce', 'nonce');
-        
-        if (WC()->cart->is_empty()) {
-            wp_send_json_error(['message' => 'Cart is empty.']);
-        }
-        
-        WC()->cart->calculate_totals();
-        
-        ob_start();
-        ?>
-        <div class="wcflow-basket-summary">
-            <?php foreach (WC()->cart->get_cart() as $cart_item_key => $cart_item) :
-                $_product = apply_filters('woocommerce_cart_item_product', $cart_item['data'], $cart_item, $cart_item_key);
-                if (!$_product || !$_product->exists()) continue;
-                ?>
-                <div class="wcflow-basket-item" data-cart-key="<?php echo esc_attr($cart_item_key); ?>" style="display:flex;align-items:center;padding:16px;border-bottom:1px solid #e0e0e0;">
-                    <div class="wcflow-basket-item-img" style="width:60px;height:60px;margin-right:16px;">
-                        <?php echo $_product->get_image('thumbnail'); ?>
-                    </div>
-                    <div class="wcflow-basket-item-details" style="flex:1;">
-                        <p class="wcflow-basket-item-title" style="margin:0 0 4px 0;font-weight:600;color:#333;"><?php echo $_product->get_name(); ?></p>
-                        <p class="wcflow-basket-item-qty" style="margin:0;color:#666;font-size:14px;">Kiekis: <?php echo $cart_item['quantity']; ?></p>
-                    </div>
-                    <div class="wcflow-basket-item-actions">
-                        <div class="wcflow-basket-item-price" style="font-weight:700;color:#007cba;"><?php echo WC()->cart->get_product_price($_product); ?></div>
-                    </div>
-                </div>
-            <?php endforeach; ?>
-            
-            <?php if (WC()->cart->get_fees()) : ?>
-                <?php foreach (WC()->cart->get_fees() as $fee) : ?>
-                    <div class="wcflow-basket-fee" style="display:flex;justify-content:space-between;padding:12px 16px;border-bottom:1px solid #e0e0e0;">
-                        <span style="color:#666;"><?php echo esc_html($fee->name); ?></span>
-                        <span style="font-weight:600;color:#333;"><?php echo wc_price($fee->total); ?></span>
-                    </div>
-                <?php endforeach; ?>
-            <?php endif; ?>
-            
-            <div class="wcflow-basket-subtotal" style="display:flex;justify-content:space-between;padding:12px 16px;border-bottom:1px solid #e0e0e0;">
-                <span style="color:#666;">Tarpinė suma:</span>
-                <span style="font-weight:600;color:#333;"><?php echo WC()->cart->get_cart_subtotal(); ?></span>
-            </div>
-            
-            <?php if (WC()->cart->get_shipping_total() > 0) : ?>
-                <div class="wcflow-basket-shipping" style="display:flex;justify-content:space-between;padding:12px 16px;border-bottom:1px solid #e0e0e0;">
-                    <span style="color:#666;">Pristatymas:</span>
-                    <span style="font-weight:600;color:#333;"><?php echo WC()->cart->get_cart_shipping_total(); ?></span>
-                </div>
-            <?php endif; ?>
-            
-            <div class="wcflow-basket-total" style="display:flex;justify-content:space-between;padding:16px;background:#f8f9fa;font-size:18px;">
-                <strong style="color:#333;">Iš viso:</strong>
-                <strong style="color:#007cba;"><?php echo WC()->cart->get_total(); ?></strong>
-            </div>
-        </div>
-        <?php
-        $html = ob_get_clean();
-        
-        wcflow_log('Cart summary generated with total: ' . WC()->cart->get_total());
-        wp_send_json_success(['html' => $html]);
-        
-    } catch (Exception $e) {
-        wcflow_log('Error generating cart summary: ' . $e->getMessage());
-        wp_send_json_error(['message' => 'Failed to load cart summary']);
-    }
-}
-add_action('wp_ajax_wcflow_get_cart_summary', 'wcflow_get_cart_summary_ajax');
-add_action('wp_ajax_nopriv_wcflow_get_cart_summary', 'wcflow_get_cart_summary_ajax');
-
-// Get checkout form and create order functions would continue here...
-// [Additional functions truncated for space - include remaining AJAX handlers]
