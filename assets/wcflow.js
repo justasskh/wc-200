@@ -288,26 +288,26 @@ jQuery(function($) {
         debug('Rendering fallback cards');
         
         const fallbackCards = {
-            'Birthday': {
-                'description': "Because it wouldn't be a birthday without a card. Pick your fave design, and add your own celebratory note.",
+            'Sample Cards': {
+                'description': "Sample greeting cards for demonstration. Create your own categories and cards in the admin panel.",
                 'cards': [
                     {
                         id: 'fallback-1',
-                        title: 'Birthday Hugs',
+                        title: 'Sample Card 1',
                         price: 'FREE',
                         price_value: 0,
                         img: 'https://images.pexels.com/photos/1666065/pexels-photo-1666065.jpeg?auto=compress&cs=tinysrgb&w=400'
                     },
                     {
                         id: 'fallback-2',
-                        title: 'June Birth Flower',
+                        title: 'Sample Card 2',
                         price: '€1.50',
                         price_value: 1.50,
                         img: 'https://images.pexels.com/photos/1040173/pexels-photo-1040173.jpeg?auto=compress&cs=tinysrgb&w=400'
                     },
                     {
                         id: 'fallback-3',
-                        title: 'Happy Birthday by Lucy Sherston',
+                        title: 'Sample Card 3',
                         price: '€2.50',
                         price_value: 2.50,
                         img: 'https://images.pexels.com/photos/1729931/pexels-photo-1729931.jpeg?auto=compress&cs=tinysrgb&w=400'
@@ -336,6 +336,8 @@ jQuery(function($) {
         const firstCategory = Object.keys(cardsByCategory)[0];
         const categoryData = cardsByCategory[firstCategory];
         
+        debug('Processing first category:', firstCategory, categoryData);
+        
         // Update category title and description
         $('.greeting-cards-title').text(firstCategory);
         if (categoryData && categoryData.description) {
@@ -346,19 +348,25 @@ jQuery(function($) {
         let cards = [];
         if (categoryData && categoryData.cards && Array.isArray(categoryData.cards)) {
             cards = categoryData.cards;
+            debug('Using cards from categoryData.cards', cards);
         } else if (Array.isArray(categoryData)) {
             cards = categoryData;
+            debug('Using categoryData as cards array', cards);
         } else {
             debug('Unexpected data structure', categoryData);
+            $slider.html('<p style="text-align:center;color:#666;padding:40px;">Invalid card data structure.</p>');
             return;
         }
         
         if (cards.length === 0) {
-            $slider.html('<p style="text-align:center;color:#666;padding:40px;">No cards found.</p>');
+            $slider.html('<p style="text-align:center;color:#666;padding:40px;">No cards found in this category.</p>');
             return;
         }
         
-        cards.forEach(function(card) {
+        debug('Rendering ' + cards.length + ' cards');
+        
+        cards.forEach(function(card, index) {
+            debug('Rendering card ' + index, card);
             const $cardItem = $(`
                 <div class="greeting-card" data-card-id="${card.id}" data-price-value="${card.price_value}" role="listitem" tabindex="0">
                     ${card.img ? `<img src="${card.img}" alt="${card.title}" class="greeting-card-image" loading="lazy">` : ''}

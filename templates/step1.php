@@ -1,7 +1,7 @@
 <?php
 /**
  * WooCommerce Gifting Flow Step 1 - Complete with progress bar and controls
- * Updated: 2025-01-27 - Exact design match with proper controls
+ * Updated: 2025-01-27 - Dynamic category display from database
  */
 ?>
 <div class="wcflow-modal wcflow-fullscreen" data-step="1">
@@ -46,16 +46,16 @@
             </div>
         </div>
         
-        <!-- Complete Greeting Cards Slider with exact design match -->
+        <!-- Complete Greeting Cards Slider with dynamic content -->
         <section class="greeting-cards-section" role="region" aria-label="Greeting Cards">
             <div class="greeting-cards-container">
                 <div class="greeting-cards-header">
-                    <h2 class="greeting-cards-title">Birthday</h2>
+                    <h2 class="greeting-cards-title">Choose your card</h2>
                     <a href="#" class="greeting-cards-see-all">See all</a>
                 </div>
                 
                 <p class="greeting-cards-description">
-                    Because it wouldn't be a birthday without a card. Pick your fave design, and add your own celebratory note.
+                    Select a beautiful card to accompany your gift.
                 </p>
                 
                 <div class="greeting-cards-slider-wrapper">

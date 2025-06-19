@@ -358,6 +358,8 @@ function wcflow_get_cards_data() {
             'order' => 'ASC'
         ]);
         
+        wcflow_log('Found categories: ' . count($categories));
+        
         if (!empty($categories) && !is_wp_error($categories)) {
             foreach ($categories as $category) {
                 wcflow_log('Processing category: ' . $category->name . ' (ID: ' . $category->term_id . ')');
@@ -378,10 +380,15 @@ function wcflow_get_cards_data() {
                     ],
                 ]);
                 
+                wcflow_log('Found ' . count($cards) . ' cards for category: ' . $category->name);
+                
                 if (!empty($cards)) {
                     $category_description = get_term_meta($category->term_id, '_wcflow_category_description', true);
                     if (empty($category_description)) {
                         $category_description = $category->description;
+                    }
+                    if (empty($category_description)) {
+                        $category_description = "Browse our collection of " . strtolower($category->name) . " cards.";
                     }
                     
                     $category_cards = [];
@@ -412,70 +419,56 @@ function wcflow_get_cards_data() {
                         'cards' => $category_cards
                     ];
                     
-                    wcflow_log('Added ' . count($cards) . ' cards to category: ' . $category->name);
+                    wcflow_log('Added category: ' . $category->name . ' with ' . count($category_cards) . ' cards');
                 }
             }
         }
         
-        // FIXED: Always provide sample data to ensure cards display with correct structure
+        // FIXED: Only provide sample data if NO categories exist at all
         if (empty($cards_by_category)) {
-            wcflow_log('No cards found in database, providing sample data');
+            wcflow_log('No categories or cards found in database, providing sample data');
             
-            $cards_by_category['Birthday'] = [
-                'description' => "Because it wouldn't be a birthday without a card. Pick your fave design, and add your own celebratory note.",
+            $cards_by_category['Sample Cards'] = [
+                'description' => "Sample greeting cards for demonstration. Create your own categories and cards in the admin panel.",
                 'cards' => [
                     [
                         'id' => 'sample-1',
-                        'title' => 'Birthday Hugs',
+                        'title' => 'Sample Card 1',
                         'price' => 'FREE',
                         'price_value' => 0,
                         'img' => 'https://images.pexels.com/photos/1666065/pexels-photo-1666065.jpeg?auto=compress&cs=tinysrgb&w=400'
                     ],
                     [
                         'id' => 'sample-2',
-                        'title' => 'June Birth Flower',
-                        'price' => '£1.50',
+                        'title' => 'Sample Card 2',
+                        'price' => '€1.50',
                         'price_value' => 1.50,
                         'img' => 'https://images.pexels.com/photos/1040173/pexels-photo-1040173.jpeg?auto=compress&cs=tinysrgb&w=400'
                     ],
                     [
                         'id' => 'sample-3',
-                        'title' => 'Happy Birthday by Lucy Sherston',
-                        'price' => '£2.50',
+                        'title' => 'Sample Card 3',
+                        'price' => '€2.50',
                         'price_value' => 2.50,
                         'img' => 'https://images.pexels.com/photos/1729931/pexels-photo-1729931.jpeg?auto=compress&cs=tinysrgb&w=400'
-                    ],
-                    [
-                        'id' => 'sample-4',
-                        'title' => 'Happy Birthday',
-                        'price' => '£1.50',
-                        'price_value' => 1.50,
-                        'img' => 'https://images.pexels.com/photos/1666065/pexels-photo-1666065.jpeg?auto=compress&cs=tinysrgb&w=400'
-                    ],
-                    [
-                        'id' => 'sample-5',
-                        'title' => 'Cheers to Another Year',
-                        'price' => '£1.50',
-                        'price_value' => 1.50,
-                        'img' => 'https://images.pexels.com/photos/1040173/pexels-photo-1040173.jpeg?auto=compress&cs=tinysrgb&w=400'
                     ]
                 ]
             ];
         }
         
-        wcflow_log('Cards data retrieved by category: ' . json_encode(array_keys($cards_by_category)));
+        wcflow_log('Final cards data structure: ' . json_encode(array_keys($cards_by_category)));
         wp_send_json_success($cards_by_category);
         
     } catch (Exception $e) {
         wcflow_log('Error loading cards: ' . $e->getMessage());
         // Return sample data even on error with correct structure
         $sample_cards = [
-            'Birthday' => [
-                'description' => "Because it wouldn't be a birthday without a card. Pick your fave design, and add your own celebratory note.",
+            'Error Fallback' => [
+                'description' => "There was an error loading cards. Please check your configuration.",
                 'cards' => [
                     [
                         'id' => 'error-sample-1',
-                        'title' => 'Birthday Greeting',
+                        'title' => 'Error Card',
                         'price' => 'FREE',
                         'price_value' => 0,
                         'img' => 'https://images.pexels.com/photos/1666065/pexels-photo-1666065.jpeg?auto=compress&cs=tinysrgb&w=400'
