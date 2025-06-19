@@ -1,6 +1,6 @@
 <?php
 /**
- * WooCommerce Gifting Flow Custom Post Types with Category Management
+ * WooCommerce Gifting Flow Custom Post Types with Complete Admin Integration
  * 
  * @package WooCommerce_Gifting_Flow
  * @author justasskh
@@ -12,7 +12,7 @@ if (!defined('ABSPATH')) exit;
 
 // Register custom post types and taxonomies
 add_action('init', function() {
-    // Register Card Categories taxonomy
+    // Register Card Categories taxonomy FIRST
     register_taxonomy('wcflow_card_category', 'wcflow_card', [
         'label' => 'Card Categories',
         'public' => false,
@@ -110,6 +110,52 @@ add_action('init', function() {
     ]);
 });
 
+// Create default categories on activation
+add_action('init', function() {
+    if (get_option('wcflow_default_categories_created') !== 'yes') {
+        wcflow_create_default_categories();
+        update_option('wcflow_default_categories_created', 'yes');
+    }
+});
+
+function wcflow_create_default_categories() {
+    if (!taxonomy_exists('wcflow_card_category')) {
+        return;
+    }
+    
+    $default_categories = [
+        [
+            'name' => 'Birthday Cards',
+            'description' => 'Perfect cards for birthday celebrations',
+            'order' => 1
+        ],
+        [
+            'name' => 'Holiday Cards',
+            'description' => 'Festive cards for special occasions',
+            'order' => 2
+        ],
+        [
+            'name' => 'Thank You Cards',
+            'description' => 'Express your gratitude with these cards',
+            'order' => 3
+        ]
+    ];
+    
+    foreach ($default_categories as $cat_data) {
+        $existing = term_exists($cat_data['name'], 'wcflow_card_category');
+        if (!$existing) {
+            $term = wp_insert_term($cat_data['name'], 'wcflow_card_category', [
+                'description' => $cat_data['description']
+            ]);
+            
+            if (!is_wp_error($term)) {
+                update_term_meta($term['term_id'], '_wcflow_category_order', $cat_data['order']);
+                update_term_meta($term['term_id'], '_wcflow_category_description', $cat_data['description']);
+            }
+        }
+    }
+}
+
 // Add custom meta boxes
 add_action('add_meta_boxes', function() {
     // Price meta box for both post types
@@ -119,16 +165,6 @@ add_action('add_meta_boxes', function() {
         'wcflow_price_meta_box_callback',
         ['wcflow_addon', 'wcflow_card'],
         'side',
-        'high'
-    );
-    
-    // Category settings meta box
-    add_meta_box(
-        'wcflow_category_settings_meta_box',
-        'Category Display Settings',
-        'wcflow_category_settings_meta_box_callback',
-        'wcflow_card_category',
-        'normal',
         'high'
     );
 });
@@ -144,35 +180,6 @@ function wcflow_price_meta_box_callback($post) {
     echo '<input type="number" id="wcflow_price" name="wcflow_price" value="' . esc_attr($price) . '" step="0.01" min="0" style="width: 100%;" placeholder="0.00" />';
     echo '<p style="margin-top: 5px; font-size: 12px; color: #666;">Set to 0 for free items.</p>';
     echo '</div>';
-}
-
-// Category settings meta box callback
-function wcflow_category_settings_meta_box_callback($term) {
-    $category_order = get_term_meta($term->term_id, '_wcflow_category_order', true);
-    $category_description = get_term_meta($term->term_id, '_wcflow_category_description', true);
-    
-    ?>
-    <table class="form-table">
-        <tr>
-            <th scope="row">
-                <label for="wcflow_category_order">Display Order</label>
-            </th>
-            <td>
-                <input type="number" id="wcflow_category_order" name="wcflow_category_order" value="<?php echo esc_attr($category_order); ?>" min="0" step="1" />
-                <p class="description">Lower numbers appear first. Leave empty for default ordering.</p>
-            </td>
-        </tr>
-        <tr>
-            <th scope="row">
-                <label for="wcflow_category_description">Category Description</label>
-            </th>
-            <td>
-                <textarea id="wcflow_category_description" name="wcflow_category_description" rows="3" cols="50"><?php echo esc_textarea($category_description); ?></textarea>
-                <p class="description">This description will appear below the category title in the slider.</p>
-            </td>
-        </tr>
-    </table>
-    <?php
 }
 
 // Save meta box data
@@ -191,6 +198,48 @@ add_action('save_post', function($post_id) {
             update_post_meta($post_id, '_wcflow_price', $price);
         }
     }
+});
+
+// Add category meta fields to edit form
+add_action('wcflow_card_category_edit_form_fields', function($term) {
+    $category_order = get_term_meta($term->term_id, '_wcflow_category_order', true);
+    $category_description = get_term_meta($term->term_id, '_wcflow_category_description', true);
+    ?>
+    <tr class="form-field">
+        <th scope="row">
+            <label for="wcflow_category_order">Display Order</label>
+        </th>
+        <td>
+            <input type="number" id="wcflow_category_order" name="wcflow_category_order" value="<?php echo esc_attr($category_order); ?>" min="0" step="1" />
+            <p class="description">Lower numbers appear first. Leave empty for default ordering.</p>
+        </td>
+    </tr>
+    <tr class="form-field">
+        <th scope="row">
+            <label for="wcflow_category_description">Frontend Description</label>
+        </th>
+        <td>
+            <textarea id="wcflow_category_description" name="wcflow_category_description" rows="3" cols="50"><?php echo esc_textarea($category_description); ?></textarea>
+            <p class="description">This description will appear below the category title in the slider.</p>
+        </td>
+    </tr>
+    <?php
+});
+
+// Add category meta fields to add form
+add_action('wcflow_card_category_add_form_fields', function() {
+    ?>
+    <div class="form-field">
+        <label for="wcflow_category_order">Display Order</label>
+        <input type="number" id="wcflow_category_order" name="wcflow_category_order" value="" min="0" step="1" />
+        <p>Lower numbers appear first. Leave empty for default ordering.</p>
+    </div>
+    <div class="form-field">
+        <label for="wcflow_category_description">Frontend Description</label>
+        <textarea id="wcflow_category_description" name="wcflow_category_description" rows="3" cols="40"></textarea>
+        <p>This description will appear below the category title in the slider.</p>
+    </div>
+    <?php
 });
 
 // Save category meta data
@@ -315,18 +364,6 @@ function wcflow_category_column_content($content, $column, $term_id) {
     return $content;
 }
 
-// Add admin scripts for drag and drop functionality
-add_action('admin_enqueue_scripts', function($hook) {
-    if (strpos($hook, 'wcflow') !== false || $hook === 'edit.php') {
-        wp_enqueue_script('jquery-ui-sortable');
-        wp_enqueue_script('wcflow-admin-sortable', WCFLOW_URL . 'assets/admin-sortable.js', ['jquery', 'jquery-ui-sortable'], WCFLOW_VERSION, true);
-        wp_localize_script('wcflow-admin-sortable', 'wcflow_admin', [
-            'ajax_url' => admin_url('admin-ajax.php'),
-            'nonce' => wp_create_nonce('wcflow_admin_nonce')
-        ]);
-    }
-});
-
 // AJAX handlers for updating order
 add_action('wp_ajax_wcflow_update_menu_order', function() {
     check_ajax_referer('wcflow_admin_nonce', 'nonce');
@@ -362,5 +399,30 @@ add_filter('pre_get_posts', function($query) {
     if (in_array($query->get('post_type'), ['wcflow_addon', 'wcflow_card'])) {
         $query->set('orderby', 'menu_order');
         $query->set('order', 'ASC');
+    }
+});
+
+// Add admin notice for setup
+add_action('admin_notices', function() {
+    if (!current_user_can('manage_woocommerce')) return;
+    
+    $screen = get_current_screen();
+    if (!$screen || strpos($screen->id, 'wcflow') === false) return;
+    
+    // Check if we have categories and cards
+    $categories_count = wp_count_terms(['taxonomy' => 'wcflow_card_category']);
+    $cards_count = wp_count_posts('wcflow_card');
+    
+    if ($categories_count == 0 || $cards_count->publish == 0) {
+        ?>
+        <div class="notice notice-info">
+            <p><strong>Greeting Cards Setup:</strong></p>
+            <ol>
+                <li>First, create card categories in <a href="<?php echo admin_url('edit-tags.php?taxonomy=wcflow_card_category&post_type=wcflow_card'); ?>">Card Categories</a></li>
+                <li>Then, create greeting cards and assign them to categories in <a href="<?php echo admin_url('edit.php?post_type=wcflow_card'); ?>">Greeting Cards</a></li>
+                <li>Set prices and upload images for each card</li>
+            </ol>
+        </div>
+        <?php
     }
 });
