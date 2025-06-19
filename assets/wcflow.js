@@ -201,6 +201,7 @@ jQuery(function($) {
                 action: 'wcflow_get_addons',
                 nonce: wcflow_params.nonce
             },
+            timeout: 10000,
             success: function(response) {
                 if (response.success) {
                     renderAddons(response.data);
@@ -249,6 +250,9 @@ jQuery(function($) {
     
     // FIXED: Load cards with proper slider implementation
     function loadCardsWithSlider() {
+        const $slider = $('#wcflow-cards-slider');
+        $slider.html('<div class="wcflow-loader"></div>');
+        
         $.ajax({
             url: wcflow_params.ajax_url,
             type: 'POST',
@@ -256,6 +260,7 @@ jQuery(function($) {
                 action: 'wcflow_get_cards',
                 nonce: wcflow_params.nonce
             },
+            timeout: 15000,
             success: function(response) {
                 if (response.success) {
                     renderCardsInSlider(response.data);
@@ -263,11 +268,12 @@ jQuery(function($) {
                     setTimeout(initializeSlider, 100);
                 } else {
                     debug('No cards available');
-                    $('#wcflow-cards-slider').html('<p style="text-align:center;color:#666;">No cards available at this time.</p>');
+                    $slider.html('<p style="text-align:center;color:#666;padding:40px;">No cards available at this time.</p>');
                 }
             },
-            error: function() {
-                $('#wcflow-cards-slider').html('<p style="text-align:center;color:#666;">Failed to load cards.</p>');
+            error: function(xhr, status, error) {
+                debug('Cards loading failed', {status: status, error: error});
+                $slider.html('<p style="text-align:center;color:#666;padding:40px;">Failed to load cards. Please try again.</p>');
             }
         });
     }
