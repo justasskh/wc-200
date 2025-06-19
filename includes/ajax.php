@@ -6,7 +6,7 @@
  * @author justasskh
  * @version 4.3
  * @since 2025-06-18
- * @updated 2025-06-19 12:05:54 UTC - Fixed shipping data validation and transfer
+ * @updated 2025-01-27 - Fixed data transfer and validation
  */
 
 if (!defined('ABSPATH')) exit;
@@ -14,7 +14,7 @@ if (!defined('ABSPATH')) exit;
 // Debug logging helper
 function wcflow_log($message) {
     if (get_option('wcflow_enable_debug') === 'yes' || (defined('WP_DEBUG') && WP_DEBUG)) {
-        error_log('[WooCommerce Gifting Flow 2025-06-19 12:05:54] ' . $message);
+        error_log('[WooCommerce Gifting Flow 2025-01-27] ' . $message);
     }
 }
 
@@ -468,6 +468,14 @@ function wcflow_create_order() {
     // Get state data from POST
     $state = isset($_POST['state']) ? $_POST['state'] : [];
     
+    // CRITICAL FIX: Also check session data as fallback
+    $session_data = WC()->session->get('wcflow_customer_data', []);
+    if (!empty($session_data)) {
+        // Merge session data with state data, giving priority to state data
+        $state = array_merge($session_data, $state);
+        wcflow_log('Merged session data with state data');
+    }
+    
     if (WC()->cart->is_empty()) {
         wp_send_json_error(['message' => 'Cart is empty.']);
     }
@@ -636,8 +644,8 @@ function wcflow_create_order() {
         // Add gifting flow metadata
         $order->add_meta_data('_wcflow_order', 'yes');
         $order->add_meta_data('_wcflow_version', defined('WCFLOW_VERSION') ? WCFLOW_VERSION : '4.3');
-        $order->add_meta_data('_wcflow_created_at', '2025-06-19 12:05:54');
-        $order->add_meta_data('_wcflow_created_by', 'justasskh');
+        $order->add_meta_data('_wcflow_created_at', current_time('mysql'));
+        $order->add_meta_data('_wcflow_created_by', 'wcflow_plugin');
         
         if (is_user_logged_in()) {
             $order->add_meta_data('_wcflow_customer_id', get_current_user_id());
@@ -654,7 +662,7 @@ function wcflow_create_order() {
             $order->set_payment_method($payment_gateways[$state['payment_method']]);
         }
         
-        $order->update_status('pending', 'Order created via WooCommerce Gifting Flow v4.3 by justasskh at 2025-06-19 12:05:54');
+        $order->update_status('pending', 'Order created via WooCommerce Gifting Flow');
         $order->save();
         
         wcflow_log('Order created successfully: #' . $order->get_id() . ' - Total: ' . $order->get_total() . ' - Email: ' . $state['billing_email']);

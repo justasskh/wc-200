@@ -2,7 +2,7 @@
  * WooCommerce Gifting Flow - Modal Checkout JS
  * Handles multi-step modal checkout, shipping, billing, and payment logic
  * Supports dynamic payment method loading and buyer/billing logic.
- * Updated: 2025-06-19 12:05:54 UTC - Fixed data transfer and validation
+ * Updated: 2025-01-27 - Fixed data transfer and billing toggle
  */
 
 jQuery(function($) {
@@ -115,7 +115,7 @@ jQuery(function($) {
                 const $field = $('#' + fieldId);
                 if ($field.length) {
                     const value = $field.val();
-                    if (value !== undefined && value !== null) {
+                    if (value !== undefined && value !== null && value !== '') {
                         window.wcflow.orderState[stateKey] = value;
                         orderState[stateKey] = value;
                         debug('Synced ' + stateKey + ' = ' + value);
@@ -268,6 +268,11 @@ jQuery(function($) {
             }
         });
 
+        // Initialize checkbox state
+        if ($('#wcflow-buyer-same').is(':checked')) {
+            copyShippingToBilling();
+        }
+
         loadPaymentMethods();
     }
 
@@ -351,12 +356,12 @@ jQuery(function($) {
             'wcflow-shipping-phone': 'shipping_phone'
         };
 
-        // Sync Step 2 fields from DOM
+        // Sync Step 2 fields from DOM (in case they're still in the DOM)
         Object.entries(fieldMappings).forEach(([fieldId, stateKey]) => {
             const $field = $('#' + fieldId);
             if ($field.length) {
                 const value = $field.val();
-                if (value !== undefined && value !== null) {
+                if (value !== undefined && value !== null && value !== '') {
                     window.wcflow.orderState[stateKey] = value;
                     debug('Final sync:', stateKey, '=', value);
                 }
@@ -369,7 +374,7 @@ jQuery(function($) {
             const billingKey = $field.data('wcflow-billing');
             if (billingKey) {
                 const value = $field.val();
-                if (value !== undefined && value !== null) {
+                if (value !== undefined && value !== null && value !== '') {
                     window.wcflow.orderState[billingKey] = value;
                     debug('Final billing sync:', billingKey, '=', value);
                 }
@@ -512,9 +517,29 @@ jQuery(function($) {
             if (!window.wcflowValidateStep2()) {
                 return;
             }
+            // Save data to session before moving to step 3
+            $.ajax({
+                url: wcflow_params.ajax_url,
+                type: 'POST',
+                data: {
+                    action: 'wcflow_save_customer_data',
+                    nonce: wcflow_params.nonce,
+                    customer_data: window.wcflow.orderState
+                },
+                success: function(response) {
+                    debug('Customer data saved to session:', response);
+                    loadStep(currentStep + 1);
+                },
+                error: function() {
+                    debug('Failed to save customer data, but continuing...');
+                    loadStep(currentStep + 1);
+                }
+            });
+        } else {
+            loadStep(currentStep + 1);
         }
-        loadStep(currentStep + 1);
     });
+    
     $document.on('click', '.wcflow-btn-prev', function () {
         const currentStep = $(this).closest('.wcflow-modal').data('step');
         if (currentStep > 1) {
@@ -523,7 +548,7 @@ jQuery(function($) {
     });
 
     // --- Launch flow (e.g. from product page) ---
-    $document.on('click', '.wcflow-start-btn', function (e) {
+    $document.on('click', '.wcflow-start-btn, .wcflow-trigger-btn', function (e) {
         e.preventDefault();
         const productId = $(this).data('product-id') || window.wcflow_product_id;
         if (!productId) return alert('Product not found.');
