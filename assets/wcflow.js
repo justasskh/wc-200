@@ -1,6 +1,6 @@
 /**
- * WooCommerce Gifting Flow - Updated with toggle selection and grid view
- * 2025-01-27 - Complete functionality with category management
+ * WooCommerce Gifting Flow - DEBUGGING VERSION
+ * 2025-01-27 - Debug undefined cards issue
  */
 
 jQuery(function($) {
@@ -264,7 +264,12 @@ jQuery(function($) {
             },
             timeout: 15000,
             success: function(response) {
-                debug('Cards AJAX response received', response);
+                console.log('=== CARDS AJAX RESPONSE ===');
+                console.log('Full response:', response);
+                console.log('Response success:', response.success);
+                console.log('Response data:', response.data);
+                console.log('Data type:', typeof response.data);
+                console.log('Data keys:', Object.keys(response.data || {}));
                 
                 if (response && response.success && response.data) {
                     debug('Cards data received successfully', response.data);
@@ -320,12 +325,16 @@ jQuery(function($) {
         setTimeout(initializeSlider, 200);
     }
     
-    // FIXED: Render cards in slider format with proper data structure handling
+    // FIXED: Render cards in slider format with comprehensive debugging
     function renderCardsInSlider(cardsByCategory) {
         const $slider = $('#wcflow-cards-slider');
         $slider.empty();
         
-        debug('Rendering cards in slider', cardsByCategory);
+        console.log('=== RENDERING CARDS ===');
+        console.log('Input data:', cardsByCategory);
+        console.log('Data type:', typeof cardsByCategory);
+        console.log('Is array:', Array.isArray(cardsByCategory));
+        console.log('Keys:', Object.keys(cardsByCategory || {}));
         
         if (!cardsByCategory || Object.keys(cardsByCategory).length === 0) {
             $slider.html('<p style="text-align:center;color:#666;padding:40px;">No cards available at this time.</p>');
@@ -333,50 +342,78 @@ jQuery(function($) {
         }
         
         // Get the first category (should be ordered by priority)
-        const firstCategory = Object.keys(cardsByCategory)[0];
-        const categoryData = cardsByCategory[firstCategory];
+        const firstCategoryKey = Object.keys(cardsByCategory)[0];
+        const categoryData = cardsByCategory[firstCategoryKey];
         
-        debug('Processing first category:', firstCategory, categoryData);
+        console.log('First category key:', firstCategoryKey);
+        console.log('Category data:', categoryData);
+        console.log('Category data type:', typeof categoryData);
         
         // Update category title and description
-        $('.greeting-cards-title').text(firstCategory);
+        $('.greeting-cards-title').text(firstCategoryKey);
         if (categoryData && categoryData.description) {
             $('.greeting-cards-description').text(categoryData.description);
         }
         
-        // FIXED: Handle both data structures - with and without 'cards' wrapper
+        // FIXED: Handle multiple data structure possibilities
         let cards = [];
+        
         if (categoryData && categoryData.cards && Array.isArray(categoryData.cards)) {
+            // Structure: {category: {description: "...", cards: [...]}}
             cards = categoryData.cards;
-            debug('Using cards from categoryData.cards', cards);
+            console.log('Using categoryData.cards structure');
         } else if (Array.isArray(categoryData)) {
+            // Structure: {category: [...]}
             cards = categoryData;
-            debug('Using categoryData as cards array', cards);
-        } else {
-            debug('Unexpected data structure', categoryData);
-            $slider.html('<p style="text-align:center;color:#666;padding:40px;">Invalid card data structure.</p>');
-            return;
+            console.log('Using categoryData as array structure');
+        } else if (categoryData && typeof categoryData === 'object') {
+            // Try to find cards in any property
+            for (let key in categoryData) {
+                if (Array.isArray(categoryData[key])) {
+                    cards = categoryData[key];
+                    console.log('Found cards in property:', key);
+                    break;
+                }
+            }
         }
         
-        if (cards.length === 0) {
+        console.log('Final cards array:', cards);
+        console.log('Cards count:', cards.length);
+        
+        if (!Array.isArray(cards) || cards.length === 0) {
             $slider.html('<p style="text-align:center;color:#666;padding:40px;">No cards found in this category.</p>');
             return;
         }
         
-        debug('Rendering ' + cards.length + ' cards');
-        
+        // Render each card with detailed debugging
         cards.forEach(function(card, index) {
-            debug('Rendering card ' + index, card);
+            console.log(`=== CARD ${index} ===`);
+            console.log('Card data:', card);
+            console.log('Card ID:', card.id);
+            console.log('Card title:', card.title);
+            console.log('Card price:', card.price);
+            console.log('Card price_value:', card.price_value);
+            console.log('Card img:', card.img);
+            
+            // FIXED: Ensure all properties exist with fallbacks
+            const cardId = card.id || `card-${index}`;
+            const cardTitle = card.title || 'Untitled Card';
+            const cardPrice = card.price || 'FREE';
+            const cardPriceValue = card.price_value || 0;
+            const cardImg = card.img || 'https://images.pexels.com/photos/1666065/pexels-photo-1666065.jpeg?auto=compress&cs=tinysrgb&w=400';
+            
             const $cardItem = $(`
-                <div class="greeting-card" data-card-id="${card.id}" data-price-value="${card.price_value}" role="listitem" tabindex="0">
-                    ${card.img ? `<img src="${card.img}" alt="${card.title}" class="greeting-card-image" loading="lazy">` : ''}
+                <div class="greeting-card" data-card-id="${cardId}" data-price-value="${cardPriceValue}" role="listitem" tabindex="0">
+                    <img src="${cardImg}" alt="${cardTitle}" class="greeting-card-image" loading="lazy">
                     <div class="greeting-card-content">
-                        <h4 class="greeting-card-title">${card.title}</h4>
-                        <p class="greeting-card-price ${card.price_value == 0 ? 'free' : ''}">${card.price}</p>
+                        <h4 class="greeting-card-title">${cardTitle}</h4>
+                        <p class="greeting-card-price ${cardPriceValue == 0 ? 'free' : ''}">${cardPrice}</p>
                     </div>
                 </div>
             `);
             $slider.append($cardItem);
+            
+            console.log('Card HTML created and appended');
         });
         
         // Handle card selection with toggle functionality
@@ -418,7 +455,8 @@ jQuery(function($) {
             });
         });
         
-        debug('Cards rendered successfully', {total: cards.length});
+        console.log('=== CARDS RENDERING COMPLETE ===');
+        console.log('Total cards rendered:', cards.length);
     }
     
     // Initialize slider functionality with enhanced features
@@ -1074,5 +1112,5 @@ jQuery(function($) {
         }
     });
     
-    debug('WCFlow JavaScript initialized with complete functionality');
+    debug('WCFlow JavaScript initialized with complete debugging');
 });
