@@ -1,7 +1,7 @@
 <?php
 /**
  * WooCommerce Gifting Flow AJAX Handlers
- * FIXED: 2025-01-27 - Critical fixes for 500 errors and pricing
+ * FIXED: 2025-01-27 - Critical fixes for cards loading and pricing
  */
 
 if (!defined('ABSPATH')) exit;
@@ -13,7 +13,7 @@ function wcflow_log($message) {
     }
 }
 
-// FIXED: Start flow with proper error handling
+// FIXED: Start flow with proper error handling and pricing
 function wcflow_start_flow() {
     try {
         check_ajax_referer('wcflow_nonce', 'nonce');
@@ -36,15 +36,23 @@ function wcflow_start_flow() {
             wp_send_json_error(['message' => 'Failed to add product to cart.']);
         }
         
-        // Calculate cart totals
+        // Set default shipping for calculation
+        WC()->customer->set_shipping_country('LT');
+        WC()->customer->set_shipping_postcode('01001');
+        
+        // Calculate cart totals with shipping
+        WC()->cart->calculate_shipping();
         WC()->cart->calculate_totals();
         
         $product_price = floatval($product->get_price());
+        $shipping_total = floatval(WC()->cart->get_shipping_total());
         
-        wcflow_log('Flow started for product ID: ' . $product_id . ' with price: ' . $product_price);
+        wcflow_log('Flow started - Product: ' . $product_id . ', Price: ' . $product_price . ', Shipping: ' . $shipping_total);
+        
         wp_send_json_success([
             'message' => 'Flow started successfully.',
             'product_price' => $product_price,
+            'shipping_cost' => $shipping_total,
             'cart_total' => WC()->cart->get_total('edit')
         ]);
         
@@ -133,54 +141,67 @@ function wcflow_get_addons_data() {
 add_action('wp_ajax_wcflow_get_addons', 'wcflow_get_addons_data');
 add_action('wp_ajax_nopriv_wcflow_get_addons', 'wcflow_get_addons_data');
 
-// FIXED: Get cards data with proper error handling and sample data
+// FIXED: Get cards data using category IDs 814 and 815
 function wcflow_get_cards_data() {
     try {
         check_ajax_referer('wcflow_nonce', 'nonce');
         
         $cards_by_category = [];
         
-        // Check if post type exists
+        // FIXED: Use specific category IDs as requested
+        $category_mapping = [
+            814 => 'Populiariausi atvirukai',
+            815 => 'Gimtadienio ir švenčių atvirukai'
+        ];
+        
+        // Check if post type exists and try to load from database
         if (post_type_exists('wcflow_card')) {
-            $cards = get_posts([
-                'post_type' => 'wcflow_card',
-                'numberposts' => 20, // Limit to prevent memory issues
-                'post_status' => 'publish'
-            ]);
-            
-            foreach ($cards as $card) {
-                $terms = get_the_terms($card->ID, 'wcflow_card_category');
-                $category = $terms && !is_wp_error($terms) ? $terms[0]->name : 'Gimtadienio ir švenčių atvirukai';
+            foreach ($category_mapping as $cat_id => $cat_name) {
+                // Get cards by category ID
+                $cards = get_posts([
+                    'post_type' => 'wcflow_card',
+                    'numberposts' => 10,
+                    'post_status' => 'publish',
+                    'tax_query' => [
+                        [
+                            'taxonomy' => 'wcflow_card_category',
+                            'field'    => 'term_id',
+                            'terms'    => $cat_id,
+                        ],
+                    ],
+                ]);
                 
-                $price_value = get_post_meta($card->ID, '_wcflow_price', true);
-                $price_value = $price_value ? floatval($price_value) : 0;
-                
-                $image_id = get_post_thumbnail_id($card->ID);
-                $image_url = 'https://images.pexels.com/photos/1666065/pexels-photo-1666065.jpeg?auto=compress&cs=tinysrgb&w=400';
-                if ($image_id) {
-                    $image_data = wp_get_attachment_image_src($image_id, 'medium');
-                    $image_url = $image_data ? $image_data[0] : $image_url;
+                if (!empty($cards)) {
+                    $cards_by_category[$cat_name] = [];
+                    
+                    foreach ($cards as $card) {
+                        $price_value = get_post_meta($card->ID, '_wcflow_price', true);
+                        $price_value = $price_value ? floatval($price_value) : 0;
+                        
+                        $image_id = get_post_thumbnail_id($card->ID);
+                        $image_url = 'https://images.pexels.com/photos/1666065/pexels-photo-1666065.jpeg?auto=compress&cs=tinysrgb&w=400';
+                        if ($image_id) {
+                            $image_data = wp_get_attachment_image_src($image_id, 'medium');
+                            $image_url = $image_data ? $image_data[0] : $image_url;
+                        }
+                        
+                        $cards_by_category[$cat_name][] = [
+                            'id' => $card->ID,
+                            'title' => $card->post_title,
+                            'price' => $price_value > 0 ? wc_price($price_value) : 'NEMOKAMA',
+                            'price_value' => $price_value,
+                            'img' => $image_url
+                        ];
+                    }
                 }
-                
-                if (!isset($cards_by_category[$category])) {
-                    $cards_by_category[$category] = [];
-                }
-                
-                $cards_by_category[$category][] = [
-                    'id' => $card->ID,
-                    'title' => $card->post_title,
-                    'price' => $price_value > 0 ? wc_price($price_value) : 'NEMOKAMA',
-                    'price_value' => $price_value,
-                    'img' => $image_url
-                ];
             }
         }
         
         // FIXED: Always provide sample data to ensure cards display
         if (empty($cards_by_category)) {
-            wcflow_log('No cards found in database, providing sample data');
+            wcflow_log('No cards found in database, providing sample data with correct categories');
             
-            // First category: Populiariausi atvirukai (Most Popular Cards)
+            // First category: Populiariausi atvirukai (Category ID 814)
             $cards_by_category['Populiariausi atvirukai'] = [
                 [
                     'id' => 'sample-pop-1',
@@ -219,7 +240,7 @@ function wcflow_get_cards_data() {
                 ]
             ];
             
-            // Second category: Gimtadienio ir švenčių atvirukai (Birthday and Holiday Cards)
+            // Second category: Gimtadienio ir švenčių atvirukai (Category ID 815)
             $cards_by_category['Gimtadienio ir švenčių atvirukai'] = [
                 [
                     'id' => 'sample-bday-1',
