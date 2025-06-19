@@ -69,7 +69,15 @@ add_action('wp_enqueue_scripts', function() {
     wp_enqueue_style('wcflow-style', WCFLOW_URL . 'assets/wcflow.css', [], WCFLOW_VERSION);
     wp_enqueue_script('wcflow-script', WCFLOW_URL . 'assets/wcflow.js', ['jquery'], WCFLOW_VERSION, true);
     
-    // FIXED: Enhanced localization with proper currency symbol
+    // FIXED: Enhanced localization with proper currency and product price
+    $product_price = 0;
+    if (is_product()) {
+        global $product;
+        if ($product && $product->get_price()) {
+            $product_price = floatval($product->get_price());
+        }
+    }
+    
     wp_localize_script('wcflow-script', 'wcflow_params', [
         'ajax_url' => admin_url('admin-ajax.php'),
         'nonce'    => wp_create_nonce('wcflow_nonce'),
@@ -79,7 +87,7 @@ add_action('wp_enqueue_scripts', function() {
         'checkout_url' => wc_get_checkout_url(),
         'version' => WCFLOW_VERSION,
         'debug' => defined('WP_DEBUG') && WP_DEBUG,
-        'base_product_price' => 0 // Will be set when flow starts
+        'base_product_price' => $product_price // Set initial product price
     ]);
 });
 
