@@ -1,8 +1,8 @@
 <?php
 /*
 Plugin Name: WooCommerce Gifting Flow
-Description: A multi-step modal checkout flow for gifting, with modern full-screen UI.
-Version: 4.3
+Description: A complete alternative checkout system for WooCommerce with gifting features, greeting cards, and streamlined user experience.
+Version: 5.0
 Author: justasskh
 Author URI: https://github.com/justasskh
 Text Domain: wcflow
@@ -21,7 +21,7 @@ Developer: justasskh
 
 if (!defined('ABSPATH')) exit;
 
-define('WCFLOW_VERSION', '4.3');
+define('WCFLOW_VERSION', '5.0');
 define('WCFLOW_PATH', plugin_dir_path(__FILE__));
 define('WCFLOW_URL', plugin_dir_url(__FILE__));
 define('WCFLOW_PLUGIN_FILE', __FILE__);
@@ -34,115 +34,450 @@ if (!in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get
     return;
 }
 
-// Include required files - only include files that exist
-$required_files = [
-    'includes/settings.php',
-    'includes/cpt.php', 
-    'includes/ajax.php',
-    'includes/checkout-handler.php'
-];
+/**
+ * Main plugin class
+ */
+class WooCommerce_Gifting_Flow {
+    
+    public function __construct() {
+        add_action('plugins_loaded', array($this, 'init'));
+        register_activation_hook(__FILE__, array($this, 'activate'));
+        register_deactivation_hook(__FILE__, array($this, 'deactivate'));
+    }
+    
+    /**
+     * Initialize the plugin
+     */
+    public function init() {
+        // Load text domain
+        load_plugin_textdomain('wcflow', false, dirname(plugin_basename(__FILE__)) . '/languages');
+        
+        // Include required files
+        $this->include_files();
+        
+        // Initialize hooks
+        $this->init_hooks();
+        
+        // Check for updates
+        $this->check_version();
+    }
+    
+    /**
+     * Include required files
+     */
+    private function include_files() {
+        $required_files = [
+            'includes/settings.php',
+            'includes/cpt.php', 
+            'includes/ajax.php',
+            'includes/checkout-handler.php',
+            'includes/order-handler.php',
+            'includes/product-integration.php',
+            'includes/security-validation.php',
+            'includes/compatibility.php'
+        ];
 
-foreach ($required_files as $file) {
-    $file_path = WCFLOW_PATH . $file;
-    if (file_exists($file_path)) {
-        require_once $file_path;
+        foreach ($required_files as $file) {
+            $file_path = WCFLOW_PATH . $file;
+            if (file_exists($file_path)) {
+                require_once $file_path;
+            } else {
+                wcflow_log('Missing required file: ' . $file);
+            }
+        }
+    }
+    
+    /**
+     * Initialize hooks
+     */
+    private function init_hooks() {
+        add_action('wp_enqueue_scripts', array($this, 'enqueue_assets'));
+        add_action('admin_enqueue_scripts', array($this, 'enqueue_admin_assets'));
+        add_filter('plugin_action_links_' . plugin_basename(__FILE__), array($this, 'add_action_links'));
+        add_action('admin_notices', array($this, 'admin_notices'));
+        
+        // WooCommerce integration hooks
+        add_action('woocommerce_init', array($this, 'woocommerce_integration'));
+        add_filter('woocommerce_checkout_fields', array($this, 'add_checkout_fields'));
+        add_action('woocommerce_email_order_meta', array($this, 'add_email_order_meta'), 10, 3);
+    }
+    
+    /**
+     * Enqueue frontend assets
+     */
+    public function enqueue_assets() {
+        if (!is_product() && !is_shop() && !is_product_category() && !is_cart() && !is_checkout()) {
+            return;
+        }
+        
+        wp_enqueue_style('wcflow-style', WCFLOW_URL . 'assets/wcflow.css', [], WCFLOW_VERSION);
+        wp_enqueue_script('wcflow-script', WCFLOW_URL . 'assets/wcflow.js', ['jquery'], WCFLOW_VERSION, true);
+        
+        // Enhanced localization with comprehensive data
+        $product_price = 0;
+        if (is_product()) {
+            global $product;
+            if ($product && $product->get_price()) {
+                $product_price = floatval($product->get_price());
+            }
+        }
+        
+        wp_localize_script('wcflow-script', 'wcflow_params', [
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'nonce'    => wp_create_nonce('wcflow_nonce'),
+            'locale'   => get_locale(),
+            'currency_symbol' => get_woocommerce_currency_symbol(),
+            'currency_code' => get_woocommerce_currency(),
+            'user_logged_in' => is_user_logged_in(),
+            'checkout_url' => wc_get_checkout_url(),
+            'cart_url' => wc_get_cart_url(),
+            'version' => WCFLOW_VERSION,
+            'debug' => defined('WP_DEBUG') && WP_DEBUG,
+            'base_product_price' => $product_price,
+            'processing_time' => get_option('wcflow_processing_time', 2),
+            'allowed_delivery_days' => get_option('wcflow_allowed_delivery_days', [1,2,3,4,5]),
+            'strings' => [
+                'loading' => __('Loading...', 'wcflow'),
+                'error' => __('An error occurred. Please try again.', 'wcflow'),
+                'success' => __('Success!', 'wcflow'),
+                'required_field' => __('This field is required.', 'wcflow'),
+                'invalid_email' => __('Please enter a valid email address.', 'wcflow'),
+                'order_total' => __('Order Total', 'wcflow'),
+                'including_delivery' => __('Including delivery', 'wcflow'),
+                'free_delivery' => __('Free delivery included', 'wcflow')
+            ]
+        ]);
+    }
+    
+    /**
+     * Enqueue admin assets
+     */
+    public function enqueue_admin_assets($hook) {
+        if (strpos($hook, 'wcflow') !== false || $hook === 'post.php' || $hook === 'post-new.php') {
+            wp_enqueue_style('wcflow-admin-style', WCFLOW_URL . 'assets/admin.css', [], WCFLOW_VERSION);
+            wp_enqueue_script('wcflow-admin-script', WCFLOW_URL . 'assets/admin.js', ['jquery'], WCFLOW_VERSION, true);
+        }
+    }
+    
+    /**
+     * WooCommerce integration
+     */
+    public function woocommerce_integration() {
+        // Ensure WooCommerce objects are available
+        if (!WC()->session) {
+            WC()->session = new WC_Session_Handler();
+            WC()->session->init();
+        }
+        
+        // Initialize customer and cart
+        if (!WC()->customer) {
+            WC()->customer = new WC_Customer();
+        }
+        
+        if (!WC()->cart) {
+            WC()->cart = new WC_Cart();
+        }
+        
+        // Hook into WooCommerce processes
+        add_action('woocommerce_before_calculate_totals', array($this, 'before_calculate_totals'));
+        add_filter('woocommerce_cart_needs_shipping', array($this, 'cart_needs_shipping'));
+    }
+    
+    /**
+     * Add custom checkout fields
+     */
+    public function add_checkout_fields($fields) {
+        // Add delivery date field to checkout
+        $fields['order']['wcflow_delivery_date'] = array(
+            'type'        => 'date',
+            'label'       => __('Preferred Delivery Date', 'wcflow'),
+            'required'    => false,
+            'class'       => array('form-row-wide'),
+            'clear'       => true,
+            'priority'    => 25,
+            'custom_attributes' => array(
+                'min' => date('Y-m-d', strtotime('+' . get_option('wcflow_processing_time', 2) . ' days'))
+            )
+        );
+        
+        // Add greeting message field
+        $fields['order']['wcflow_greeting_message'] = array(
+            'type'        => 'textarea',
+            'label'       => __('Greeting Card Message', 'wcflow'),
+            'required'    => false,
+            'class'       => array('form-row-wide'),
+            'clear'       => true,
+            'priority'    => 26,
+            'custom_attributes' => array(
+                'maxlength' => '450',
+                'rows' => '4'
+            )
+        );
+        
+        return $fields;
+    }
+    
+    /**
+     * Add order meta to emails
+     */
+    public function add_email_order_meta($order, $sent_to_admin, $plain_text) {
+        $delivery_date = $order->get_meta('_delivery_date');
+        $greeting_message = $order->get_meta('_greeting_card_message');
+        
+        if ($delivery_date || $greeting_message) {
+            if ($plain_text) {
+                echo "\n" . __('Gift Details:', 'wcflow') . "\n";
+                if ($delivery_date) {
+                    echo __('Delivery Date:', 'wcflow') . ' ' . date('F j, Y', strtotime($delivery_date)) . "\n";
+                }
+                if ($greeting_message) {
+                    echo __('Message:', 'wcflow') . ' ' . $greeting_message . "\n";
+                }
+            } else {
+                echo '<h2 style="color: #007cba;">' . __('🎁 Gift Details', 'wcflow') . '</h2>';
+                if ($delivery_date) {
+                    echo '<p><strong>' . __('Delivery Date:', 'wcflow') . '</strong> ' . date('F j, Y', strtotime($delivery_date)) . '</p>';
+                }
+                if ($greeting_message) {
+                    echo '<p><strong>' . __('Message:', 'wcflow') . '</strong><br>' . nl2br(esc_html($greeting_message)) . '</p>';
+                }
+            }
+        }
+    }
+    
+    /**
+     * Before calculate totals hook
+     */
+    public function before_calculate_totals($cart) {
+        // Add any custom calculations here
+        do_action('wcflow_before_calculate_totals', $cart);
+    }
+    
+    /**
+     * Cart needs shipping filter
+     */
+    public function cart_needs_shipping($needs_shipping) {
+        // Ensure shipping is calculated for gifting orders
+        return $needs_shipping;
+    }
+    
+    /**
+     * Add action links
+     */
+    public function add_action_links($links) {
+        $settings_link = '<a href="' . admin_url('admin.php?page=wc-settings&tab=wcflow_settings') . '">' . __('Settings', 'wcflow') . '</a>';
+        $docs_link = '<a href="#" target="_blank">' . __('Documentation', 'wcflow') . '</a>';
+        
+        array_unshift($links, $settings_link, $docs_link);
+        return $links;
+    }
+    
+    /**
+     * Admin notices
+     */
+    public function admin_notices() {
+        if (!current_user_can('manage_woocommerce')) return;
+        
+        $screen = get_current_screen();
+        if ($screen && strpos($screen->id, 'wcflow') !== false) return;
+        
+        // Check if settings are configured
+        $processing_time = get_option('wcflow_processing_time');
+        $allowed_days = get_option('wcflow_allowed_delivery_days');
+        
+        if (empty($processing_time) && empty($allowed_days)) {
+            ?>
+            <div class="notice notice-warning is-dismissible">
+                <p>
+                    <strong><?php _e('WooCommerce Gifting Flow:', 'wcflow'); ?></strong> 
+                    <?php _e('Please configure your delivery settings to get started.', 'wcflow'); ?>
+                    <a href="<?php echo admin_url('admin.php?page=wc-settings&tab=wcflow_settings'); ?>" class="button button-primary" style="margin-left: 10px;">
+                        <?php _e('Configure Now', 'wcflow'); ?>
+                    </a>
+                </p>
+            </div>
+            <?php
+        }
+        
+        // Check for WooCommerce version compatibility
+        if (version_compare(WC_VERSION, '5.0', '<')) {
+            ?>
+            <div class="notice notice-error">
+                <p>
+                    <strong><?php _e('WooCommerce Gifting Flow:', 'wcflow'); ?></strong> 
+                    <?php _e('This plugin requires WooCommerce 5.0 or higher. Please update WooCommerce.', 'wcflow'); ?>
+                </p>
+            </div>
+            <?php
+        }
+    }
+    
+    /**
+     * Check version and run updates if needed
+     */
+    private function check_version() {
+        $current_version = get_option('wcflow_version', '0.0');
+        
+        if (version_compare($current_version, WCFLOW_VERSION, '<')) {
+            $this->update_plugin($current_version);
+            update_option('wcflow_version', WCFLOW_VERSION);
+        }
+    }
+    
+    /**
+     * Update plugin data
+     */
+    private function update_plugin($from_version) {
+        wcflow_log('Updating plugin from version ' . $from_version . ' to ' . WCFLOW_VERSION);
+        
+        // Run version-specific updates
+        if (version_compare($from_version, '5.0', '<')) {
+            // Update to 5.0 - ensure new settings exist
+            if (!get_option('wcflow_processing_time')) {
+                update_option('wcflow_processing_time', 2);
+            }
+            if (!get_option('wcflow_allowed_delivery_days')) {
+                update_option('wcflow_allowed_delivery_days', [1,2,3,4,5]);
+            }
+        }
+        
+        // Clear any caches
+        wp_cache_flush();
+        
+        do_action('wcflow_updated', $from_version, WCFLOW_VERSION);
+    }
+    
+    /**
+     * Plugin activation
+     */
+    public function activate() {
+        // Set default settings
+        if (!get_option('wcflow_processing_time')) {
+            update_option('wcflow_processing_time', 2);
+        }
+        if (!get_option('wcflow_allowed_delivery_days')) {
+            update_option('wcflow_allowed_delivery_days', [1,2,3,4,5]);
+        }
+        if (!get_option('wcflow_enable_debug')) {
+            update_option('wcflow_enable_debug', 'no');
+        }
+        
+        // Set version
+        update_option('wcflow_version', WCFLOW_VERSION);
+        
+        // Create database tables if needed
+        $this->create_tables();
+        
+        // Flush rewrite rules
+        flush_rewrite_rules();
+        
+        wcflow_log('WooCommerce Gifting Flow activated - Version ' . WCFLOW_VERSION);
+        
+        do_action('wcflow_activated');
+    }
+    
+    /**
+     * Plugin deactivation
+     */
+    public function deactivate() {
+        // Clear scheduled events
+        wp_clear_scheduled_hook('wcflow_daily_cleanup');
+        
+        // Flush rewrite rules
+        flush_rewrite_rules();
+        
+        wcflow_log('WooCommerce Gifting Flow deactivated');
+        
+        do_action('wcflow_deactivated');
+    }
+    
+    /**
+     * Create database tables
+     */
+    private function create_tables() {
+        global $wpdb;
+        
+        $charset_collate = $wpdb->get_charset_collate();
+        
+        // Create analytics table for tracking gifting flow usage
+        $table_name = $wpdb->prefix . 'wcflow_analytics';
+        
+        $sql = "CREATE TABLE $table_name (
+            id mediumint(9) NOT NULL AUTO_INCREMENT,
+            order_id bigint(20) NOT NULL,
+            step_completed varchar(20) NOT NULL,
+            completion_time datetime DEFAULT CURRENT_TIMESTAMP,
+            user_agent text,
+            ip_address varchar(45),
+            PRIMARY KEY (id),
+            KEY order_id (order_id),
+            KEY step_completed (step_completed)
+        ) $charset_collate;";
+        
+        require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+        dbDelta($sql);
     }
 }
 
-// Set default settings on activation
-register_activation_hook(__FILE__, 'wcflow_set_default_settings');
-function wcflow_set_default_settings() {
-    if (get_option('wcflow_processing_time') === false) {
-        update_option('wcflow_processing_time', 2);
-    }
-    if (get_option('wcflow_allowed_delivery_days') === false) {
-        update_option('wcflow_allowed_delivery_days', [1, 2, 3, 4, 5]);
-    }
-    
-    error_log('WooCommerce Gifting Flow activated on ' . date('Y-m-d H:i:s') . ' UTC');
+// Initialize the plugin
+new WooCommerce_Gifting_Flow();
+
+/**
+ * Helper function to check if gifting flow is enabled for a product
+ */
+function wcflow_is_enabled_for_product($product_id) {
+    $enabled = get_post_meta($product_id, '_enable_wcflow_gifting', true);
+    return $enabled === 'yes' || $enabled === ''; // Default to enabled
 }
 
-// Enqueue assets
-add_action('wp_enqueue_scripts', function() {
-    if (!is_product() && !is_shop() && !is_product_category()) return;
-    
-    wp_enqueue_style('wcflow-style', WCFLOW_URL . 'assets/wcflow.css', [], WCFLOW_VERSION);
-    wp_enqueue_script('wcflow-script', WCFLOW_URL . 'assets/wcflow.js', ['jquery'], WCFLOW_VERSION, true);
-    
-    // FIXED: Enhanced localization with proper currency and product price
-    $product_price = 0;
-    if (is_product()) {
+/**
+ * Helper function to get gifting flow settings
+ */
+function wcflow_get_setting($key, $default = '') {
+    return get_option('wcflow_' . $key, $default);
+}
+
+/**
+ * Helper function to log messages
+ */
+function wcflow_log($message) {
+    if (get_option('wcflow_enable_debug') === 'yes' || (defined('WP_DEBUG') && WP_DEBUG)) {
+        error_log('[WooCommerce Gifting Flow] ' . $message);
+    }
+}
+
+/**
+ * Template function to display gifting flow button
+ */
+function wcflow_display_button($product_id = null) {
+    if (!$product_id) {
         global $product;
-        if ($product && $product->get_price()) {
-            $product_price = floatval($product->get_price());
-        }
+        $product_id = $product ? $product->get_id() : 0;
     }
     
-    wp_localize_script('wcflow-script', 'wcflow_params', [
-        'ajax_url' => admin_url('admin-ajax.php'),
-        'nonce'    => wp_create_nonce('wcflow_nonce'),
-        'locale'   => get_locale(),
-        'currency_symbol' => get_woocommerce_currency_symbol(),
-        'user_logged_in' => is_user_logged_in(),
-        'checkout_url' => wc_get_checkout_url(),
-        'version' => WCFLOW_VERSION,
-        'debug' => defined('WP_DEBUG') && WP_DEBUG,
-        'base_product_price' => $product_price // Set initial product price
-    ]);
-});
-
-// Add gifting flow button after add to cart
-add_action('woocommerce_after_add_to_cart_button', function() {
-    global $product;
-    if (!$product || !$product->get_id()) return;
-    
-    echo '<script>window.wcflow_product_id = ' . intval($product->get_id()) . ';</script>';
-    echo '<button type="button" class="button alt wcflow-start-btn" style="margin-top: 15px; width: 100%; background: #007cba; border-color: #007cba;" data-product-id="' . esc_attr($product->get_id()) . '">Order with Gifting Flow</button>';
-});
-
-// Add admin notices for configuration
-add_action('admin_notices', function() {
-    if (!current_user_can('manage_woocommerce')) return;
-    
-    $screen = get_current_screen();
-    if ($screen && strpos($screen->id, 'wcflow') !== false) return;
-    
-    $processing_time = get_option('wcflow_processing_time');
-    $allowed_days = get_option('wcflow_allowed_delivery_days');
-    
-    if (empty($processing_time) && empty($allowed_days)) {
-        ?>
-        <div class="notice notice-warning is-dismissible">
-            <p><strong>WooCommerce Gifting Flow:</strong> Please configure your delivery settings to get started. <a href="<?php echo admin_url('admin.php?page=wc-settings&tab=wcflow_settings'); ?>" class="button button-primary" style="margin-left: 10px;">Configure Now</a></p>
-        </div>
-        <?php
+    if ($product_id && wcflow_is_enabled_for_product($product_id)) {
+        echo '<button type="button" class="wcflow-start-btn" data-product-id="' . esc_attr($product_id) . '">Send as Gift</button>';
     }
-});
+}
 
-// Add custom order meta display in admin
-add_action('woocommerce_admin_order_data_after_shipping_address', function($order) {
-    $delivery_date = $order->get_meta('_delivery_date');
-    if ($delivery_date) {
-        echo '<p><strong>Delivery Date:</strong> ' . date('l, F j, Y', strtotime($delivery_date)) . '</p>';
+/**
+ * Shortcode for displaying gifting flow button
+ */
+add_shortcode('wcflow_button', function($atts) {
+    $atts = shortcode_atts([
+        'product_id' => 0,
+        'text' => 'Send as Gift',
+        'class' => 'wcflow-start-btn'
+    ], $atts);
+    
+    if (!$atts['product_id']) {
+        global $product;
+        $atts['product_id'] = $product ? $product->get_id() : 0;
     }
-});
-
-// Add delivery date to order emails
-add_action('woocommerce_email_order_meta', function($order, $sent_to_admin, $plain_text, $email) {
-    $delivery_date = $order->get_meta('_delivery_date');
-    if ($delivery_date) {
-        if ($plain_text) {
-            echo "\nDelivery Date: " . date('l, F j, Y', strtotime($delivery_date)) . "\n";
-        } else {
-            echo '<h2 style="color: #007cba; margin-top: 20px;">Delivery Information</h2>';
-            echo '<p><strong>Requested Delivery Date:</strong> ' . date('l, F j, Y', strtotime($delivery_date)) . '</p>';
-        }
+    
+    if ($atts['product_id'] && wcflow_is_enabled_for_product($atts['product_id'])) {
+        return '<button type="button" class="' . esc_attr($atts['class']) . '" data-product-id="' . esc_attr($atts['product_id']) . '">' . esc_html($atts['text']) . '</button>';
     }
-}, 20, 4);
-
-// Add plugin action links
-add_filter('plugin_action_links_' . plugin_basename(__FILE__), function($links) {
-    $settings_link = '<a href="' . admin_url('admin.php?page=wc-settings&tab=wcflow_settings') . '">Settings</a>';
-    array_unshift($links, $settings_link);
-    return $links;
+    
+    return '';
 });
