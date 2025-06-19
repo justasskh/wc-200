@@ -6,8 +6,6 @@
 
 if (!defined('ABSPATH')) exit;
 
-// REMOVED: Duplicate wcflow_log function - it's already declared in main plugin file
-
 // FIXED: Start flow with proper WooCommerce shipping calculation
 function wcflow_start_flow() {
     try {
@@ -293,6 +291,8 @@ function wcflow_get_addons_data() {
     try {
         check_ajax_referer('wcflow_nonce', 'nonce');
         
+        wcflow_log('=== LOADING ADDONS ===');
+        
         // Check if post type exists
         if (!post_type_exists('wcflow_addon')) {
             wcflow_log('wcflow_addon post type does not exist');
@@ -306,6 +306,8 @@ function wcflow_get_addons_data() {
             'orderby' => 'menu_order',
             'order' => 'ASC'
         ]);
+        
+        wcflow_log('Found ' . count($addons) . ' addons in database');
         
         $addons_data = [];
         foreach ($addons as $addon) {
@@ -327,6 +329,8 @@ function wcflow_get_addons_data() {
                 'price_value' => $price_value,
                 'img' => $image_url
             ];
+            
+            wcflow_log('Processed addon: ' . $addon->post_title . ' (ID: ' . $addon->ID . ')');
         }
         
         wcflow_log('Addons data retrieved: ' . count($addons_data) . ' items');
@@ -340,19 +344,48 @@ function wcflow_get_addons_data() {
 add_action('wp_ajax_wcflow_get_addons', 'wcflow_get_addons_data');
 add_action('wp_ajax_nopriv_wcflow_get_addons', 'wcflow_get_addons_data');
 
-// FIXED: Get cards data organized by categories with proper data structure
+// COMPLETELY FIXED: Get cards data organized by categories with proper taxonomy connection
 function wcflow_get_cards_data() {
     try {
         check_ajax_referer('wcflow_nonce', 'nonce');
         
-        wcflow_log('Starting cards data retrieval...');
+        wcflow_log('=== STARTING CARDS DATA RETRIEVAL ===');
         
         $cards_by_category = [];
+        
+        // FIXED: Check if the custom taxonomy exists
+        if (!taxonomy_exists('wcflow_card_category')) {
+            wcflow_log('wcflow_card_category taxonomy does not exist');
+            // Return sample data with proper structure
+            $cards_by_category = wcflow_get_sample_cards_data();
+            wp_send_json_success($cards_by_category);
+            return;
+        }
+        
+        // FIXED: Check if the post type exists
+        if (!post_type_exists('wcflow_card')) {
+            wcflow_log('wcflow_card post type does not exist');
+            // Return sample data with proper structure
+            $cards_by_category = wcflow_get_sample_cards_data();
+            wp_send_json_success($cards_by_category);
+            return;
+        }
         
         // Get all card categories ordered by display order
         $categories = get_terms([
             'taxonomy' => 'wcflow_card_category',
             'hide_empty' => false,
+            'meta_query' => [
+                'relation' => 'OR',
+                [
+                    'key' => '_wcflow_category_order',
+                    'compare' => 'EXISTS'
+                ],
+                [
+                    'key' => '_wcflow_category_order',
+                    'compare' => 'NOT EXISTS'
+                ]
+            ],
             'meta_key' => '_wcflow_category_order',
             'orderby' => 'meta_value_num',
             'order' => 'ASC'
@@ -360,7 +393,12 @@ function wcflow_get_cards_data() {
         
         wcflow_log('Found categories: ' . count($categories));
         
-        if (!empty($categories) && !is_wp_error($categories)) {
+        if (is_wp_error($categories)) {
+            wcflow_log('Error getting categories: ' . $categories->get_error_message());
+            $categories = [];
+        }
+        
+        if (!empty($categories)) {
             foreach ($categories as $category) {
                 wcflow_log('Processing category: ' . $category->name . ' (ID: ' . $category->term_id . ')');
                 
@@ -383,6 +421,7 @@ function wcflow_get_cards_data() {
                 wcflow_log('Found ' . count($cards) . ' cards for category: ' . $category->name);
                 
                 if (!empty($cards)) {
+                    // Get category description
                     $category_description = get_term_meta($category->term_id, '_wcflow_category_description', true);
                     if (empty($category_description)) {
                         $category_description = $category->description;
@@ -411,6 +450,8 @@ function wcflow_get_cards_data() {
                             'price_value' => $price_value,
                             'img' => $image_url
                         ];
+                        
+                        wcflow_log('Processed card: ' . $card->post_title . ' (ID: ' . $card->ID . ')');
                     }
                     
                     // FIXED: Use the correct data structure expected by JavaScript
@@ -424,60 +465,70 @@ function wcflow_get_cards_data() {
             }
         }
         
-        // FIXED: Only provide sample data if NO categories exist at all
+        // If no categories or cards found, provide sample data
         if (empty($cards_by_category)) {
             wcflow_log('No categories or cards found in database, providing sample data');
-            
-            $cards_by_category['Sample Cards'] = [
-                'description' => "Sample greeting cards for demonstration. Create your own categories and cards in the admin panel.",
-                'cards' => [
-                    [
-                        'id' => 'sample-1',
-                        'title' => 'Sample Card 1',
-                        'price' => 'FREE',
-                        'price_value' => 0,
-                        'img' => 'https://images.pexels.com/photos/1666065/pexels-photo-1666065.jpeg?auto=compress&cs=tinysrgb&w=400'
-                    ],
-                    [
-                        'id' => 'sample-2',
-                        'title' => 'Sample Card 2',
-                        'price' => '€1.50',
-                        'price_value' => 1.50,
-                        'img' => 'https://images.pexels.com/photos/1040173/pexels-photo-1040173.jpeg?auto=compress&cs=tinysrgb&w=400'
-                    ],
-                    [
-                        'id' => 'sample-3',
-                        'title' => 'Sample Card 3',
-                        'price' => '€2.50',
-                        'price_value' => 2.50,
-                        'img' => 'https://images.pexels.com/photos/1729931/pexels-photo-1729931.jpeg?auto=compress&cs=tinysrgb&w=400'
-                    ]
-                ]
-            ];
+            $cards_by_category = wcflow_get_sample_cards_data();
         }
         
-        wcflow_log('Final cards data structure: ' . json_encode(array_keys($cards_by_category)));
+        wcflow_log('=== CARDS DATA RETRIEVAL COMPLETE ===');
+        wcflow_log('Final categories: ' . implode(', ', array_keys($cards_by_category)));
+        
         wp_send_json_success($cards_by_category);
         
     } catch (Exception $e) {
         wcflow_log('Error loading cards: ' . $e->getMessage());
         // Return sample data even on error with correct structure
-        $sample_cards = [
-            'Error Fallback' => [
-                'description' => "There was an error loading cards. Please check your configuration.",
-                'cards' => [
-                    [
-                        'id' => 'error-sample-1',
-                        'title' => 'Error Card',
-                        'price' => 'FREE',
-                        'price_value' => 0,
-                        'img' => 'https://images.pexels.com/photos/1666065/pexels-photo-1666065.jpeg?auto=compress&cs=tinysrgb&w=400'
-                    ]
-                ]
-            ]
-        ];
+        $sample_cards = wcflow_get_sample_cards_data();
         wp_send_json_success($sample_cards);
     }
 }
+
+// Helper function to get sample cards data
+function wcflow_get_sample_cards_data() {
+    return [
+        'Sample Cards' => [
+            'description' => "Sample greeting cards for demonstration. Create your own categories and cards in the admin panel.",
+            'cards' => [
+                [
+                    'id' => 'sample-1',
+                    'title' => 'Sample Birthday Card',
+                    'price' => 'FREE',
+                    'price_value' => 0,
+                    'img' => 'https://images.pexels.com/photos/1666065/pexels-photo-1666065.jpeg?auto=compress&cs=tinysrgb&w=400'
+                ],
+                [
+                    'id' => 'sample-2',
+                    'title' => 'Sample Celebration Card',
+                    'price' => '€1.50',
+                    'price_value' => 1.50,
+                    'img' => 'https://images.pexels.com/photos/1040173/pexels-photo-1040173.jpeg?auto=compress&cs=tinysrgb&w=400'
+                ],
+                [
+                    'id' => 'sample-3',
+                    'title' => 'Sample Holiday Card',
+                    'price' => '€2.50',
+                    'price_value' => 2.50,
+                    'img' => 'https://images.pexels.com/photos/1729931/pexels-photo-1729931.jpeg?auto=compress&cs=tinysrgb&w=400'
+                ],
+                [
+                    'id' => 'sample-4',
+                    'title' => 'Sample Thank You Card',
+                    'price' => '€1.75',
+                    'price_value' => 1.75,
+                    'img' => 'https://images.pexels.com/photos/1040173/pexels-photo-1040173.jpeg?auto=compress&cs=tinysrgb&w=400'
+                ],
+                [
+                    'id' => 'sample-5',
+                    'title' => 'Sample Congratulations Card',
+                    'price' => '€2.00',
+                    'price_value' => 2.00,
+                    'img' => 'https://images.pexels.com/photos/1666065/pexels-photo-1666065.jpeg?auto=compress&cs=tinysrgb&w=400'
+                ]
+            ]
+        ]
+    ];
+}
+
 add_action('wp_ajax_wcflow_get_cards', 'wcflow_get_cards_data');
 add_action('wp_ajax_nopriv_wcflow_get_cards', 'wcflow_get_cards_data');

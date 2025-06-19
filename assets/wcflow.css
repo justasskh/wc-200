@@ -296,25 +296,14 @@ body.wcflow-modal-open {
 .greeting-cards-section {
     margin: 60px 0;
     position: relative;
-    /* FIXED: Remove container constraints to allow full-width extension */
 }
 
+/* FIXED: Left side aligns with inner content, right side extends to page edge */
 .greeting-cards-container {
-    /* FIXED: Left-aligned with content, extends to right edge */
-    max-width: none;
-    margin: 0;
+    max-width: 1200px;
+    margin: 0 auto;
     padding-left: 20px;
     position: relative;
-    /* Calculate left margin to align with content wrapper */
-    margin-left: calc((100vw - 1200px) / 2);
-}
-
-/* Ensure proper alignment on smaller screens */
-@media (max-width: 1240px) {
-    .greeting-cards-container {
-        margin-left: 0;
-        padding-left: 20px;
-    }
 }
 
 .greeting-cards-header {
@@ -322,28 +311,28 @@ body.wcflow-modal-open {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 16px;
-    /* FIXED: Constrain header to content width */
-    max-width: 1160px; /* 1200px - 40px padding */
+    padding-right: 20px;
 }
 
 .greeting-cards-title {
-    font-size: 28px;
+    font-size: 32px;
     font-weight: 700;
     color: #333;
     margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 .greeting-cards-see-all {
-    color: #007cba;
-    text-decoration: none;
-    font-weight: 600;
+    color: #333;
+    text-decoration: underline;
+    font-weight: 500;
     font-size: 16px;
     transition: color 0.2s ease;
+    cursor: pointer;
 }
 
 .greeting-cards-see-all:hover {
-    color: #005a87;
-    text-decoration: underline;
+    color: #007cba;
 }
 
 .greeting-cards-description {
@@ -351,93 +340,123 @@ body.wcflow-modal-open {
     font-size: 16px;
     line-height: 1.5;
     margin: 0 0 32px 0;
-    /* FIXED: Constrain description to content width */
-    max-width: 1160px; /* 1200px - 40px padding */
+    padding-right: 20px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
+/* FIXED: Slider extends to right edge while maintaining left alignment */
 .greeting-cards-slider-wrapper {
     position: relative;
     overflow: hidden;
-    /* FIXED: Full width extension to right edge */
-    width: 100vw;
-    margin-left: calc(-1 * ((100vw - 1200px) / 2));
-    padding-left: calc((100vw - 1200px) / 2 + 20px);
+    /* Extend to right edge of page */
+    width: calc(100vw - ((100vw - 1200px) / 2) - 20px);
+    margin-right: calc(-1 * ((100vw - 1200px) / 2));
 }
 
 /* Adjust for smaller screens */
 @media (max-width: 1240px) {
-    .greeting-cards-slider-wrapper {
-        width: 100vw;
-        margin-left: -20px;
+    .greeting-cards-container {
         padding-left: 20px;
+    }
+    
+    .greeting-cards-slider-wrapper {
+        width: calc(100vw - 20px);
+        margin-right: -20px;
     }
 }
 
 .greeting-cards-slider {
     display: flex;
-    gap: 20px;
+    gap: 16px;
     transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     padding-bottom: 20px;
-    /* FIXED: Extend to right edge with proper padding */
     padding-right: 20px;
     min-width: 100%;
 }
 
+/* Grid view for "See All" mode */
+.greeting-cards-section.grid-view .greeting-cards-slider-wrapper {
+    width: 100%;
+    margin-right: 0;
+    overflow: visible;
+}
+
+.greeting-cards-section.grid-view .greeting-cards-slider {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 20px;
+    padding: 20px 20px 20px 0;
+    transform: none !important;
+}
+
+.greeting-cards-section.grid-view .slider-nav {
+    display: none;
+}
+
+.greeting-cards-section.grid-view .slider-controls {
+    display: none;
+}
+
 .greeting-card {
     flex: 0 0 auto;
-    width: 200px;
+    width: 240px;
     background: #fff;
-    border: 2px solid #e0e0e0;
+    border: none;
     border-radius: 12px;
     overflow: hidden;
+    box-shadow: none;
     transition: all 0.3s ease;
     cursor: pointer;
     position: relative;
 }
 
 .greeting-card:hover {
-    border-color: #007cba;
     transform: translateY(-4px);
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
 }
 
 .greeting-card.selected {
-    border-color: #007cba;
-    background: #f0f8ff;
+    border: 3px solid #007cba;
     transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 124, 186, 0.25);
 }
 
 .greeting-card-image {
     width: 100%;
-    height: 240px;
+    height: 300px;
     object-fit: cover;
     display: block;
+    border-radius: 12px 12px 0 0;
 }
 
 .greeting-card-content {
     padding: 16px;
+    background: #fff;
+    border-radius: 0 0 12px 12px;
 }
 
 .greeting-card-title {
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 600;
     color: #333;
     margin: 0 0 8px 0;
     line-height: 1.3;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 .greeting-card-price {
-    font-size: 14px;
-    font-weight: 700;
-    color: #007cba;
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
     margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 .greeting-card-price.free {
-    color: #28a745;
+    color: #333;
 }
 
-/* Navigation Arrows */
+/* Navigation Arrows - Overlay style */
 .slider-nav {
     position: absolute;
     top: 50%;
@@ -445,8 +464,8 @@ body.wcflow-modal-open {
     width: 48px;
     height: 48px;
     background: #fff;
-    border: 2px solid #e0e0e0;
-    border-radius: 50%;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -457,7 +476,7 @@ body.wcflow-modal-open {
 }
 
 .slider-nav:hover {
-    border-color: #007cba;
+    border-color: #333;
     background: #f8f9fa;
     transform: translateY(-50%) scale(1.05);
 }
@@ -488,14 +507,21 @@ body.wcflow-modal-open {
 }
 
 .slider-nav:hover svg {
-    color: #007cba;
+    color: #333;
 }
 
-/* Progress Bar */
-.slider-progress-container {
+/* FIXED: Progress bar and controls positioned as in the image */
+.slider-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     margin-top: 24px;
-    /* FIXED: Constrain progress bar to content width */
-    max-width: 1160px; /* 1200px - 40px padding */
+    padding-right: 20px;
+}
+
+.slider-progress-container {
+    flex: 1;
+    margin-right: 20px;
 }
 
 .slider-progress-bar {
@@ -509,10 +535,31 @@ body.wcflow-modal-open {
 
 .slider-progress-fill {
     height: 100%;
-    background: #007cba;
+    background: #333;
     border-radius: 2px;
     transition: width 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     width: 0%;
+}
+
+.slider-nav-controls {
+    display: flex;
+    gap: 8px;
+}
+
+.slider-nav-controls .slider-nav {
+    position: static;
+    transform: none;
+    width: 40px;
+    height: 40px;
+}
+
+.slider-nav-controls .slider-nav:hover {
+    transform: scale(1.05);
+}
+
+.slider-nav-controls .slider-nav svg {
+    width: 16px;
+    height: 16px;
 }
 
 /* Message Section */
@@ -971,25 +1018,37 @@ body.wcflow-modal-open {
     }
     
     .greeting-cards-header {
-        max-width: none;
         padding-right: 16px;
     }
     
     .greeting-cards-description {
-        max-width: none;
         padding-right: 16px;
     }
     
     .greeting-cards-title {
-        font-size: 20px;
+        font-size: 24px;
     }
     
     .greeting-card {
-        width: 160px;
+        width: 200px;
     }
     
     .greeting-card-image {
-        height: 200px;
+        height: 250px;
+    }
+    
+    .greeting-cards-slider {
+        gap: 12px;
+    }
+    
+    .greeting-cards-section.grid-view .greeting-cards-slider {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 16px;
+        padding: 16px 16px 16px 0;
+    }
+    
+    .slider-controls {
+        padding-right: 16px;
     }
     
     .slider-nav {
@@ -1010,9 +1069,9 @@ body.wcflow-modal-open {
         right: 16px;
     }
     
-    .slider-progress-container {
-        max-width: none;
-        padding-right: 16px;
+    .greeting-cards-slider-wrapper {
+        width: calc(100vw - 16px);
+        margin-right: -16px;
     }
     
     .wcflow-form-row.two-columns {
@@ -1044,14 +1103,29 @@ body.wcflow-modal-open {
     }
     
     .greeting-card {
-        width: 140px;
+        width: 180px;
     }
     
     .greeting-card-image {
-        height: 180px;
+        height: 220px;
     }
     
     .greeting-cards-slider {
+        gap: 12px;
+    }
+    
+    .greeting-cards-section.grid-view .greeting-cards-slider {
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 12px;
+    }
+    
+    .slider-controls {
+        flex-direction: column;
         gap: 16px;
+        align-items: stretch;
+    }
+    
+    .slider-progress-container {
+        margin-right: 0;
     }
 }

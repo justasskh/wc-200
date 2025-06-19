@@ -1,7 +1,7 @@
 <?php
 /**
  * WooCommerce Gifting Flow Step 1 - Complete with progress bar and controls
- * Updated: 2025-01-27 - Dynamic category display from database
+ * Updated: 2025-01-27 - Dynamic category display from database with fixed layout
  */
 ?>
 <div class="wcflow-modal wcflow-fullscreen" data-step="1">
@@ -46,7 +46,7 @@
             </div>
         </div>
         
-        <!-- Complete Greeting Cards Slider with dynamic content -->
+        <!-- Complete Greeting Cards Slider with dynamic content and fixed layout -->
         <section class="greeting-cards-section" role="region" aria-label="Greeting Cards">
             <div class="greeting-cards-container">
                 <div class="greeting-cards-header">
@@ -59,6 +59,7 @@
                 </p>
                 
                 <div class="greeting-cards-slider-wrapper">
+                    <!-- Main navigation arrows (overlay style) -->
                     <button class="slider-nav slider-nav-prev" aria-label="Previous cards" type="button">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M15 18l-6-6 6-6"/>
