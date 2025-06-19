@@ -1,6 +1,6 @@
 /**
- * Greeting Cards Slider Component
- * Responsive horizontal slider with navigation and progress bar
+ * Greeting Cards Slider Component - Updated to match design
+ * Responsive horizontal slider with navigation arrows
  */
 
 class GreetingCardsSlider {
@@ -10,10 +10,9 @@ class GreetingCardsSlider {
         this.cards = container.querySelectorAll('.greeting-card');
         this.prevBtn = container.querySelector('.slider-nav-prev');
         this.nextBtn = container.querySelector('.slider-nav-next');
-        this.progressFill = container.querySelector('.slider-progress-fill');
         
         this.currentIndex = 0;
-        this.cardWidth = 220; // 200px + 20px gap
+        this.cardWidth = 256; // 240px + 16px gap
         this.visibleCards = this.calculateVisibleCards();
         this.maxIndex = Math.max(0, this.cards.length - this.visibleCards);
         
@@ -23,10 +22,7 @@ class GreetingCardsSlider {
     init() {
         this.updateCardWidth();
         this.updateNavigation();
-        this.updateProgress();
         this.bindEvents();
-        
-        // Initial setup
         this.updateSliderPosition();
     }
     
@@ -39,11 +35,11 @@ class GreetingCardsSlider {
         const containerWidth = this.container.offsetWidth;
         
         if (containerWidth <= 480) {
-            this.cardWidth = 156; // 140px + 16px gap
+            this.cardWidth = 192; // 180px + 12px gap
         } else if (containerWidth <= 768) {
-            this.cardWidth = 176; // 160px + 16px gap
+            this.cardWidth = 212; // 200px + 12px gap
         } else {
-            this.cardWidth = 220; // 200px + 20px gap
+            this.cardWidth = 256; // 240px + 16px gap
         }
         
         this.visibleCards = this.calculateVisibleCards();
@@ -143,7 +139,6 @@ class GreetingCardsSlider {
             this.updateCardWidth();
             this.updateSliderPosition();
             this.updateNavigation();
-            this.updateProgress();
         }, 150);
     }
     
@@ -191,7 +186,6 @@ class GreetingCardsSlider {
             this.currentIndex--;
             this.updateSliderPosition();
             this.updateNavigation();
-            this.updateProgress();
         }
     }
     
@@ -200,7 +194,6 @@ class GreetingCardsSlider {
             this.currentIndex++;
             this.updateSliderPosition();
             this.updateNavigation();
-            this.updateProgress();
         }
     }
     
@@ -208,7 +201,6 @@ class GreetingCardsSlider {
         this.currentIndex = Math.max(0, Math.min(index, this.maxIndex));
         this.updateSliderPosition();
         this.updateNavigation();
-        this.updateProgress();
     }
     
     updateSliderPosition() {
@@ -228,13 +220,6 @@ class GreetingCardsSlider {
         }
     }
     
-    updateProgress() {
-        if (this.progressFill && this.maxIndex > 0) {
-            const progress = (this.currentIndex / this.maxIndex) * 100;
-            this.progressFill.style.width = `${progress}%`;
-        }
-    }
-    
     // Public methods for external control
     addCard(cardData) {
         const cardElement = this.createCardElement(cardData);
@@ -242,7 +227,6 @@ class GreetingCardsSlider {
         this.cards = this.container.querySelectorAll('.greeting-card');
         this.updateCardWidth();
         this.updateNavigation();
-        this.updateProgress();
     }
     
     removeCard(index) {
@@ -251,7 +235,6 @@ class GreetingCardsSlider {
             this.cards = this.container.querySelectorAll('.greeting-card');
             this.updateCardWidth();
             this.updateNavigation();
-            this.updateProgress();
         }
     }
     

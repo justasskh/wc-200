@@ -1,7 +1,7 @@
 <?php
 /**
- * WooCommerce Gifting Flow Step 1 - Fixed with proper slider
- * Updated: 2025-01-27 - Added responsive greeting cards slider
+ * WooCommerce Gifting Flow Step 1 - Updated design to match screenshot
+ * Updated: 2025-01-27 - Modern greeting cards slider design
  */
 ?>
 <div class="wcflow-modal wcflow-fullscreen" data-step="1">
@@ -46,16 +46,16 @@
             </div>
         </div>
         
-        <!-- FIXED: Proper Greeting Cards Slider Implementation -->
+        <!-- Updated Greeting Cards Slider to match design -->
         <section class="greeting-cards-section" role="region" aria-label="Greeting Cards">
             <div class="greeting-cards-container">
                 <div class="greeting-cards-header">
-                    <h2 class="greeting-cards-title">Choose your card</h2>
+                    <h2 class="greeting-cards-title">Birthday</h2>
                     <a href="#" class="greeting-cards-see-all">See all</a>
                 </div>
                 
                 <p class="greeting-cards-description">
-                    Our cards are 100% tree-free, made from zero-waste recycled sugarcane. With a lovely eggshell texture, they can be recycled, composted, or treasured for years.
+                    Because it wouldn't be a birthday without a card. Pick your fave design, and add your own celebratory note.
                 </p>
                 
                 <div class="greeting-cards-slider-wrapper">
@@ -73,12 +73,6 @@
                     
                     <div id="wcflow-cards-slider" class="greeting-cards-slider" role="list">
                         <div class="wcflow-loader"></div>
-                    </div>
-                </div>
-                
-                <div class="slider-progress-container">
-                    <div class="slider-progress-bar" role="progressbar" aria-label="Slider progress">
-                        <div class="slider-progress-fill"></div>
                     </div>
                 </div>
             </div>
