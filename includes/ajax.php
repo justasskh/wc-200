@@ -1,6 +1,6 @@
 <?php
 /**
- * WooCommerce Gifting Flow AJAX Handlers - COMPLETELY FIXED
+ * WooCommerce Gifting Flow AJAX Handlers - COMPLETELY FIXED DATA STRUCTURE
  * FIXED: 2025-01-27 - Real WooCommerce shipping methods with Lithuania default
  */
 
@@ -344,25 +344,29 @@ function wcflow_get_addons_data() {
 add_action('wp_ajax_wcflow_get_addons', 'wcflow_get_addons_data');
 add_action('wp_ajax_nopriv_wcflow_get_addons', 'wcflow_get_addons_data');
 
-// COMPLETELY FIXED: Get cards data organized by categories with bulletproof admin connection
+// COMPLETELY FIXED: Get cards data with EXACT structure JavaScript expects
 function wcflow_get_cards_data() {
     try {
         check_ajax_referer('wcflow_nonce', 'nonce');
         
         wcflow_log('=== STARTING CARDS DATA RETRIEVAL ===');
         
+        // FIXED: Return data in the EXACT format JavaScript expects
+        // JavaScript expects: { "Category Name": [card1, card2, card3] }
+        // NOT: { "Category Name": { "description": "...", "cards": [...] } }
+        
         $cards_by_category = [];
         
         // STEP 1: Check if taxonomy and post type exist
         if (!taxonomy_exists('wcflow_card_category')) {
             wcflow_log('wcflow_card_category taxonomy does not exist - returning sample data');
-            wp_send_json_success(wcflow_get_sample_cards_data());
+            wp_send_json_success(wcflow_get_sample_cards_data_fixed());
             return;
         }
         
         if (!post_type_exists('wcflow_card')) {
             wcflow_log('wcflow_card post type does not exist - returning sample data');
-            wp_send_json_success(wcflow_get_sample_cards_data());
+            wp_send_json_success(wcflow_get_sample_cards_data_fixed());
             return;
         }
         
@@ -377,7 +381,7 @@ function wcflow_get_cards_data() {
         
         if (is_wp_error($categories)) {
             wcflow_log('Error getting categories: ' . $categories->get_error_message());
-            wp_send_json_success(wcflow_get_sample_cards_data());
+            wp_send_json_success(wcflow_get_sample_cards_data_fixed());
             return;
         }
         
@@ -408,15 +412,6 @@ function wcflow_get_cards_data() {
                 wcflow_log('Found ' . count($cards) . ' cards for category: ' . $category->name);
                 
                 if (!empty($cards)) {
-                    // Get category description
-                    $category_description = get_term_meta($category->term_id, '_wcflow_category_description', true);
-                    if (empty($category_description)) {
-                        $category_description = $category->description;
-                    }
-                    if (empty($category_description)) {
-                        $category_description = "Browse our collection of " . strtolower($category->name) . ".";
-                    }
-                    
                     $category_cards = [];
                     
                     foreach ($cards as $card) {
@@ -443,11 +438,9 @@ function wcflow_get_cards_data() {
                         wcflow_log('Processed card: ' . $card->post_title . ' (ID: ' . $card->ID . ', Price: ' . $price_value . ')');
                     }
                     
-                    // FIXED: Use the correct data structure expected by JavaScript
-                    $cards_by_category[$category->name] = [
-                        'description' => $category_description,
-                        'cards' => $category_cards
-                    ];
+                    // FIXED: Use the EXACT structure JavaScript expects
+                    // JavaScript expects: categoryName => [cards array]
+                    $cards_by_category[$category->name] = $category_cards;
                     
                     wcflow_log('Added category: ' . $category->name . ' with ' . count($category_cards) . ' cards');
                 }
@@ -459,7 +452,7 @@ function wcflow_get_cards_data() {
         // STEP 4: Fallback to sample data if no real data found
         if (empty($cards_by_category)) {
             wcflow_log('No categories or cards found in database, providing sample data');
-            $cards_by_category = wcflow_get_sample_cards_data();
+            $cards_by_category = wcflow_get_sample_cards_data_fixed();
         }
         
         wcflow_log('=== CARDS DATA RETRIEVAL COMPLETE ===');
@@ -471,53 +464,69 @@ function wcflow_get_cards_data() {
     } catch (Exception $e) {
         wcflow_log('Error loading cards: ' . $e->getMessage());
         // Return sample data even on error with correct structure
-        wp_send_json_success(wcflow_get_sample_cards_data());
+        wp_send_json_success(wcflow_get_sample_cards_data_fixed());
     }
 }
 
-// Helper function to get sample cards data with proper structure
-function wcflow_get_sample_cards_data() {
-    wcflow_log('Returning sample cards data');
+// FIXED: Helper function to get sample cards data in EXACT format JavaScript expects
+function wcflow_get_sample_cards_data_fixed() {
+    wcflow_log('Returning FIXED sample cards data');
+    
+    // FIXED: Return in format: { "Category Name": [cards] }
+    // NOT: { "Category Name": { "description": "...", "cards": [...] } }
     
     return [
         'Birthday Cards' => [
-            'description' => "Perfect cards for birthday celebrations. Create your own cards in the admin panel.",
-            'cards' => [
-                [
-                    'id' => 'sample-birthday-1',
-                    'title' => 'Happy Birthday Balloons',
-                    'price' => 'FREE',
-                    'price_value' => 0,
-                    'img' => 'https://images.pexels.com/photos/1666065/pexels-photo-1666065.jpeg?auto=compress&cs=tinysrgb&w=400'
-                ],
-                [
-                    'id' => 'sample-birthday-2',
-                    'title' => 'Birthday Cake Celebration',
-                    'price' => '€1.50',
-                    'price_value' => 1.50,
-                    'img' => 'https://images.pexels.com/photos/1040173/pexels-photo-1040173.jpeg?auto=compress&cs=tinysrgb&w=400'
-                ],
-                [
-                    'id' => 'sample-birthday-3',
-                    'title' => 'Birthday Wishes',
-                    'price' => '€2.50',
-                    'price_value' => 2.50,
-                    'img' => 'https://images.pexels.com/photos/1729931/pexels-photo-1729931.jpeg?auto=compress&cs=tinysrgb&w=400'
-                ],
-                [
-                    'id' => 'sample-birthday-4',
-                    'title' => 'Party Time',
-                    'price' => '€1.75',
-                    'price_value' => 1.75,
-                    'img' => 'https://images.pexels.com/photos/1040173/pexels-photo-1040173.jpeg?auto=compress&cs=tinysrgb&w=400'
-                ],
-                [
-                    'id' => 'sample-birthday-5',
-                    'title' => 'Another Year Older',
-                    'price' => '€2.00',
-                    'price_value' => 2.00,
-                    'img' => 'https://images.pexels.com/photos/1666065/pexels-photo-1666065.jpeg?auto=compress&cs=tinysrgb&w=400'
-                ]
+            [
+                'id' => 'sample-birthday-1',
+                'title' => 'Happy Birthday Balloons',
+                'price' => 'FREE',
+                'price_value' => 0,
+                'img' => 'https://images.pexels.com/photos/1666065/pexels-photo-1666065.jpeg?auto=compress&cs=tinysrgb&w=400'
+            ],
+            [
+                'id' => 'sample-birthday-2',
+                'title' => 'Birthday Cake Celebration',
+                'price' => '€1.50',
+                'price_value' => 1.50,
+                'img' => 'https://images.pexels.com/photos/1040173/pexels-photo-1040173.jpeg?auto=compress&cs=tinysrgb&w=400'
+            ],
+            [
+                'id' => 'sample-birthday-3',
+                'title' => 'Birthday Wishes',
+                'price' => '€2.50',
+                'price_value' => 2.50,
+                'img' => 'https://images.pexels.com/photos/1729931/pexels-photo-1729931.jpeg?auto=compress&cs=tinysrgb&w=400'
+            ],
+            [
+                'id' => 'sample-birthday-4',
+                'title' => 'Party Time',
+                'price' => '€1.75',
+                'price_value' => 1.75,
+                'img' => 'https://images.pexels.com/photos/1040173/pexels-photo-1040173.jpeg?auto=compress&cs=tinysrgb&w=400'
+            ],
+            [
+                'id' => 'sample-birthday-5',
+                'title' => 'Another Year Older',
+                'price' => '€2.00',
+                'price_value' => 2.00,
+                'img' => 'https://images.pexels.com/photos/1666065/pexels-photo-1666065.jpeg?auto=compress&cs=tinysrgb&w=400'
+            ]
+        ],
+        'Holiday Cards' => [
+            [
+                'id' => 'sample-holiday-1',
+                'title' => 'Season Greetings',
+                'price' => 'FREE',
+                'price_value' => 0,
+                'img' => 'https://images.pexels.com/photos/1729931/pexels-photo-1729931.jpeg?auto=compress&cs=tinysrgb&w=400'
+            ],
+            [
+                'id' => 'sample-holiday-2',
+                'title' => 'Winter Wonderland',
+                'price' => '€1.25',
+                'price_value' => 1.25,
+                'img' => 'https://images.pexels.com/photos/1040173/pexels-photo-1040173.jpeg?auto=compress&cs=tinysrgb&w=400'
             ]
         ]
     ];

@@ -301,32 +301,29 @@ jQuery(function($) {
         console.log('🔄 === RENDERING FALLBACK CARDS ===');
         
         const fallbackCards = {
-            'Sample Cards' => {
-                'description': "Sample greeting cards for demonstration. Create your own categories and cards in the admin panel.",
-                'cards': [
-                    {
-                        id: 'fallback-1',
-                        title: 'Sample Birthday Card',
-                        price: 'FREE',
-                        price_value: 0,
-                        img: 'https://images.pexels.com/photos/1666065/pexels-photo-1666065.jpeg?auto=compress&cs=tinysrgb&w=400'
-                    },
-                    {
-                        id: 'fallback-2',
-                        title: 'Sample Celebration Card',
-                        price: '€1.50',
-                        price_value: 1.50,
-                        img: 'https://images.pexels.com/photos/1040173/pexels-photo-1040173.jpeg?auto=compress&cs=tinysrgb&w=400'
-                    },
-                    {
-                        id: 'fallback-3',
-                        title: 'Sample Holiday Card',
-                        price: '€2.50',
-                        price_value: 2.50,
-                        img: 'https://images.pexels.com/photos/1729931/pexels-photo-1729931.jpeg?auto=compress&cs=tinysrgb&w=400'
-                    }
-                ]
-            }
+            'Sample Cards': [
+                {
+                    id: 'fallback-1',
+                    title: 'Sample Birthday Card',
+                    price: 'FREE',
+                    price_value: 0,
+                    img: 'https://images.pexels.com/photos/1666065/pexels-photo-1666065.jpeg?auto=compress&cs=tinysrgb&w=400'
+                },
+                {
+                    id: 'fallback-2',
+                    title: 'Sample Celebration Card',
+                    price: '€1.50',
+                    price_value: 1.50,
+                    img: 'https://images.pexels.com/photos/1040173/pexels-photo-1040173.jpeg?auto=compress&cs=tinysrgb&w=400'
+                },
+                {
+                    id: 'fallback-3',
+                    title: 'Sample Holiday Card',
+                    price: '€2.50',
+                    price_value: 2.50,
+                    img: 'https://images.pexels.com/photos/1729931/pexels-photo-1729931.jpeg?auto=compress&cs=tinysrgb&w=400'
+                }
+            ]
         };
         
         renderCardsInSlider(fallbackCards);
@@ -368,47 +365,25 @@ jQuery(function($) {
         console.log('📛 Category name:', firstCategoryKey);
         console.log('📦 Category data:', categoryData);
         console.log('🔍 Category data type:', typeof categoryData);
+        console.log('📋 Is array:', Array.isArray(categoryData));
         
-        // Update category title and description
+        // Update category title
         $('.greeting-cards-title').text(firstCategoryKey || 'Choose your card');
         
-        // FIXED: Extract cards array from category data with bulletproof logic
+        // FIXED: Extract cards array - SIMPLIFIED LOGIC
         let cards = [];
-        let description = 'Select a beautiful card to accompany your gift.';
         
-        if (categoryData && typeof categoryData === 'object') {
-            console.log('🔍 === EXTRACTING FROM OBJECT ===');
-            
-            // Check for description
-            if (categoryData.description && typeof categoryData.description === 'string') {
-                description = categoryData.description;
-                console.log('📝 Found description:', description);
-            }
-            
-            // Extract cards array - BULLETPROOF LOGIC
-            if (categoryData.cards && Array.isArray(categoryData.cards)) {
-                cards = categoryData.cards;
-                console.log('✅ Found cards in .cards property:', cards.length);
-            } else if (Array.isArray(categoryData)) {
-                cards = categoryData;
-                console.log('✅ Category data is direct array:', cards.length);
-            } else {
-                // Look for any array property
-                for (let key in categoryData) {
-                    if (Array.isArray(categoryData[key])) {
-                        cards = categoryData[key];
-                        console.log('✅ Found cards in property:', key, cards.length);
-                        break;
-                    }
-                }
-            }
-        } else if (Array.isArray(categoryData)) {
-            console.log('✅ === CATEGORY DATA IS DIRECT ARRAY ===');
+        if (Array.isArray(categoryData)) {
+            // Direct array of cards
             cards = categoryData;
+            console.log('✅ === CATEGORY DATA IS DIRECT ARRAY ===');
+            console.log('🎴 Cards count:', cards.length);
+        } else {
+            console.log('❌ === UNEXPECTED DATA STRUCTURE ===');
+            console.log('Expected array, got:', typeof categoryData);
+            $slider.html('<p style="text-align:center;color:#666;padding:40px;">Unexpected data structure received.</p>');
+            return;
         }
-        
-        // Update description
-        $('.greeting-cards-description').text(description);
         
         console.log('🎯 === FINAL CARDS PROCESSING ===');
         console.log('🎴 Cards array:', cards);
