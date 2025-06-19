@@ -1,0 +1,52 @@
+/* Step 3 Place Order Section Styling - Added 2025-06-18 21:30:05 UTC by justasskh */
+.wcflow-place-order-section {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #e0e0e0;
+}
+
+.wcflow-place-order-button {
+    width: 100%;
+    background: #000;
+    color: #fff;
+    border: none;
+    padding: 16px 24px;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-bottom: 12px;
+}
+
+.wcflow-place-order-button:hover {
+    background: #333;
+    transform: translateY(-1px);
+}
+
+.wcflow-place-order-button:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.wcflow-terms-text {
+    font-size: 12px;
+    color: #666;
+    text-align: center;
+    line-height: 1.4;
+}
+
+.wcflow-terms-link {
+    color: #007cba;
+    text-decoration: underline;
+}
+
+.wcflow-terms-link:hover {
+    color: #005a87;
+}
+
+/* Remove bottom bar styles from step 3 */
+.wcflow-modal[data-step="3"] .wcflow-bottom-bar {
+    display: none !important;
+}
