@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Greeting Cards Slider Demo</title>
+    <link rel="stylesheet" href="../assets/greeting-cards-slider.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 40px 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8f9fa;
+        }
+        
+        .demo-container {
+            background: white;
+            padding: 40px 0;
+        }
+        
+        .demo-info {
+            max-width: 1200px;
+            margin: 0 auto 40px auto;
+            padding: 0 20px;
+        }
+        
+        .demo-info h1 {
+            margin: 0 0 16px 0;
+            color: #333;
+        }
+        
+        .demo-info p {
+            color: #666;
+            margin: 0;
+        }
+        
+        .demo-controls {
+            max-width: 1200px;
+            margin: 40px auto 0 auto;
+            padding: 0 20px;
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        
+        .demo-button {
+            background: #007cba;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: background 0.2s ease;
+        }
+        
+        .demo-button:hover {
+            background: #005a87;
+        }
+        
+        .demo-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .selected-card-info {
+            margin-top: 20px;
+            padding: 16px;
+            background: #e8f5e8;
+            border-radius: 8px;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .selected-card-info h3 {
+            margin: 0 0 8px 0;
+            color: #155724;
+        }
+        
+        .selected-card-info p {
+            margin: 0;
+            color: #155724;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <div class="demo-info">
+            <h1>Greeting Cards Slider Demo</h1>
+            <p>A responsive horizontal slider component with navigation arrows, progress bar, and keyboard support.</p>
+        </div>
+        
+        <!-- Include the greeting cards slider component -->
+        <section class="greeting-cards-section" role="region" aria-label="Greeting Cards">
+            <div class="greeting-cards-container">
+                <div class="greeting-cards-header">
+                    <h2 class="greeting-cards-title">Birthday</h2>
+                    <a href="#" class="greeting-cards-see-all">See all</a>
+                </div>
+                
+                <p class="greeting-cards-description">
+                    Because it wouldn't be a birthday without a card. Pick your fave design, and add your own celebratory note.
+                </p>
+                
+                <div class="greeting-cards-slider-wrapper">
+                    <button class="slider-nav slider-nav-prev" aria-label="Previous cards" type="button">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M15 18l-6-6 6-6"/>
+                        </svg>
+                    </button>
+                    
+                    <button class="slider-nav slider-nav-next" aria-label="Next cards" type="button">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 18l6-6-6-6"/>
+                        </svg>
+                    </button>
+                    
+                    <div class="greeting-cards-slider" role="list">
+                        <div class="greeting-card" data-card-id="1" role="listitem">
+                            <img src="https://images.pexels.com/photos/1666065/pexels-photo-1666065.jpeg?auto=compress&cs=tinysrgb&w=400" alt="Birthday Hugs" class="greeting-card-image">
+                            <div class="greeting-card-content">
+                                <h4 class="greeting-card-title">Birthday Hugs</h4>
+                                <p class="greeting-card-price free">FREE</p>
+                            </div>
+                        </div>
+                        
+                        <div class="greeting-card" data-card-id="2" role="listitem">
+                            <img src="https://images.pexels.com/photos/1040173/pexels-photo-1040173.jpeg?auto=compress&cs=tinysrgb&w=400" alt="June Birth Flower" class="greeting-card-image">
+                            <div class="greeting-card-content">
+                                <h4 class="greeting-card-title">June Birth Flower</h4>
+                                <p class="greeting-card-price">£1.50</p>
+                            </div>
+                        </div>
+                        
+                        <div class="greeting-card" data-card-id="3" role="listitem">
+                            <img src="https://images.pexels.com/photos/1729931/pexels-photo-1729931.jpeg?auto=compress&cs=tinysrgb&w=400" alt="Happy Birthday by Lucy Sherston" class="greeting-card-image">
+                            <div class="greeting-card-content">
+                                <h4 class="greeting-card-title">Happy Birthday by Lucy Sherston</h4>
+                                <p class="greeting-card-price">£2.50</p>
+                            </div>
+                        </div>
+                        
+                        <div class="greeting-card" data-card-id="4" role="listitem">
+                            <img src="https://images.pexels.com/photos/1729931/pexels-photo-1729931.jpeg?auto=compress&cs=tinysrgb&w=400" alt="Happy Birthday" class="greeting-card-image">
+                            <div class="greeting-card-content">
+                                <h4 class="greeting-card-title">Happy Birthday</h4>
+                                <p class="greeting-card-price">£1.50</p>
+                            </div>
+                        </div>
+                        
+                        <div class="greeting-card" data-card-id="5" role="listitem">
+                            <img src="https://images.pexels.com/photos/1040173/pexels-photo-1040173.jpeg?auto=compress&cs=tinysrgb&w=400" alt="Cheers to Another Year" class="greeting-card-image">
+                            <div class="greeting-card-content">
+                                <h4 class="greeting-card-title">Cheers to Another Year</h4>
+                                <p class="greeting-card-price">£1.50</p>
+                            </div>
+                        </div>
+                        
+                        <div class="greeting-card" data-card-id="6" role="listitem">
+                            <img src="https://images.pexels.com/photos/1666065/pexels-photo-1666065.jpeg?auto=compress&cs=tinysrgb&w=400" alt="Modern Birthday" class="greeting-card-image">
+                            <div class="greeting-card-content">
+                                <h4 class="greeting-card-title">Modern Birthday</h4>
+                                <p class="greeting-card-price">£1.50</p>
+                            </div>
+                        </div>
+                        
+                        <div class="greeting-card" data-card-id="7" role="listitem">
+                            <img src="https://images.pexels.com/photos/1040173/pexels-photo-1040173.jpeg?auto=compress&cs=tinysrgb&w=400" alt="Floral Birthday" class="greeting-card-image">
+                            <div class="greeting-card-content">
+                                <h4 class="greeting-card-title">Floral Birthday</h4>
+                                <p class="greeting-card-price">£2.00</p>
+                            </div>
+                        </div>
+                        
+                        <div class="greeting-card" data-card-id="8" role="listitem">
+                            <img src="https://images.pexels.com/photos/1729931/pexels-photo-1729931.jpeg?auto=compress&cs=tinysrgb&w=400" alt="Vintage Birthday" class="greeting-card-image">
+                            <div class="greeting-card-content">
+                                <h4 class="greeting-card-title">Vintage Birthday</h4>
+                                <p class="greeting-card-price">£1.75</p>
+                            </div>
+                        </div>
+                        
+                        <div class="greeting-card" data-card-id="9" role="listitem">
+                            <img src="https://images.pexels.com/photos/1666065/pexels-photo-1666065.jpeg?auto=compress&cs=tinysrgb&w=400" alt="Celebration Time" class="greeting-card-image">
+                            <div class="greeting-card-content">
+                                <h4 class="greeting-card-title">Celebration Time</h4>
+                                <p class="greeting-card-price">£1.25</p>
+                            </div>
+                        </div>
+                        
+                        <div class="greeting-card" data-card-id="10" role="listitem">
+                            <img src="https://images.pexels.com/photos/1040173/pexels-photo-1040173.jpeg?auto=compress&cs=tinysrgb&w=400" alt="Birthday Wishes" class="greeting-card-image">
+                            <div class="greeting-card-content">
+                                <h4 class="greeting-card-title">Birthday Wishes</h4>
+                                <p class="greeting-card-price">£1.75</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="slider-progress-container">
+                    <div class="slider-progress-bar" role="progressbar" aria-label="Slider progress">
+                        <div class="slider-progress-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <div class="demo-controls">
+            <button class="demo-button" onclick="goToFirst()">Go to First</button>
+            <button class="demo-button" onclick="goToLast()">Go to Last</button>
+            <button class="demo-button" onclick="addCard()">Add Card</button>
+            <button class="demo-button" onclick="removeCard()">Remove Last Card</button>
+            
+            <div id="selectedCardInfo" class="selected-card-info" style="display: none;">
+                <h3>Selected Card</h3>
+                <p id="selectedCardDetails"></p>
+            </div>
+        </div>
+    </div>
+    
+    <script src="../assets/greeting-cards-slider.js"></script>
+    <script>
+        let sliderInstance;
+        
+        // Get slider instance after initialization
+        document.addEventListener('DOMContentLoaded', function() {
+            const sliderElement = document.querySelector('.greeting-cards-section');
+            sliderInstance = new GreetingCardsSlider(sliderElement);
+            
+            // Listen for card selection events
+            sliderElement.addEventListener('cardSelected', function(e) {
+                const cardData = e.detail.cardData;
+                const infoDiv = document.getElementById('selectedCardInfo');
+                const detailsP = document.getElementById('selectedCardDetails');
+                
+                detailsP.textContent = `${cardData.title} - ${cardData.price}`;
+                infoDiv.style.display = 'block';
+            });
+        });
+        
+        // Demo control functions
+        function goToFirst() {
+            if (sliderInstance) {
+                sliderInstance.goToSlide(0);
+            }
+        }
+        
+        function goToLast() {
+            if (sliderInstance) {
+                sliderInstance.goToSlide(sliderInstance.maxIndex);
+            }
+        }
+        
+        function addCard() {
+            if (sliderInstance) {
+                const newCard = {
+                    id: Date.now(),
+                    title: 'New Birthday Card',
+                    price: '£2.00',
+                    image: 'https://images.pexels.com/photos/1729931/pexels-photo-1729931.jpeg?auto=compress&cs=tinysrgb&w=400'
+                };
+                sliderInstance.addCard(newCard);
+            }
+        }
+        
+        function removeCard() {
+            if (sliderInstance && sliderInstance.cards.length > 0) {
+                sliderInstance.removeCard(sliderInstance.cards.length - 1);
+            }
+        }
+    </script>
+</body>
+</html>

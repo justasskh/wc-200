@@ -1,0 +1,310 @@
+/* Greeting Cards Slider Styles */
+.greeting-cards-section {
+    margin: 60px 0;
+    position: relative;
+}
+
+.greeting-cards-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding-left: 20px;
+    position: relative;
+}
+
+.greeting-cards-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-right: 20px;
+}
+
+.greeting-cards-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #333;
+    margin: 0;
+}
+
+.greeting-cards-see-all {
+    color: #007cba;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 16px;
+    transition: color 0.2s ease;
+}
+
+.greeting-cards-see-all:hover {
+    color: #005a87;
+    text-decoration: underline;
+}
+
+.greeting-cards-description {
+    color: #666;
+    font-size: 16px;
+    line-height: 1.5;
+    margin: 0 0 32px 0;
+    padding-right: 20px;
+}
+
+.greeting-cards-slider-wrapper {
+    position: relative;
+    overflow: hidden;
+}
+
+.greeting-cards-slider {
+    display: flex;
+    gap: 20px;
+    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    padding-bottom: 20px;
+    /* Extend to right edge of page */
+    padding-right: calc(50vw - 600px + 20px);
+    min-width: 100%;
+}
+
+.greeting-card {
+    flex: 0 0 auto;
+    width: 200px;
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+}
+
+.greeting-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.greeting-card-image {
+    width: 100%;
+    height: 240px;
+    object-fit: cover;
+    display: block;
+}
+
+.greeting-card-content {
+    padding: 16px;
+}
+
+.greeting-card-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+    margin: 0 0 8px 0;
+    line-height: 1.3;
+}
+
+.greeting-card-price {
+    font-size: 14px;
+    font-weight: 700;
+    color: #007cba;
+    margin: 0;
+}
+
+.greeting-card-price.free {
+    color: #28a745;
+}
+
+/* Navigation Arrows */
+.slider-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 48px;
+    height: 48px;
+    background: #fff;
+    border: 2px solid #e0e0e0;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 10;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.slider-nav:hover {
+    border-color: #007cba;
+    background: #f8f9fa;
+    transform: translateY(-50%) scale(1.05);
+}
+
+.slider-nav:active {
+    transform: translateY(-50%) scale(0.95);
+}
+
+.slider-nav.disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.slider-nav-prev {
+    left: -24px;
+}
+
+.slider-nav-next {
+    right: 20px;
+}
+
+.slider-nav svg {
+    width: 20px;
+    height: 20px;
+    color: #333;
+    transition: color 0.3s ease;
+}
+
+.slider-nav:hover svg {
+    color: #007cba;
+}
+
+/* Progress Bar */
+.slider-progress-container {
+    margin-top: 24px;
+    padding-right: 20px;
+}
+
+.slider-progress-bar {
+    width: 100%;
+    height: 4px;
+    background: #e0e0e0;
+    border-radius: 2px;
+    overflow: hidden;
+    position: relative;
+}
+
+.slider-progress-fill {
+    height: 100%;
+    background: #007cba;
+    border-radius: 2px;
+    transition: width 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    width: 0%;
+}
+
+/* Responsive Design */
+@media (max-width: 1240px) {
+    .greeting-cards-slider {
+        padding-right: 20px;
+    }
+}
+
+@media (max-width: 768px) {
+    .greeting-cards-container {
+        padding-left: 16px;
+    }
+    
+    .greeting-cards-header {
+        padding-right: 16px;
+    }
+    
+    .greeting-cards-description {
+        padding-right: 16px;
+    }
+    
+    .greeting-cards-title {
+        font-size: 20px;
+    }
+    
+    .greeting-card {
+        width: 160px;
+    }
+    
+    .greeting-card-image {
+        height: 200px;
+    }
+    
+    .slider-nav {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .slider-nav svg {
+        width: 16px;
+        height: 16px;
+    }
+    
+    .slider-nav-prev {
+        left: -20px;
+    }
+    
+    .slider-nav-next {
+        right: 16px;
+    }
+    
+    .slider-progress-container {
+        padding-right: 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .greeting-cards-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    
+    .greeting-card {
+        width: 140px;
+    }
+    
+    .greeting-card-image {
+        height: 180px;
+    }
+    
+    .greeting-cards-slider {
+        gap: 16px;
+    }
+}
+
+/* Keyboard Navigation */
+.greeting-card:focus {
+    outline: 2px solid #007cba;
+    outline-offset: 2px;
+}
+
+.slider-nav:focus {
+    outline: 2px solid #007cba;
+    outline-offset: 2px;
+}
+
+/* Loading State */
+.greeting-cards-loading {
+    display: flex;
+    gap: 20px;
+    padding-bottom: 20px;
+}
+
+.greeting-card-skeleton {
+    flex: 0 0 auto;
+    width: 200px;
+    height: 320px;
+    background: #f0f0f0;
+    border-radius: 12px;
+    position: relative;
+    overflow: hidden;
+}
+
+.greeting-card-skeleton::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+    animation: skeleton-loading 1.5s infinite;
+}
+
+@keyframes skeleton-loading {
+    0% {
+        left: -100%;
+    }
+    100% {
+        left: 100%;
+    }
+}
