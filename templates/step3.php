@@ -54,14 +54,14 @@
                 <div class="wcflow-right-column">
                     <div class="wcflow-payment-section">
                         <h3>Payment options</h3>
-                        <!-- Buyer/Billing Logic - FIXED -->
+                        <!-- Buyer/Billing Logic -->
                         <div class="wcflow-form-group" style="margin-bottom:18px;">
                             <label style="font-weight:bold;display:flex;align-items:center;cursor:pointer;padding:12px;border:2px solid #e0e0e0;border-radius:8px;background:#f9f9f9;">
                                 <input type="checkbox" id="wcflow-buyer-same" checked style="margin-right:12px;width:18px;height:18px;">
                                 <span style="font-size:16px;">I am the buyer (billing info same as shipping)</span>
                             </label>
                         </div>
-                        <!-- Billing form (hidden unless needed) - FIXED -->
+                        <!-- Billing form (hidden unless needed) -->
                         <div id="wcflow-billing-form" style="display:none; margin-bottom:18px; padding:20px; border:2px solid #007cba; border-radius:8px; background:#f0f8ff;">
                             <h4 style="margin:0 0 16px 0; color:#333; font-size:18px;">💳 Billing Information</h4>
                             <div class="wcflow-form-row" style="display:flex; gap:12px; margin-bottom:12px;">
@@ -119,29 +119,3 @@
         </div>
     </div>
 </div>
-
-<script>
-// Initialize billing form toggle when step 3 loads
-jQuery(document).ready(function($) {
-    // Ensure the checkbox toggle works properly
-    $(document).on('change', '#wcflow-buyer-same', function() {
-        const isChecked = $(this).is(':checked');
-        console.log('[WCFlow Step 3] Buyer same checkbox changed to:', isChecked);
-        
-        if (isChecked) {
-            console.log('[WCFlow Step 3] Hiding billing form');
-            $('#wcflow-billing-form').slideUp(200);
-        } else {
-            console.log('[WCFlow Step 3] Showing billing form');
-            $('#wcflow-billing-form').slideDown(200);
-        }
-    });
-    
-    // Initialize the form state based on checkbox
-    if ($('#wcflow-buyer-same').is(':checked')) {
-        $('#wcflow-billing-form').hide();
-    } else {
-        $('#wcflow-billing-form').show();
-    }
-});
-</script>

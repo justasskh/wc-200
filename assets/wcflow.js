@@ -512,22 +512,6 @@ jQuery(function($) {
             if (!window.wcflowValidateStep2()) {
                 return;
             }
-            // Save customer data to session when moving from step 2 to step 3
-            $.ajax({
-                url: wcflow_params.ajax_url,
-                type: 'POST',
-                data: {
-                    action: 'wcflow_save_customer_data',
-                    nonce: wcflow_params.nonce,
-                    customer_data: window.wcflow.orderState
-                },
-                success: function(response) {
-                    debug('Customer data saved to session before step 3:', response);
-                },
-                error: function() {
-                    debug('Failed to save customer data to session');
-                }
-            });
         }
         loadStep(currentStep + 1);
     });
@@ -539,7 +523,7 @@ jQuery(function($) {
     });
 
     // --- Launch flow (e.g. from product page) ---
-    $document.on('click', '.wcflow-start-btn, .wcflow-trigger-btn', function (e) {
+    $document.on('click', '.wcflow-start-btn', function (e) {
         e.preventDefault();
         const productId = $(this).data('product-id') || window.wcflow_product_id;
         if (!productId) return alert('Product not found.');

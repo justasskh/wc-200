@@ -468,14 +468,6 @@ function wcflow_create_order() {
     // Get state data from POST
     $state = isset($_POST['state']) ? $_POST['state'] : [];
     
-    // CRITICAL FIX: Also check session data as fallback
-    $session_data = WC()->session->get('wcflow_customer_data', []);
-    if (!empty($session_data)) {
-        // Merge session data with state data, giving priority to state data
-        $state = array_merge($session_data, $state);
-        wcflow_log('Merged session data with state data');
-    }
-    
     if (WC()->cart->is_empty()) {
         wp_send_json_error(['message' => 'Cart is empty.']);
     }
