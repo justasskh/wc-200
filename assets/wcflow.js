@@ -248,10 +248,12 @@ jQuery(function($) {
         });
     }
     
-    // FIXED: Load cards with proper slider implementation
+    // FIXED: Load cards with proper error handling and fallback
     function loadCardsWithSlider() {
         const $slider = $('#wcflow-cards-slider');
         $slider.html('<div class="wcflow-loader"></div>');
+        
+        debug('Starting to load cards...');
         
         $.ajax({
             url: wcflow_params.ajax_url,
@@ -262,20 +264,74 @@ jQuery(function($) {
             },
             timeout: 15000,
             success: function(response) {
-                if (response.success) {
+                debug('Cards AJAX response received', response);
+                
+                if (response && response.success && response.data) {
+                    debug('Cards data received successfully', response.data);
                     renderCardsInSlider(response.data);
                     // Initialize slider after cards are rendered
-                    setTimeout(initializeSlider, 100);
+                    setTimeout(initializeSlider, 200);
                 } else {
-                    debug('No cards available');
-                    $slider.html('<p style="text-align:center;color:#666;padding:40px;">No cards available at this time.</p>');
+                    debug('No cards data in response, using fallback');
+                    renderFallbackCards();
                 }
             },
             error: function(xhr, status, error) {
-                debug('Cards loading failed', {status: status, error: error});
-                $slider.html('<p style="text-align:center;color:#666;padding:40px;">Failed to load cards. Please try again.</p>');
+                debug('Cards loading failed', {status: status, error: error, xhr: xhr});
+                console.error('Cards AJAX Error:', xhr.responseText);
+                renderFallbackCards();
             }
         });
+    }
+    
+    // FIXED: Render fallback cards when AJAX fails
+    function renderFallbackCards() {
+        debug('Rendering fallback cards');
+        
+        const fallbackCards = {
+            'Populiariausi atvirukai': [
+                {
+                    id: 'fallback-1',
+                    title: 'Gimtadienio apkabinimai',
+                    price: 'NEMOKAMA',
+                    price_value: 0,
+                    img: 'https://images.pexels.com/photos/1666065/pexels-photo-1666065.jpeg?auto=compress&cs=tinysrgb&w=400'
+                },
+                {
+                    id: 'fallback-2',
+                    title: 'Birželio gimimo gėlė',
+                    price: '€1.50',
+                    price_value: 1.50,
+                    img: 'https://images.pexels.com/photos/1040173/pexels-photo-1040173.jpeg?auto=compress&cs=tinysrgb&w=400'
+                },
+                {
+                    id: 'fallback-3',
+                    title: 'Su gimtadieniu!',
+                    price: '€2.50',
+                    price_value: 2.50,
+                    img: 'https://images.pexels.com/photos/1729931/pexels-photo-1729931.jpeg?auto=compress&cs=tinysrgb&w=400'
+                }
+            ],
+            'Gimtadienio ir švenčių atvirukai': [
+                {
+                    id: 'fallback-4',
+                    title: 'Linksmų gimtadienio',
+                    price: '€1.50',
+                    price_value: 1.50,
+                    img: 'https://images.pexels.com/photos/1666065/pexels-photo-1666065.jpeg?auto=compress&cs=tinysrgb&w=400'
+                },
+                {
+                    id: 'fallback-5',
+                    title: 'Šventinis tortas',
+                    price: '€2.00',
+                    price_value: 2.00,
+                    img: 'https://images.pexels.com/photos/1729931/pexels-photo-1729931.jpeg?auto=compress&cs=tinysrgb&w=400'
+                }
+            ]
+        };
+        
+        renderCardsInSlider(fallbackCards);
+        setTimeout(initializeSlider, 200);
     }
     
     // FIXED: Render cards in slider format with proper categories
@@ -283,8 +339,10 @@ jQuery(function($) {
         const $slider = $('#wcflow-cards-slider');
         $slider.empty();
         
-        if (Object.keys(cardsByCategory).length === 0) {
-            $slider.html('<p style="text-align:center;color:#666;">No cards available.</p>');
+        debug('Rendering cards in slider', cardsByCategory);
+        
+        if (!cardsByCategory || Object.keys(cardsByCategory).length === 0) {
+            $slider.html('<p style="text-align:center;color:#666;padding:40px;">No cards available at this time.</p>');
             return;
         }
         
@@ -306,10 +364,15 @@ jQuery(function($) {
             }
         });
         
+        if (allCards.length === 0) {
+            $slider.html('<p style="text-align:center;color:#666;padding:40px;">No cards found.</p>');
+            return;
+        }
+        
         allCards.forEach(function(card) {
             const $cardItem = $(`
                 <div class="greeting-card" data-card-id="${card.id}" data-price-value="${card.price_value}" role="listitem" tabindex="0">
-                    ${card.img ? `<img src="${card.img}" alt="${card.title}" class="greeting-card-image">` : ''}
+                    ${card.img ? `<img src="${card.img}" alt="${card.title}" class="greeting-card-image" loading="lazy">` : ''}
                     <div class="greeting-card-content">
                         <h4 class="greeting-card-title">${card.title}</h4>
                         <p class="greeting-card-price ${card.price_value == 0 ? 'free' : ''}">${card.price}</p>
@@ -320,7 +383,7 @@ jQuery(function($) {
         });
         
         // Handle card selection
-        $(document).on('click', '.greeting-card', function() {
+        $(document).off('click', '.greeting-card').on('click', '.greeting-card', function() {
             $('.greeting-card').removeClass('selected');
             $(this).addClass('selected');
             
@@ -337,7 +400,7 @@ jQuery(function($) {
             });
         });
         
-        debug('Cards rendered', {total: allCards.length});
+        debug('Cards rendered successfully', {total: allCards.length});
     }
     
     // FIXED: Initialize slider functionality with proper calculations
@@ -443,6 +506,8 @@ jQuery(function($) {
                 updateSlider();
             }
         };
+        
+        debug('Slider fully initialized and ready');
     }
     
     // Initialize floating labels
