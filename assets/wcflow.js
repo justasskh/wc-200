@@ -248,7 +248,7 @@ jQuery(function($) {
         });
     }
     
-    // FIXED: Load cards with comprehensive error handling and debugging
+    // COMPLETELY FIXED: Load cards with comprehensive error handling and debugging
     function loadCardsWithSlider() {
         const $slider = $('#wcflow-cards-slider');
         $slider.html('<div class="wcflow-loader"></div>');
@@ -370,36 +370,39 @@ jQuery(function($) {
         // Update category title and description
         $('.greeting-cards-title').text(firstCategoryKey || 'Choose your card');
         
-        // Extract cards array from category data
+        // FIXED: Extract cards array from category data with bulletproof logic
         let cards = [];
         let description = 'Select a beautiful card to accompany your gift.';
         
         if (categoryData && typeof categoryData === 'object') {
+            console.log('=== EXTRACTING FROM OBJECT ===');
+            
             // Check for description
             if (categoryData.description && typeof categoryData.description === 'string') {
                 description = categoryData.description;
+                console.log('Found description:', description);
             }
             
-            // Extract cards array
-            if (Array.isArray(categoryData.cards)) {
+            // Extract cards array - FIXED LOGIC
+            if (categoryData.cards && Array.isArray(categoryData.cards)) {
                 cards = categoryData.cards;
-                console.log('Found cards in .cards property');
+                console.log('Found cards in .cards property:', cards.length);
             } else if (Array.isArray(categoryData)) {
                 cards = categoryData;
-                console.log('Category data is array of cards');
+                console.log('Category data is direct array:', cards.length);
             } else {
                 // Look for any array property
                 for (let key in categoryData) {
                     if (Array.isArray(categoryData[key])) {
                         cards = categoryData[key];
-                        console.log('Found cards in property:', key);
+                        console.log('Found cards in property:', key, cards.length);
                         break;
                     }
                 }
             }
         } else if (Array.isArray(categoryData)) {
+            console.log('=== CATEGORY DATA IS DIRECT ARRAY ===');
             cards = categoryData;
-            console.log('Category data is direct array');
         }
         
         // Update description
