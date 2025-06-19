@@ -1,6 +1,6 @@
 /**
  * WooCommerce Gifting Flow - Main JavaScript
- * Recreated: 2025-01-27 - Complete rebuild with proper functionality
+ * FIXED: 2025-01-27 - Complete rebuild with proper functionality and pricing
  */
 
 jQuery(function($) {
@@ -12,12 +12,53 @@ jQuery(function($) {
     
     let orderState = window.wcflow.orderState;
     let currentStep = 1;
+    let sliderInstance = null;
     
     // Debug helper
     function debug(message, data) {
         if (wcflow_params.debug) {
             console.log('[WCFlow]', message, data || '');
         }
+    }
+    
+    // FIXED: Price calculation and display
+    function updatePricing() {
+        let basePrice = parseFloat(wcflow_params.base_product_price || 0);
+        let addonsTotal = 0;
+        let cardPrice = 0;
+        let shippingPrice = parseFloat(orderState.shipping_cost || 0);
+        
+        // Calculate addons total
+        $('.wcflow-addon-card.selected').each(function() {
+            const priceValue = parseFloat($(this).data('price-value') || 0);
+            addonsTotal += priceValue;
+        });
+        
+        // Calculate card price
+        const $selectedCard = $('.greeting-card.selected');
+        if ($selectedCard.length) {
+            cardPrice = parseFloat($selectedCard.data('price-value') || 0);
+        }
+        
+        const subtotal = basePrice + addonsTotal + cardPrice;
+        const total = subtotal + shippingPrice;
+        
+        // Update display
+        $('#wcflow-dynamic-total').text(wcflow_params.currency_symbol + total.toFixed(2));
+        $('#wcflow-shipping-details').text('Including ' + wcflow_params.currency_symbol + shippingPrice.toFixed(2) + ' delivery');
+        
+        // Store in order state
+        orderState.subtotal = subtotal;
+        orderState.shipping_cost = shippingPrice;
+        orderState.total = total;
+        
+        debug('Pricing updated', {
+            base: basePrice,
+            addons: addonsTotal,
+            card: cardPrice,
+            shipping: shippingPrice,
+            total: total
+        });
     }
     
     // Modal management
@@ -88,21 +129,25 @@ jQuery(function($) {
         }
     }
     
-    // Step 1 initialization
+    // FIXED: Step 1 initialization with proper slider
     function initStep1() {
         debug('Initializing step 1');
         
         // Load addons
         loadAddons();
         
-        // Load cards
-        loadCards();
+        // Load cards with slider
+        loadCardsWithSlider();
         
         // Message textarea functionality
         $(document).on('input', '#wcflow-card-message', function() {
             const length = $(this).val().length;
             $('#wcflow-message-count').text(length);
+            orderState.card_message = $(this).val();
         });
+        
+        // Initial pricing update
+        updatePricing();
     }
     
     // Step 2 initialization
@@ -118,8 +163,8 @@ jQuery(function($) {
         // Load delivery options
         loadDeliveryOptions();
         
-        // Load shipping methods
-        loadShippingMethods();
+        // FIXED: Load shipping methods with proper display
+        loadShippingMethodsForStep2();
     }
     
     // Step 3 initialization
@@ -165,7 +210,7 @@ jQuery(function($) {
         
         addons.forEach(function(addon) {
             const $card = $(`
-                <div class="wcflow-addon-card" data-addon-id="${addon.id}">
+                <div class="wcflow-addon-card" data-addon-id="${addon.id}" data-price-value="${addon.price_value}">
                     ${addon.img ? `<img src="${addon.img}" alt="${addon.title}" class="wcflow-addon-image">` : ''}
                     <div class="wcflow-addon-content">
                         <h3 class="wcflow-addon-title">${addon.title}</h3>
@@ -181,11 +226,12 @@ jQuery(function($) {
         $(document).on('click', '.wcflow-addon-card', function() {
             $(this).toggleClass('selected');
             updateOrderState();
+            updatePricing();
         });
     }
     
-    // Load cards
-    function loadCards() {
+    // FIXED: Load cards with proper slider implementation
+    function loadCardsWithSlider() {
         $.ajax({
             url: wcflow_params.ajax_url,
             type: 'POST',
@@ -195,51 +241,45 @@ jQuery(function($) {
             },
             success: function(response) {
                 if (response.success) {
-                    renderCards(response.data);
+                    renderCardsInSlider(response.data);
+                    initializeSlider();
                 }
             }
         });
     }
     
-    // Render cards
-    function renderCards(cardsByCategory) {
-        const $container = $('#wcflow-all-cards-container');
-        $container.empty();
+    // FIXED: Render cards in slider format
+    function renderCardsInSlider(cardsByCategory) {
+        const $slider = $('#wcflow-cards-slider');
+        $slider.empty();
         
         if (Object.keys(cardsByCategory).length === 0) {
-            $container.html('<p style="text-align:center;color:#666;">No cards available.</p>');
+            $slider.html('<p style="text-align:center;color:#666;">No cards available.</p>');
             return;
         }
         
+        // Flatten all cards into single array for slider
+        let allCards = [];
         Object.entries(cardsByCategory).forEach(function([category, cards]) {
-            const $categoryDiv = $(`
-                <div class="wcflow-cards-category">
-                    <h3 class="wcflow-cards-category-title">${category}</h3>
-                    <div class="wcflow-cards-grid"></div>
+            allCards = allCards.concat(cards);
+        });
+        
+        allCards.forEach(function(card) {
+            const $cardItem = $(`
+                <div class="greeting-card" data-card-id="${card.id}" data-price-value="${card.price_value}" role="listitem">
+                    ${card.img ? `<img src="${card.img}" alt="${card.title}" class="greeting-card-image">` : ''}
+                    <div class="greeting-card-content">
+                        <h4 class="greeting-card-title">${card.title}</h4>
+                        <p class="greeting-card-price ${card.price_value == 0 ? 'free' : ''}">${card.price}</p>
+                    </div>
                 </div>
             `);
-            
-            const $grid = $categoryDiv.find('.wcflow-cards-grid');
-            
-            cards.forEach(function(card) {
-                const $cardItem = $(`
-                    <div class="wcflow-card-item" data-card-id="${card.id}">
-                        ${card.img ? `<img src="${card.img}" alt="${card.title}" class="wcflow-card-image">` : ''}
-                        <div class="wcflow-card-content">
-                            <h4 class="wcflow-card-title">${card.title}</h4>
-                            <p class="wcflow-card-price">${card.price}</p>
-                        </div>
-                    </div>
-                `);
-                $grid.append($cardItem);
-            });
-            
-            $container.append($categoryDiv);
+            $slider.append($cardItem);
         });
         
         // Handle card selection
-        $(document).on('click', '.wcflow-card-item', function() {
-            $('.wcflow-card-item').removeClass('selected');
+        $(document).on('click', '.greeting-card', function() {
+            $('.greeting-card').removeClass('selected');
             $(this).addClass('selected');
             
             // Enable message textarea
@@ -247,6 +287,74 @@ jQuery(function($) {
             $('.wcflow-message-note').hide();
             
             updateOrderState();
+            updatePricing();
+        });
+    }
+    
+    // FIXED: Initialize slider functionality
+    function initializeSlider() {
+        const $sliderWrapper = $('.greeting-cards-slider-wrapper');
+        const $slider = $('#wcflow-cards-slider');
+        const $prevBtn = $('.slider-nav-prev');
+        const $nextBtn = $('.slider-nav-next');
+        const $progressFill = $('.slider-progress-fill');
+        
+        let currentIndex = 0;
+        const cardWidth = 220; // 200px + 20px gap
+        const visibleCards = Math.floor($sliderWrapper.width() / cardWidth);
+        const totalCards = $slider.find('.greeting-card').length;
+        const maxIndex = Math.max(0, totalCards - visibleCards);
+        
+        function updateSlider() {
+            const translateX = -currentIndex * cardWidth;
+            $slider.css('transform', `translateX(${translateX}px)`);
+            
+            // Update navigation
+            $prevBtn.toggleClass('disabled', currentIndex === 0);
+            $nextBtn.toggleClass('disabled', currentIndex >= maxIndex);
+            
+            // Update progress
+            if (maxIndex > 0) {
+                const progress = (currentIndex / maxIndex) * 100;
+                $progressFill.css('width', progress + '%');
+            }
+        }
+        
+        // Navigation handlers
+        $prevBtn.on('click', function() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                updateSlider();
+            }
+        });
+        
+        $nextBtn.on('click', function() {
+            if (currentIndex < maxIndex) {
+                currentIndex++;
+                updateSlider();
+            }
+        });
+        
+        // Keyboard navigation
+        $(document).on('keydown', function(e) {
+            if ($('.wcflow-modal[data-step="1"]').length) {
+                if (e.key === 'ArrowLeft') {
+                    e.preventDefault();
+                    $prevBtn.click();
+                } else if (e.key === 'ArrowRight') {
+                    e.preventDefault();
+                    $nextBtn.click();
+                }
+            }
+        });
+        
+        // Initial update
+        updateSlider();
+        
+        debug('Slider initialized', {
+            totalCards: totalCards,
+            visibleCards: visibleCards,
+            maxIndex: maxIndex
         });
     }
     
@@ -343,10 +451,79 @@ jQuery(function($) {
         });
     }
     
-    // Load shipping methods
-    function loadShippingMethods() {
-        $(document).on('click', '#wcflow-shipping-method-selector', function() {
-            showShippingMethods();
+    // FIXED: Load shipping methods for Step 2 with proper display
+    function loadShippingMethodsForStep2() {
+        const $selector = $('#wcflow-shipping-method-selector');
+        
+        // Show loading state
+        $selector.find('.selectable-box-value').text('Loading...');
+        
+        $.ajax({
+            url: wcflow_params.ajax_url,
+            type: 'POST',
+            data: {
+                action: 'wcflow_get_shipping_methods',
+                nonce: wcflow_params.nonce
+            },
+            success: function(response) {
+                if (response.success && response.data.length > 0) {
+                    // Set first method as default
+                    const firstMethod = response.data[0];
+                    $selector.find('.selectable-box-value').text(firstMethod.label + ' - ' + wcflow_params.currency_symbol + firstMethod.cost_with_tax);
+                    orderState.shipping_method = firstMethod.id;
+                    orderState.shipping_cost = firstMethod.cost_with_tax;
+                    
+                    // Update pricing
+                    updatePricing();
+                    
+                    // Setup click handler for popup
+                    $selector.off('click').on('click', function() {
+                        showShippingMethodsPopup(response.data);
+                    });
+                    
+                    debug('Shipping methods loaded for Step 2', response.data);
+                } else {
+                    $selector.find('.selectable-box-value').text('No shipping methods available');
+                }
+            },
+            error: function() {
+                $selector.find('.selectable-box-value').text('Failed to load shipping methods');
+            }
+        });
+    }
+    
+    // Show shipping methods popup
+    function showShippingMethodsPopup(methods) {
+        let html = '<div class="wcflow-popup-content wcflow-shipping-popup">';
+        html += '<button class="wcflow-popup-close">&times;</button>';
+        html += '<h3>Select Shipping Method</h3>';
+        
+        methods.forEach(function(method) {
+            const isSelected = orderState.shipping_method === method.id;
+            html += `<div class="wcflow-shipping-option ${isSelected ? 'selected' : ''}" data-method="${method.id}" data-cost="${method.cost_with_tax}" style="padding:12px;border:1px solid ${isSelected ? '#007cba' : '#ddd'};margin:8px 0;cursor:pointer;border-radius:4px;background:${isSelected ? '#f0f8ff' : '#fff'};">
+                <strong>${method.label}</strong><br>
+                <span style="color:#666;">${wcflow_params.currency_symbol}${method.cost_with_tax}</span>
+            </div>`;
+        });
+        
+        html += '</div>';
+        
+        showPopup(html);
+        
+        // Handle method selection
+        $(document).on('click', '.wcflow-shipping-option', function() {
+            const methodId = $(this).data('method');
+            const methodCost = parseFloat($(this).data('cost'));
+            const label = $(this).find('strong').text();
+            
+            $('#wcflow-shipping-method-selector .selectable-box-value').text(label + ' - ' + wcflow_params.currency_symbol + methodCost);
+            orderState.shipping_method = methodId;
+            orderState.shipping_cost = methodCost;
+            
+            // Update pricing
+            updatePricing();
+            
+            closePopup();
         });
     }
     
@@ -393,52 +570,6 @@ jQuery(function($) {
             
             $('#wcflow-delivery-date-selector .selectable-box-value').text(label);
             orderState.delivery_date = date;
-            
-            closePopup();
-        });
-    }
-    
-    // Show shipping methods
-    function showShippingMethods() {
-        $.ajax({
-            url: wcflow_params.ajax_url,
-            type: 'POST',
-            data: {
-                action: 'wcflow_get_shipping_methods',
-                nonce: wcflow_params.nonce
-            },
-            success: function(response) {
-                if (response.success) {
-                    renderShippingMethods(response.data);
-                }
-            }
-        });
-    }
-    
-    // Render shipping methods
-    function renderShippingMethods(methods) {
-        let html = '<div class="wcflow-popup-content wcflow-shipping-popup">';
-        html += '<button class="wcflow-popup-close">&times;</button>';
-        html += '<h3>Select Shipping Method</h3>';
-        
-        methods.forEach(function(method) {
-            html += `<div class="wcflow-shipping-option" data-method="${method.id}" style="padding:12px;border:1px solid #ddd;margin:8px 0;cursor:pointer;border-radius:4px;">
-                <strong>${method.label}</strong><br>
-                <span style="color:#666;">${wcflow_params.currency_symbol}${method.cost_with_tax}</span>
-            </div>`;
-        });
-        
-        html += '</div>';
-        
-        showPopup(html);
-        
-        // Handle method selection
-        $(document).on('click', '.wcflow-shipping-option', function() {
-            const methodId = $(this).data('method');
-            const label = $(this).find('strong').text();
-            
-            $('#wcflow-shipping-method-selector .selectable-box-value').text(label);
-            orderState.shipping_method = methodId;
             
             closePopup();
         });
@@ -588,7 +719,7 @@ jQuery(function($) {
         orderState.addons = selectedAddons;
         
         // Selected card
-        const $selectedCard = $('.wcflow-card-item.selected');
+        const $selectedCard = $('.greeting-card.selected');
         if ($selectedCard.length) {
             orderState.card_id = $selectedCard.data('card-id');
             orderState.card_message = $('#wcflow-card-message').val();
@@ -644,6 +775,8 @@ jQuery(function($) {
             },
             success: function(response) {
                 if (response.success) {
+                    // Get base product price for calculations
+                    wcflow_params.base_product_price = response.data.product_price || 0;
                     loadStep(1);
                 } else {
                     alert(response.data ? response.data.message : 'Failed to start checkout');

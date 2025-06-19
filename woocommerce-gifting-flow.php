@@ -38,7 +38,8 @@ if (!in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get
 $required_files = [
     'includes/settings.php',
     'includes/cpt.php', 
-    'includes/ajax.php'
+    'includes/ajax.php',
+    'includes/checkout-handler.php'
 ];
 
 foreach ($required_files as $file) {
@@ -68,7 +69,7 @@ add_action('wp_enqueue_scripts', function() {
     wp_enqueue_style('wcflow-style', WCFLOW_URL . 'assets/wcflow.css', [], WCFLOW_VERSION);
     wp_enqueue_script('wcflow-script', WCFLOW_URL . 'assets/wcflow.js', ['jquery'], WCFLOW_VERSION, true);
     
-    // Localize script
+    // FIXED: Enhanced localization with proper currency symbol
     wp_localize_script('wcflow-script', 'wcflow_params', [
         'ajax_url' => admin_url('admin-ajax.php'),
         'nonce'    => wp_create_nonce('wcflow_nonce'),
@@ -78,6 +79,7 @@ add_action('wp_enqueue_scripts', function() {
         'checkout_url' => wc_get_checkout_url(),
         'version' => WCFLOW_VERSION,
         'debug' => defined('WP_DEBUG') && WP_DEBUG,
+        'base_product_price' => 0 // Will be set when flow starts
     ]);
 });
 

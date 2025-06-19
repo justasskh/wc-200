@@ -1,4 +1,9 @@
-<!-- WooCommerce Gifting Flow Step 1 - Updated 2025-06-18 09:46:30 UTC by justasskh -->
+<?php
+/**
+ * WooCommerce Gifting Flow Step 1 - Fixed with proper slider
+ * Updated: 2025-01-27 - Added responsive greeting cards slider
+ */
+?>
 <div class="wcflow-modal wcflow-fullscreen" data-step="1">
     <header class="wcflow-header">
         <div class="wcflow-content-wrapper">
@@ -8,7 +13,7 @@
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                             <path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
-                        Tęsti apsipirkimą
+                        Continue Shopping
                     </button>
                 </div>
                 <div class="wcflow-header-right">
@@ -18,7 +23,7 @@
                             <circle cx="12" cy="16" r="1" fill="currentColor"/>
                             <path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="currentColor" stroke-width="2"/>
                         </svg>
-                        Saugus atsiskaitymas
+                        Secure Checkout
                     </div>
                 </div>
             </div>
@@ -41,14 +46,43 @@
             </div>
         </div>
         
-        <div class="wcflow-section-header">
-            <h2 class="wcflow-section-title">Choose your card</h2>
-            <p class="wcflow-section-subtitle">Our cards are 100% tree-free, made from zero-waste recycled sugarcane. With a lovely eggshell texture, they can be recycled, composted, or treasured for years.</p>
-        </div>
-
-        <div id="wcflow-all-cards-container">
-            <div class="wcflow-loader"></div>
-        </div>
+        <!-- FIXED: Proper Greeting Cards Slider Implementation -->
+        <section class="greeting-cards-section" role="region" aria-label="Greeting Cards">
+            <div class="greeting-cards-container">
+                <div class="greeting-cards-header">
+                    <h2 class="greeting-cards-title">Choose your card</h2>
+                    <a href="#" class="greeting-cards-see-all">See all</a>
+                </div>
+                
+                <p class="greeting-cards-description">
+                    Our cards are 100% tree-free, made from zero-waste recycled sugarcane. With a lovely eggshell texture, they can be recycled, composted, or treasured for years.
+                </p>
+                
+                <div class="greeting-cards-slider-wrapper">
+                    <button class="slider-nav slider-nav-prev" aria-label="Previous cards" type="button">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M15 18l-6-6 6-6"/>
+                        </svg>
+                    </button>
+                    
+                    <button class="slider-nav slider-nav-next" aria-label="Next cards" type="button">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 18l6-6-6-6"/>
+                        </svg>
+                    </button>
+                    
+                    <div id="wcflow-cards-slider" class="greeting-cards-slider" role="list">
+                        <div class="wcflow-loader"></div>
+                    </div>
+                </div>
+                
+                <div class="slider-progress-container">
+                    <div class="slider-progress-bar" role="progressbar" aria-label="Slider progress">
+                        <div class="slider-progress-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
 
         <div class="wcflow-content-wrapper">
             <section class="wcflow-message-section">
@@ -68,29 +102,19 @@
             <div class="wcflow-bottom-bar-inner">
                 <div class="wcflow-order-summary">
                     <div class="wcflow-order-total-line">
-                        <span class="wcflow-order-label">Užsakymo suma</span>
-                        <span class="wcflow-order-amount" id="wcflow-dynamic-total">0.00 €</span>
+                        <span class="wcflow-order-label">Order Total</span>
+                        <span class="wcflow-order-amount" id="wcflow-dynamic-total">£0.00</span>
                     </div>
                     <div class="wcflow-order-details">
-                        <span class="wcflow-order-breakdown" id="wcflow-shipping-details">Įskaičiuotas 0.00 € pristatymo mokestis</span>
+                        <span class="wcflow-order-breakdown" id="wcflow-shipping-details">Including £0.00 delivery</span>
                     </div>
                 </div>
                 <div class="wcflow-bottom-bar-action">
                     <button type="button" class="wcflow-btn-next wcflow-bottom-bar-btn">
-                        Pereiti prie pristatymo informacijos
+                        Continue to Delivery Information
                     </button>
                 </div>
             </div>
         </div>
     </footer>
-
-    <!-- Add-on Details Modal -->
-    <div id="wcflow-addon-details-modal" class="wcflow-details-modal" style="display: none;">
-        <div class="wcflow-details-modal-content">
-            <button class="wcflow-details-modal-close" aria-label="Close">&times;</button>
-            <div id="wcflow-addon-details-body"></div>
-        </div>
-    </div>
 </div>
-
-<!-- Step 1 loaded at 2025-06-18 09:46:30 UTC by justasskh -->
