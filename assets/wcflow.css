@@ -1,3 +1,808 @@
+/* WooCommerce Gifting Flow - Main Styles */
+/* Updated: 2025-06-19 - Fixed modal positioning */
+
+/* Modal Container */
+.wcflow-modal-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 999999;
+    display: none;
+    overflow-y: auto;
+}
+
+.wcflow-modal-container.visible {
+    display: block;
+}
+
+/* Modal */
+.wcflow-modal {
+    position: relative;
+    width: 100%;
+    min-height: 100vh;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+}
+
+.wcflow-modal.wcflow-fullscreen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 1000000;
+    overflow-y: auto;
+}
+
+/* Prevent body scroll when modal is open */
+body.wcflow-modal-open {
+    overflow: hidden;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+}
+
+/* Header */
+.wcflow-header {
+    position: sticky;
+    top: 0;
+    background: #fff;
+    border-bottom: 1px solid #e0e0e0;
+    z-index: 10;
+    padding: 20px 0;
+}
+
+.wcflow-header-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.wcflow-back-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: none;
+    border: none;
+    color: #333;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 8px 16px;
+    border-radius: 6px;
+    transition: background 0.2s ease;
+}
+
+.wcflow-back-btn:hover {
+    background: #f5f5f5;
+}
+
+.wcflow-secure-checkout {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #666;
+    font-size: 14px;
+}
+
+/* Content wrapper */
+.wcflow-content-wrapper {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    width: 100%;
+}
+
+/* Modal Body */
+.wcflow-modal-body {
+    flex: 1;
+    padding: 40px 0;
+    overflow-y: auto;
+}
+
+/* Main Title */
+.wcflow-main-title {
+    font-size: 32px;
+    font-weight: 700;
+    color: #333;
+    margin: 0 0 12px 0;
+    text-align: center;
+}
+
+.wcflow-subtitle {
+    font-size: 18px;
+    color: #666;
+    margin: 0 0 40px 0;
+    text-align: center;
+}
+
+/* Loading */
+.wcflow-loader {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #007cba;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 20px auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.wcflow-loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+}
+
+/* Bottom Bar */
+.wcflow-bottom-bar {
+    position: sticky;
+    bottom: 0;
+    background: #fff;
+    border-top: 1px solid #e0e0e0;
+    padding: 20px 0;
+    z-index: 10;
+}
+
+.wcflow-bottom-bar-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+}
+
+.wcflow-order-summary {
+    flex: 1;
+}
+
+.wcflow-order-total-line {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+.wcflow-order-label {
+    font-size: 16px;
+    color: #333;
+    font-weight: 500;
+}
+
+.wcflow-order-amount {
+    font-size: 18px;
+    font-weight: 700;
+    color: #333;
+}
+
+.wcflow-order-details {
+    font-size: 14px;
+    color: #666;
+}
+
+.wcflow-bottom-bar-btn {
+    background: #007cba;
+    color: #fff;
+    border: none;
+    padding: 16px 32px;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.wcflow-bottom-bar-btn:hover {
+    background: #005a87;
+    transform: translateY(-1px);
+}
+
+.wcflow-bottom-bar-btn:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Step 1 Styles */
+.wcflow-step1-body {
+    padding-bottom: 100px;
+}
+
+.wcflow-addons-gallery {
+    margin-bottom: 60px;
+}
+
+.wcflow-addons-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+    margin-top: 32px;
+}
+
+.wcflow-addon-card {
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    background: #fff;
+}
+
+.wcflow-addon-card:hover {
+    border-color: #007cba;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 124, 186, 0.15);
+}
+
+.wcflow-addon-card.selected {
+    border-color: #007cba;
+    background: #f0f8ff;
+}
+
+.wcflow-addon-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.wcflow-addon-content {
+    padding: 20px;
+}
+
+.wcflow-addon-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+    margin: 0 0 8px 0;
+}
+
+.wcflow-addon-price {
+    font-size: 16px;
+    font-weight: 700;
+    color: #007cba;
+    margin: 0 0 12px 0;
+}
+
+.wcflow-addon-description {
+    font-size: 14px;
+    color: #666;
+    line-height: 1.4;
+    margin: 0;
+}
+
+/* Section Headers */
+.wcflow-section-header {
+    text-align: center;
+    margin: 60px 0 40px 0;
+}
+
+.wcflow-section-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: #333;
+    margin: 0 0 12px 0;
+}
+
+.wcflow-section-subtitle {
+    font-size: 16px;
+    color: #666;
+    line-height: 1.5;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* Cards */
+.wcflow-cards-container {
+    margin-bottom: 60px;
+}
+
+.wcflow-cards-category {
+    margin-bottom: 40px;
+}
+
+.wcflow-cards-category-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: #333;
+    margin: 0 0 20px 0;
+}
+
+.wcflow-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.wcflow-card-item {
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: #fff;
+}
+
+.wcflow-card-item:hover {
+    border-color: #007cba;
+    transform: translateY(-2px);
+}
+
+.wcflow-card-item.selected {
+    border-color: #007cba;
+    background: #f0f8ff;
+}
+
+.wcflow-card-image {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+}
+
+.wcflow-card-content {
+    padding: 16px;
+}
+
+.wcflow-card-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+    margin: 0 0 8px 0;
+}
+
+.wcflow-card-price {
+    font-size: 14px;
+    font-weight: 700;
+    color: #007cba;
+    margin: 0;
+}
+
+/* Message Section */
+.wcflow-message-section {
+    margin-top: 60px;
+}
+
+.wcflow-message-subheading {
+    font-size: 16px;
+    color: #666;
+    margin: 0 0 24px 0;
+    text-align: center;
+}
+
+.wcflow-message-wrapper {
+    max-width: 600px;
+    margin: 0 auto 12px auto;
+}
+
+.wcflow-message-textarea {
+    width: 100%;
+    min-height: 120px;
+    padding: 16px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 16px;
+    font-family: inherit;
+    resize: vertical;
+    transition: border-color 0.3s ease;
+}
+
+.wcflow-message-textarea:focus {
+    outline: none;
+    border-color: #007cba;
+}
+
+.wcflow-message-textarea:disabled {
+    background: #f5f5f5;
+    color: #999;
+    cursor: not-allowed;
+}
+
+.wcflow-message-count {
+    text-align: center;
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 8px;
+}
+
+.wcflow-message-note {
+    text-align: center;
+    font-size: 14px;
+    color: #999;
+    margin: 0;
+}
+
+/* Step 2 Styles */
+.wcflow-form-wrapper {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.wcflow-form-subtitle {
+    font-size: 16px;
+    color: #666;
+    margin: 0 0 40px 0;
+    text-align: center;
+}
+
+.wcflow-login-prompt {
+    text-align: center;
+    margin-bottom: 40px;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.wcflow-login-prompt a {
+    color: #007cba;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.wcflow-login-prompt a:hover {
+    text-decoration: underline;
+}
+
+.wcflow-welcome-back {
+    text-align: center;
+    margin-bottom: 40px;
+    padding: 20px;
+    background: #e8f5e8;
+    border-radius: 8px;
+    color: #2d5a2d;
+}
+
+.wcflow-form-section {
+    margin-bottom: 40px;
+}
+
+.wcflow-form-section-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: #333;
+    margin: 0 0 20px 0;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+.wcflow-form-row {
+    margin-bottom: 20px;
+}
+
+.wcflow-form-row.two-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.wcflow-form-group {
+    position: relative;
+}
+
+.wcflow-form-group.has-error input,
+.wcflow-form-group.has-error select {
+    border-color: #dc3545;
+}
+
+.wcflow-field-error {
+    display: block;
+    color: #dc3545;
+    font-size: 12px;
+    margin-top: 4px;
+    min-height: 16px;
+}
+
+/* Floating Labels */
+.floating-label {
+    position: relative;
+}
+
+.floating-label input,
+.floating-label select {
+    width: 100%;
+    padding: 16px 12px 8px 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 16px;
+    background: #fff;
+    transition: all 0.3s ease;
+}
+
+.floating-label input:focus,
+.floating-label select:focus {
+    outline: none;
+    border-color: #007cba;
+}
+
+.floating-label label {
+    position: absolute;
+    left: 12px;
+    top: 16px;
+    font-size: 16px;
+    color: #666;
+    pointer-events: none;
+    transition: all 0.3s ease;
+    background: #fff;
+    padding: 0 4px;
+}
+
+.floating-label.has-value label,
+.floating-label input:focus + label,
+.floating-label select:focus + label {
+    top: -8px;
+    font-size: 12px;
+    color: #007cba;
+    font-weight: 600;
+}
+
+.floating-label.country-select select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 12px center;
+    background-repeat: no-repeat;
+    background-size: 16px;
+    padding-right: 40px;
+}
+
+/* Selectable Boxes */
+.selectable-box {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: #fff;
+}
+
+.selectable-box:hover {
+    border-color: #007cba;
+}
+
+.selectable-box-label {
+    font-size: 14px;
+    color: #666;
+    font-weight: 600;
+}
+
+.selectable-box-value {
+    font-size: 16px;
+    color: #333;
+    font-weight: 500;
+}
+
+.selectable-box-arrow {
+    color: #666;
+    font-size: 18px;
+}
+
+/* Popups */
+.wcflow-popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000001;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.wcflow-popup-content {
+    background: #fff;
+    border-radius: 12px;
+    max-width: 500px;
+    width: 100%;
+    max-height: 80vh;
+    overflow-y: auto;
+    position: relative;
+}
+
+.wcflow-popup-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #666;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background 0.2s ease;
+}
+
+.wcflow-popup-close:hover {
+    background: #f5f5f5;
+}
+
+/* Calendar Popup */
+.wcflow-calendar-popup {
+    padding: 24px;
+}
+
+/* Shipping Popup */
+.wcflow-shipping-popup {
+    padding: 24px;
+}
+
+/* Login Popup */
+.wcflow-login-popup-content {
+    padding: 32px;
+}
+
+.wcflow-login-popup-content h3 {
+    margin: 0 0 8px 0;
+    font-size: 24px;
+    color: #333;
+}
+
+.wcflow-login-popup-content p {
+    margin: 0 0 24px 0;
+    color: #666;
+}
+
+.wcflow-login-actions {
+    margin-top: 20px;
+}
+
+.wcflow-login-btn {
+    width: 100%;
+    background: #007cba;
+    color: #fff;
+    border: none;
+    padding: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.wcflow-login-btn:hover {
+    background: #005a87;
+}
+
+.wcflow-login-error {
+    margin-top: 16px;
+    padding: 12px;
+    background: #fee;
+    border: 1px solid #fcc;
+    border-radius: 4px;
+    color: #c33;
+    font-size: 14px;
+}
+
+/* Step 3 Styles */
+.wcflow-step3-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.wcflow-left-column,
+.wcflow-right-column {
+    background: #fff;
+}
+
+/* Discount Section */
+.wcflow-discount-section {
+    margin-bottom: 40px;
+    padding: 24px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+}
+
+.wcflow-discount-section h3 {
+    margin: 0 0 12px 0;
+    font-size: 20px;
+    color: #333;
+}
+
+.wcflow-discount-desc {
+    margin: 0 0 16px 0;
+    color: #666;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.wcflow-discount-form {
+    display: flex;
+    gap: 12px;
+}
+
+.wcflow-discount-input {
+    flex: 1;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.wcflow-apply-btn {
+    background: #007cba;
+    color: #fff;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: background 0.2s ease;
+}
+
+.wcflow-apply-btn:hover {
+    background: #005a87;
+}
+
+.wcflow-discount-message {
+    margin-top: 12px;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.wcflow-discount-message.success {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.wcflow-discount-message.error {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+/* Basket Section */
+.wcflow-basket-section {
+    padding: 24px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+}
+
+.wcflow-basket-section h3 {
+    margin: 0 0 20px 0;
+    font-size: 20px;
+    color: #333;
+}
+
+/* Payment Section */
+.wcflow-payment-section {
+    padding: 24px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+}
+
+.wcflow-payment-section h3 {
+    margin: 0 0 20px 0;
+    font-size: 20px;
+    color: #333;
+}
+
 /* Step 3 Place Order Section Styling - Added 2025-06-18 21:30:05 UTC by justasskh */
 .wcflow-place-order-section {
     margin-top: 30px;
@@ -49,4 +854,97 @@
 /* Remove bottom bar styles from step 3 */
 .wcflow-modal[data-step="3"] .wcflow-bottom-bar {
     display: none !important;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .wcflow-content-wrapper {
+        padding: 0 16px;
+    }
+    
+    .wcflow-main-title {
+        font-size: 24px;
+    }
+    
+    .wcflow-subtitle {
+        font-size: 16px;
+    }
+    
+    .wcflow-addons-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+    
+    .wcflow-cards-grid {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 16px;
+    }
+    
+    .wcflow-form-row.two-columns {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+    
+    .wcflow-step3-layout {
+        grid-template-columns: 1fr;
+        gap: 24px;
+    }
+    
+    .wcflow-bottom-bar-inner {
+        flex-direction: column;
+        gap: 16px;
+        text-align: center;
+    }
+    
+    .wcflow-bottom-bar-btn {
+        width: 100%;
+    }
+}
+
+/* Details Modal */
+.wcflow-details-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 1000002;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.wcflow-details-modal-content {
+    background: #fff;
+    border-radius: 12px;
+    max-width: 600px;
+    width: 100%;
+    max-height: 80vh;
+    overflow-y: auto;
+    position: relative;
+    padding: 32px;
+}
+
+.wcflow-details-modal-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #666;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background 0.2s ease;
+}
+
+.wcflow-details-modal-close:hover {
+    background: #f5f5f5;
 }
