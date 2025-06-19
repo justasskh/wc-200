@@ -2,7 +2,7 @@
  * WooCommerce Gifting Flow - Modal Checkout JS
  * Handles multi-step modal checkout, shipping, billing, and payment logic
  * Supports dynamic payment method loading and buyer/billing logic.
- * Updated: 2025-01-27 - Fixed data transfer and billing toggle
+ * Updated: 2025-06-19 12:05:54 UTC - Fixed data transfer and validation
  */
 
 jQuery(function($) {
@@ -115,7 +115,7 @@ jQuery(function($) {
                 const $field = $('#' + fieldId);
                 if ($field.length) {
                     const value = $field.val();
-                    if (value !== undefined && value !== null && value !== '') {
+                    if (value !== undefined && value !== null) {
                         window.wcflow.orderState[stateKey] = value;
                         orderState[stateKey] = value;
                         debug('Synced ' + stateKey + ' = ' + value);
@@ -268,11 +268,6 @@ jQuery(function($) {
             }
         });
 
-        // Initialize checkbox state
-        if ($('#wcflow-buyer-same').is(':checked')) {
-            copyShippingToBilling();
-        }
-
         loadPaymentMethods();
     }
 
@@ -356,12 +351,12 @@ jQuery(function($) {
             'wcflow-shipping-phone': 'shipping_phone'
         };
 
-        // Sync Step 2 fields from DOM (in case they're still in the DOM)
+        // Sync Step 2 fields from DOM
         Object.entries(fieldMappings).forEach(([fieldId, stateKey]) => {
             const $field = $('#' + fieldId);
             if ($field.length) {
                 const value = $field.val();
-                if (value !== undefined && value !== null && value !== '') {
+                if (value !== undefined && value !== null) {
                     window.wcflow.orderState[stateKey] = value;
                     debug('Final sync:', stateKey, '=', value);
                 }
@@ -374,7 +369,7 @@ jQuery(function($) {
             const billingKey = $field.data('wcflow-billing');
             if (billingKey) {
                 const value = $field.val();
-                if (value !== undefined && value !== null && value !== '') {
+                if (value !== undefined && value !== null) {
                     window.wcflow.orderState[billingKey] = value;
                     debug('Final billing sync:', billingKey, '=', value);
                 }
@@ -517,7 +512,7 @@ jQuery(function($) {
             if (!window.wcflowValidateStep2()) {
                 return;
             }
-            // Save data to session before moving to step 3
+            // Save customer data to session when moving from step 2 to step 3
             $.ajax({
                 url: wcflow_params.ajax_url,
                 type: 'POST',
@@ -527,19 +522,15 @@ jQuery(function($) {
                     customer_data: window.wcflow.orderState
                 },
                 success: function(response) {
-                    debug('Customer data saved to session:', response);
-                    loadStep(currentStep + 1);
+                    debug('Customer data saved to session before step 3:', response);
                 },
                 error: function() {
-                    debug('Failed to save customer data, but continuing...');
-                    loadStep(currentStep + 1);
+                    debug('Failed to save customer data to session');
                 }
             });
-        } else {
-            loadStep(currentStep + 1);
         }
+        loadStep(currentStep + 1);
     });
-    
     $document.on('click', '.wcflow-btn-prev', function () {
         const currentStep = $(this).closest('.wcflow-modal').data('step');
         if (currentStep > 1) {

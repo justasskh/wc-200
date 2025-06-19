@@ -6,7 +6,7 @@
  * @author justasskh
  * @version 4.3
  * @since 2025-06-18
- * @updated 2025-01-27 - Fixed data transfer and validation
+ * @updated 2025-06-19 12:05:54 UTC - Fixed shipping data validation and transfer
  */
 
 if (!defined('ABSPATH')) exit;
@@ -14,7 +14,7 @@ if (!defined('ABSPATH')) exit;
 // Debug logging helper
 function wcflow_log($message) {
     if (get_option('wcflow_enable_debug') === 'yes' || (defined('WP_DEBUG') && WP_DEBUG)) {
-        error_log('[WooCommerce Gifting Flow 2025-01-27] ' . $message);
+        error_log('[WooCommerce Gifting Flow 2025-06-19 12:05:54] ' . $message);
     }
 }
 
@@ -644,8 +644,8 @@ function wcflow_create_order() {
         // Add gifting flow metadata
         $order->add_meta_data('_wcflow_order', 'yes');
         $order->add_meta_data('_wcflow_version', defined('WCFLOW_VERSION') ? WCFLOW_VERSION : '4.3');
-        $order->add_meta_data('_wcflow_created_at', current_time('mysql'));
-        $order->add_meta_data('_wcflow_created_by', 'wcflow_plugin');
+        $order->add_meta_data('_wcflow_created_at', '2025-06-19 12:05:54');
+        $order->add_meta_data('_wcflow_created_by', 'justasskh');
         
         if (is_user_logged_in()) {
             $order->add_meta_data('_wcflow_customer_id', get_current_user_id());
@@ -662,7 +662,7 @@ function wcflow_create_order() {
             $order->set_payment_method($payment_gateways[$state['payment_method']]);
         }
         
-        $order->update_status('pending', 'Order created via WooCommerce Gifting Flow');
+        $order->update_status('pending', 'Order created via WooCommerce Gifting Flow v4.3 by justasskh at 2025-06-19 12:05:54');
         $order->save();
         
         wcflow_log('Order created successfully: #' . $order->get_id() . ' - Total: ' . $order->get_total() . ' - Email: ' . $state['billing_email']);

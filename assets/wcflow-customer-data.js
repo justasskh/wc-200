@@ -1,7 +1,7 @@
 /**
  * WooCommerce Gifting Flow - Customer Data Capture
  * Enhanced data persistence and transfer between steps
- * Updated: 2025-01-27 - Fixed data transfer and session management
+ * Updated: 2025-06-19 12:09:19 UTC
  */
 jQuery(function($) {
     window.wcflow = window.wcflow || {};
@@ -79,7 +79,7 @@ jQuery(function($) {
             const $field = $('#' + fieldId);
             if ($field.length) {
                 const value = $field.val();
-                if (value !== undefined && value !== null && value !== '') {
+                if (value !== undefined && value !== null) {
                     if (window.wcflow.orderState[stateKey] !== value) {
                         window.wcflow.orderState[stateKey] = value;
                         hasChanges = true;
@@ -95,7 +95,7 @@ jQuery(function($) {
             const key = $field.data('wcflow-billing');
             if (key) {
                 const value = $field.val();
-                if (value !== undefined && value !== null && value !== '') {
+                if (value !== undefined && value !== null) {
                     if (window.wcflow.orderState[key] !== value) {
                         window.wcflow.orderState[key] = value;
                         hasChanges = true;
