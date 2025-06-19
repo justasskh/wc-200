@@ -1,7 +1,7 @@
 <?php
 /**
- * WooCommerce Gifting Flow AJAX Handlers - COMPLETELY FIXED DATA STRUCTURE
- * FIXED: 2025-01-27 - Real WooCommerce shipping methods with Lithuania default
+ * WooCommerce Gifting Flow AJAX Handlers - ADMIN CONNECTION FIXED
+ * FIXED: 2025-01-27 - Real admin cards and categories with bulletproof connection
  */
 
 if (!defined('ABSPATH')) exit;
@@ -344,58 +344,112 @@ function wcflow_get_addons_data() {
 add_action('wp_ajax_wcflow_get_addons', 'wcflow_get_addons_data');
 add_action('wp_ajax_nopriv_wcflow_get_addons', 'wcflow_get_addons_data');
 
-// COMPLETELY FIXED: Get cards data with EXACT structure JavaScript expects
+// COMPLETELY FIXED: Get cards data with BULLETPROOF admin connection
 function wcflow_get_cards_data() {
     try {
         check_ajax_referer('wcflow_nonce', 'nonce');
         
-        wcflow_log('=== STARTING CARDS DATA RETRIEVAL ===');
+        wcflow_log('🎯 === BULLETPROOF CARDS DATA RETRIEVAL START ===');
         
-        // FIXED: Return data in the EXACT format JavaScript expects
-        // JavaScript expects: { "Category Name": [card1, card2, card3] }
-        // NOT: { "Category Name": { "description": "...", "cards": [...] } }
+        // STEP 1: Check WordPress environment
+        global $wpdb;
+        wcflow_log('📊 WordPress DB prefix: ' . $wpdb->prefix);
+        wcflow_log('🔍 Current user ID: ' . get_current_user_id());
+        wcflow_log('🌐 Site URL: ' . get_site_url());
         
-        $cards_by_category = [];
+        // STEP 2: Check if custom post types and taxonomies exist
+        $post_types = get_post_types();
+        $taxonomies = get_taxonomies();
         
-        // STEP 1: Check if taxonomy and post type exist
-        if (!taxonomy_exists('wcflow_card_category')) {
-            wcflow_log('wcflow_card_category taxonomy does not exist - returning sample data');
+        wcflow_log('📋 Available post types: ' . implode(', ', array_keys($post_types)));
+        wcflow_log('🏷️ Available taxonomies: ' . implode(', ', array_keys($taxonomies)));
+        
+        $has_card_post_type = post_type_exists('wcflow_card');
+        $has_card_taxonomy = taxonomy_exists('wcflow_card_category');
+        
+        wcflow_log('✅ wcflow_card post type exists: ' . ($has_card_post_type ? 'YES' : 'NO'));
+        wcflow_log('✅ wcflow_card_category taxonomy exists: ' . ($has_card_taxonomy ? 'YES' : 'NO'));
+        
+        // STEP 3: Direct database queries to check actual data
+        $cards_count = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = 'wcflow_card' AND post_status = 'publish'");
+        $categories_count = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->term_taxonomy} WHERE taxonomy = 'wcflow_card_category'");
+        
+        wcflow_log('📊 Direct DB - Cards count: ' . $cards_count);
+        wcflow_log('📊 Direct DB - Categories count: ' . $categories_count);
+        
+        // STEP 4: If no admin data exists, return sample data immediately
+        if (!$has_card_post_type || !$has_card_taxonomy || $cards_count == 0 || $categories_count == 0) {
+            wcflow_log('❌ Missing admin data - returning sample cards');
             wp_send_json_success(wcflow_get_sample_cards_data_fixed());
             return;
         }
         
-        if (!post_type_exists('wcflow_card')) {
-            wcflow_log('wcflow_card post type does not exist - returning sample data');
-            wp_send_json_success(wcflow_get_sample_cards_data_fixed());
-            return;
-        }
+        // STEP 5: Get categories with comprehensive error handling
+        wcflow_log('🔍 === GETTING CATEGORIES ===');
         
-        // STEP 2: Get all categories with proper ordering
         $categories = get_terms([
             'taxonomy' => 'wcflow_card_category',
             'hide_empty' => false,
             'orderby' => 'meta_value_num',
             'meta_key' => '_wcflow_category_order',
-            'order' => 'ASC'
+            'order' => 'ASC',
+            'number' => 10 // Limit to prevent memory issues
         ]);
         
         if (is_wp_error($categories)) {
-            wcflow_log('Error getting categories: ' . $categories->get_error_message());
+            wcflow_log('❌ Error getting categories: ' . $categories->get_error_message());
             wp_send_json_success(wcflow_get_sample_cards_data_fixed());
             return;
         }
         
-        wcflow_log('Found ' . count($categories) . ' categories');
+        wcflow_log('📂 Found ' . count($categories) . ' categories');
+        foreach ($categories as $cat) {
+            wcflow_log('📁 Category: ' . $cat->name . ' (ID: ' . $cat->term_id . ', Count: ' . $cat->count . ')');
+        }
         
-        // STEP 3: Process each category
-        if (!empty($categories)) {
-            foreach ($categories as $category) {
-                wcflow_log('Processing category: ' . $category->name . ' (ID: ' . $category->term_id . ')');
-                
-                // Get cards in this category
-                $cards_query = new WP_Query([
+        // STEP 6: Process each category and get cards
+        $cards_by_category = [];
+        $total_cards_processed = 0;
+        
+        foreach ($categories as $category) {
+            wcflow_log('🎨 === PROCESSING CATEGORY: ' . $category->name . ' ===');
+            
+            // Method 1: Try WP_Query
+            $cards_query = new WP_Query([
+                'post_type' => 'wcflow_card',
+                'posts_per_page' => 20,
+                'post_status' => 'publish',
+                'orderby' => 'menu_order',
+                'order' => 'ASC',
+                'tax_query' => [
+                    [
+                        'taxonomy' => 'wcflow_card_category',
+                        'field' => 'term_id',
+                        'terms' => $category->term_id,
+                    ],
+                ],
+                'meta_query' => [
+                    'relation' => 'OR',
+                    [
+                        'key' => '_wcflow_price',
+                        'compare' => 'EXISTS'
+                    ],
+                    [
+                        'key' => '_wcflow_price',
+                        'compare' => 'NOT EXISTS'
+                    ]
+                ]
+            ]);
+            
+            $cards = $cards_query->posts;
+            wcflow_log('🎴 WP_Query found ' . count($cards) . ' cards for category: ' . $category->name);
+            
+            // Method 2: If WP_Query fails, try get_posts
+            if (empty($cards)) {
+                wcflow_log('🔄 Trying get_posts method...');
+                $cards = get_posts([
                     'post_type' => 'wcflow_card',
-                    'posts_per_page' => -1,
+                    'numberposts' => 20,
                     'post_status' => 'publish',
                     'orderby' => 'menu_order',
                     'order' => 'ASC',
@@ -407,73 +461,121 @@ function wcflow_get_cards_data() {
                         ],
                     ],
                 ]);
+                wcflow_log('🎴 get_posts found ' . count($cards) . ' cards');
+            }
+            
+            // Method 3: If still no cards, try direct database query
+            if (empty($cards)) {
+                wcflow_log('🔄 Trying direct database query...');
+                $card_ids = $wpdb->get_col($wpdb->prepare("
+                    SELECT p.ID 
+                    FROM {$wpdb->posts} p
+                    INNER JOIN {$wpdb->term_relationships} tr ON p.ID = tr.object_id
+                    INNER JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
+                    WHERE p.post_type = 'wcflow_card' 
+                    AND p.post_status = 'publish'
+                    AND tt.taxonomy = 'wcflow_card_category'
+                    AND tt.term_id = %d
+                    ORDER BY p.menu_order ASC
+                    LIMIT 20
+                ", $category->term_id));
                 
-                $cards = $cards_query->posts;
-                wcflow_log('Found ' . count($cards) . ' cards for category: ' . $category->name);
-                
-                if (!empty($cards)) {
-                    $category_cards = [];
-                    
-                    foreach ($cards as $card) {
-                        $price_value = get_post_meta($card->ID, '_wcflow_price', true);
-                        $price_value = $price_value ? floatval($price_value) : 0;
-                        
-                        // Get card image
-                        $image_url = 'https://images.pexels.com/photos/1666065/pexels-photo-1666065.jpeg?auto=compress&cs=tinysrgb&w=400';
-                        if (has_post_thumbnail($card->ID)) {
-                            $image_data = wp_get_attachment_image_src(get_post_thumbnail_id($card->ID), 'medium');
-                            if ($image_data) {
-                                $image_url = $image_data[0];
-                            }
+                if (!empty($card_ids)) {
+                    $cards = [];
+                    foreach ($card_ids as $card_id) {
+                        $card = get_post($card_id);
+                        if ($card) {
+                            $cards[] = $card;
                         }
-                        
-                        $category_cards[] = [
-                            'id' => $card->ID,
-                            'title' => $card->post_title,
-                            'price' => $price_value > 0 ? wc_price($price_value) : 'FREE',
-                            'price_value' => $price_value,
-                            'img' => $image_url
-                        ];
-                        
-                        wcflow_log('Processed card: ' . $card->post_title . ' (ID: ' . $card->ID . ', Price: ' . $price_value . ')');
+                    }
+                }
+                wcflow_log('🎴 Direct DB query found ' . count($cards) . ' cards');
+            }
+            
+            // Process cards for this category
+            if (!empty($cards)) {
+                $category_cards = [];
+                
+                foreach ($cards as $card) {
+                    wcflow_log('🎨 Processing card: ' . $card->post_title . ' (ID: ' . $card->ID . ')');
+                    
+                    // Get price with multiple fallback methods
+                    $price_value = get_post_meta($card->ID, '_wcflow_price', true);
+                    if (empty($price_value)) {
+                        $price_value = get_post_meta($card->ID, 'wcflow_price', true);
+                    }
+                    if (empty($price_value)) {
+                        $price_value = get_post_meta($card->ID, 'price', true);
+                    }
+                    $price_value = $price_value ? floatval($price_value) : 0;
+                    
+                    // Get image with multiple fallback methods
+                    $image_url = 'https://images.pexels.com/photos/1666065/pexels-photo-1666065.jpeg?auto=compress&cs=tinysrgb&w=400';
+                    
+                    if (has_post_thumbnail($card->ID)) {
+                        $image_data = wp_get_attachment_image_src(get_post_thumbnail_id($card->ID), 'medium');
+                        if ($image_data && !empty($image_data[0])) {
+                            $image_url = $image_data[0];
+                        }
                     }
                     
-                    // FIXED: Use the EXACT structure JavaScript expects
-                    // JavaScript expects: categoryName => [cards array]
-                    $cards_by_category[$category->name] = $category_cards;
+                    // Alternative image methods
+                    if ($image_url === 'https://images.pexels.com/photos/1666065/pexels-photo-1666065.jpeg?auto=compress&cs=tinysrgb&w=400') {
+                        $custom_image = get_post_meta($card->ID, '_wcflow_image', true);
+                        if (!empty($custom_image)) {
+                            $image_url = $custom_image;
+                        }
+                    }
                     
-                    wcflow_log('Added category: ' . $category->name . ' with ' . count($category_cards) . ' cards');
+                    $card_data = [
+                        'id' => $card->ID,
+                        'title' => $card->post_title,
+                        'price' => $price_value > 0 ? wc_price($price_value) : 'FREE',
+                        'price_value' => $price_value,
+                        'img' => $image_url
+                    ];
+                    
+                    $category_cards[] = $card_data;
+                    $total_cards_processed++;
+                    
+                    wcflow_log('✅ Card processed: ' . $card->post_title . ' - Price: ' . $price_value . ' - Image: ' . (strlen($image_url) > 50 ? 'Custom' : 'Default'));
                 }
                 
-                wp_reset_postdata();
+                // Add category with cards
+                $cards_by_category[$category->name] = $category_cards;
+                wcflow_log('✅ Category added: ' . $category->name . ' with ' . count($category_cards) . ' cards');
+            } else {
+                wcflow_log('❌ No cards found for category: ' . $category->name);
             }
+            
+            wp_reset_postdata();
         }
         
-        // STEP 4: Fallback to sample data if no real data found
-        if (empty($cards_by_category)) {
-            wcflow_log('No categories or cards found in database, providing sample data');
-            $cards_by_category = wcflow_get_sample_cards_data_fixed();
+        wcflow_log('🎯 === PROCESSING COMPLETE ===');
+        wcflow_log('📊 Total categories processed: ' . count($cards_by_category));
+        wcflow_log('📊 Total cards processed: ' . $total_cards_processed);
+        wcflow_log('📋 Final categories: ' . implode(', ', array_keys($cards_by_category)));
+        
+        // STEP 7: Final validation and response
+        if (empty($cards_by_category) || $total_cards_processed === 0) {
+            wcflow_log('❌ No valid cards found - returning sample data');
+            wp_send_json_success(wcflow_get_sample_cards_data_fixed());
+        } else {
+            wcflow_log('✅ SUCCESS - Returning real admin cards');
+            wcflow_log('📦 Response structure: ' . json_encode(array_map('count', $cards_by_category)));
+            wp_send_json_success($cards_by_category);
         }
-        
-        wcflow_log('=== CARDS DATA RETRIEVAL COMPLETE ===');
-        wcflow_log('Final categories: ' . implode(', ', array_keys($cards_by_category)));
-        wcflow_log('Response structure: ' . json_encode(array_keys($cards_by_category)));
-        
-        wp_send_json_success($cards_by_category);
         
     } catch (Exception $e) {
-        wcflow_log('Error loading cards: ' . $e->getMessage());
-        // Return sample data even on error with correct structure
+        wcflow_log('💥 FATAL ERROR in cards retrieval: ' . $e->getMessage());
+        wcflow_log('📍 Error file: ' . $e->getFile() . ' line ' . $e->getLine());
         wp_send_json_success(wcflow_get_sample_cards_data_fixed());
     }
 }
 
 // FIXED: Helper function to get sample cards data in EXACT format JavaScript expects
 function wcflow_get_sample_cards_data_fixed() {
-    wcflow_log('Returning FIXED sample cards data');
-    
-    // FIXED: Return in format: { "Category Name": [cards] }
-    // NOT: { "Category Name": { "description": "...", "cards": [...] } }
+    wcflow_log('🔄 Returning FIXED sample cards data');
     
     return [
         'Birthday Cards' => [
@@ -534,3 +636,27 @@ function wcflow_get_sample_cards_data_fixed() {
 
 add_action('wp_ajax_wcflow_get_cards', 'wcflow_get_cards_data');
 add_action('wp_ajax_nopriv_wcflow_get_cards', 'wcflow_get_cards_data');
+
+// ADMIN DEBUG ENDPOINT - Check what's in the database
+function wcflow_debug_admin_data() {
+    if (!current_user_can('manage_options')) {
+        wp_die('Unauthorized');
+    }
+    
+    check_ajax_referer('wcflow_nonce', 'nonce');
+    
+    global $wpdb;
+    
+    $debug_info = [
+        'post_types' => get_post_types(),
+        'taxonomies' => get_taxonomies(),
+        'cards_count' => $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = 'wcflow_card'"),
+        'categories_count' => $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->term_taxonomy} WHERE taxonomy = 'wcflow_card_category'"),
+        'published_cards' => $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = 'wcflow_card' AND post_status = 'publish'"),
+        'cards_list' => $wpdb->get_results("SELECT ID, post_title, post_status FROM {$wpdb->posts} WHERE post_type = 'wcflow_card' LIMIT 10"),
+        'categories_list' => $wpdb->get_results("SELECT t.term_id, t.name, tt.count FROM {$wpdb->terms} t INNER JOIN {$wpdb->term_taxonomy} tt ON t.term_id = tt.term_id WHERE tt.taxonomy = 'wcflow_card_category'"),
+    ];
+    
+    wp_send_json_success($debug_info);
+}
+add_action('wp_ajax_wcflow_debug_admin_data', 'wcflow_debug_admin_data');

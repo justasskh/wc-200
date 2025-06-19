@@ -1,6 +1,6 @@
 <?php
 /**
- * WooCommerce Gifting Flow Custom Post Types with Complete Admin Integration
+ * WooCommerce Gifting Flow Custom Post Types - BULLETPROOF ADMIN INTEGRATION
  * 
  * @package WooCommerce_Gifting_Flow
  * @author justasskh
@@ -10,18 +10,20 @@
 
 if (!defined('ABSPATH')) exit;
 
-// Register custom post types and taxonomies
-add_action('init', function() {
-    // Register Card Categories taxonomy FIRST
+// FIXED: Register custom post types and taxonomies with bulletproof setup
+add_action('init', 'wcflow_register_post_types_and_taxonomies', 5);
+
+function wcflow_register_post_types_and_taxonomies() {
+    // STEP 1: Register Card Categories taxonomy FIRST
     register_taxonomy('wcflow_card_category', 'wcflow_card', [
         'label' => 'Card Categories',
-        'public' => false,
-        'publicly_queryable' => false,
+        'public' => true,
+        'publicly_queryable' => true,
         'show_ui' => true,
         'show_in_menu' => true,
         'show_admin_column' => true,
         'hierarchical' => true,
-        'rewrite' => false,
+        'rewrite' => ['slug' => 'card-category'],
         'capabilities' => [
             'manage_terms' => 'manage_woocommerce',
             'edit_terms' => 'manage_woocommerce',
@@ -48,7 +50,7 @@ add_action('init', function() {
         'show_in_rest' => true,
     ]);
     
-    // Register Add-ons post type
+    // STEP 2: Register Add-ons post type
     register_post_type('wcflow_addon', [
         'label' => 'Gifting Add-ons',
         'public' => false,
@@ -78,7 +80,7 @@ add_action('init', function() {
         'show_in_rest' => true,
     ]);
     
-    // Register Cards post type
+    // STEP 3: Register Cards post type
     register_post_type('wcflow_card', [
         'label' => 'Greeting Cards',
         'public' => false,
@@ -108,21 +110,32 @@ add_action('init', function() {
         ],
         'show_in_rest' => true,
     ]);
-});
-
-// Create default categories on activation
-add_action('init', function() {
-    if (get_option('wcflow_default_categories_created') !== 'yes') {
-        wcflow_create_default_categories();
-        update_option('wcflow_default_categories_created', 'yes');
+    
+    // STEP 4: Flush rewrite rules if needed
+    if (get_option('wcflow_flush_rewrite_rules') !== 'done') {
+        flush_rewrite_rules();
+        update_option('wcflow_flush_rewrite_rules', 'done');
     }
-});
+}
 
-function wcflow_create_default_categories() {
-    if (!taxonomy_exists('wcflow_card_category')) {
+// FIXED: Create default categories and sample data on activation
+add_action('init', 'wcflow_ensure_default_data', 10);
+
+function wcflow_ensure_default_data() {
+    if (get_option('wcflow_default_data_created') !== 'yes') {
+        wcflow_create_default_categories_and_cards();
+        update_option('wcflow_default_data_created', 'yes');
+    }
+}
+
+function wcflow_create_default_categories_and_cards() {
+    if (!taxonomy_exists('wcflow_card_category') || !post_type_exists('wcflow_card')) {
         return;
     }
     
+    wcflow_log('🎯 Creating default categories and cards...');
+    
+    // STEP 1: Create default categories
     $default_categories = [
         [
             'name' => 'Birthday Cards',
@@ -141,6 +154,8 @@ function wcflow_create_default_categories() {
         ]
     ];
     
+    $created_categories = [];
+    
     foreach ($default_categories as $cat_data) {
         $existing = term_exists($cat_data['name'], 'wcflow_card_category');
         if (!$existing) {
@@ -151,9 +166,78 @@ function wcflow_create_default_categories() {
             if (!is_wp_error($term)) {
                 update_term_meta($term['term_id'], '_wcflow_category_order', $cat_data['order']);
                 update_term_meta($term['term_id'], '_wcflow_category_description', $cat_data['description']);
+                $created_categories[$cat_data['name']] = $term['term_id'];
+                wcflow_log('✅ Created category: ' . $cat_data['name'] . ' (ID: ' . $term['term_id'] . ')');
+            }
+        } else {
+            $created_categories[$cat_data['name']] = $existing['term_id'];
+            wcflow_log('✅ Category exists: ' . $cat_data['name'] . ' (ID: ' . $existing['term_id'] . ')');
+        }
+    }
+    
+    // STEP 2: Create sample cards for each category
+    $sample_cards = [
+        'Birthday Cards' => [
+            ['title' => 'Happy Birthday Balloons', 'price' => 0],
+            ['title' => 'Birthday Cake Celebration', 'price' => 1.50],
+            ['title' => 'Birthday Wishes', 'price' => 2.50],
+            ['title' => 'Party Time', 'price' => 1.75],
+            ['title' => 'Another Year Older', 'price' => 2.00]
+        ],
+        'Holiday Cards' => [
+            ['title' => 'Season Greetings', 'price' => 0],
+            ['title' => 'Winter Wonderland', 'price' => 1.25],
+            ['title' => 'Holiday Cheer', 'price' => 1.50]
+        ],
+        'Thank You Cards' => [
+            ['title' => 'Thank You So Much', 'price' => 0],
+            ['title' => 'Grateful Heart', 'price' => 1.00]
+        ]
+    ];
+    
+    foreach ($sample_cards as $category_name => $cards) {
+        if (!isset($created_categories[$category_name])) {
+            continue;
+        }
+        
+        $category_id = $created_categories[$category_name];
+        
+        foreach ($cards as $index => $card_data) {
+            // Check if card already exists
+            $existing_card = get_posts([
+                'post_type' => 'wcflow_card',
+                'title' => $card_data['title'],
+                'post_status' => 'any',
+                'numberposts' => 1
+            ]);
+            
+            if (empty($existing_card)) {
+                $card_id = wp_insert_post([
+                    'post_title' => $card_data['title'],
+                    'post_type' => 'wcflow_card',
+                    'post_status' => 'publish',
+                    'menu_order' => $index,
+                    'post_excerpt' => 'Sample greeting card for ' . strtolower($category_name)
+                ]);
+                
+                if (!is_wp_error($card_id)) {
+                    // Set price
+                    update_post_meta($card_id, '_wcflow_price', $card_data['price']);
+                    
+                    // Assign to category
+                    wp_set_post_terms($card_id, [$category_id], 'wcflow_card_category');
+                    
+                    wcflow_log('✅ Created card: ' . $card_data['title'] . ' (ID: ' . $card_id . ') in category: ' . $category_name);
+                } else {
+                    wcflow_log('❌ Failed to create card: ' . $card_data['title']);
+                }
+            } else {
+                wcflow_log('✅ Card exists: ' . $card_data['title']);
             }
         }
     }
+    
+    wcflow_log('🎉 Default data creation complete!');
 }
 
 // Add custom meta boxes
@@ -167,6 +251,16 @@ add_action('add_meta_boxes', function() {
         'side',
         'high'
     );
+    
+    // Debug meta box for cards
+    add_meta_box(
+        'wcflow_debug_meta_box',
+        'Debug Information',
+        'wcflow_debug_meta_box_callback',
+        'wcflow_card',
+        'side',
+        'low'
+    );
 });
 
 // Price meta box callback
@@ -179,6 +273,29 @@ function wcflow_price_meta_box_callback($post) {
     echo '<label for="wcflow_price" style="display: block; margin-bottom: 5px; font-weight: bold;">Price (' . $currency . '):</label>';
     echo '<input type="number" id="wcflow_price" name="wcflow_price" value="' . esc_attr($price) . '" step="0.01" min="0" style="width: 100%;" placeholder="0.00" />';
     echo '<p style="margin-top: 5px; font-size: 12px; color: #666;">Set to 0 for free items.</p>';
+    echo '</div>';
+}
+
+// Debug meta box callback
+function wcflow_debug_meta_box_callback($post) {
+    $categories = wp_get_post_terms($post->ID, 'wcflow_card_category');
+    $price = get_post_meta($post->ID, '_wcflow_price', true);
+    
+    echo '<div style="font-size: 12px; line-height: 1.4;">';
+    echo '<p><strong>Post ID:</strong> ' . $post->ID . '</p>';
+    echo '<p><strong>Post Status:</strong> ' . $post->post_status . '</p>';
+    echo '<p><strong>Menu Order:</strong> ' . $post->menu_order . '</p>';
+    echo '<p><strong>Price Meta:</strong> ' . ($price ? $price : 'Not set') . '</p>';
+    echo '<p><strong>Categories:</strong> ';
+    if (!empty($categories)) {
+        foreach ($categories as $cat) {
+            echo $cat->name . ' (ID: ' . $cat->term_id . ') ';
+        }
+    } else {
+        echo 'None assigned';
+    }
+    echo '</p>';
+    echo '<p><strong>Has Thumbnail:</strong> ' . (has_post_thumbnail($post->ID) ? 'Yes' : 'No') . '</p>';
     echo '</div>';
 }
 
@@ -196,6 +313,7 @@ add_action('save_post', function($post_id) {
         if (isset($_POST['wcflow_price'])) {
             $price = floatval($_POST['wcflow_price']);
             update_post_meta($post_id, '_wcflow_price', $price);
+            wcflow_log('💰 Price saved for post ' . $post_id . ': ' . $price);
         }
     }
 });
@@ -280,6 +398,7 @@ function wcflow_card_columns($columns) {
     $new_columns['wcflow_price'] = 'Price';
     $new_columns['taxonomy-wcflow_card_category'] = 'Category';
     $new_columns['menu_order'] = 'Order';
+    $new_columns['wcflow_debug'] = 'Debug';
     $new_columns['date'] = $columns['date'];
     return $new_columns;
 }
@@ -348,6 +467,15 @@ function wcflow_card_column_content($column, $post_id) {
             $order = get_post_field('menu_order', $post_id);
             echo '<input type="number" value="' . esc_attr($order) . '" min="0" style="width: 60px;" onchange="updateMenuOrder(' . $post_id . ', this.value)">';
             break;
+            
+        case 'wcflow_debug':
+            $categories = wp_get_post_terms($post_id, 'wcflow_card_category');
+            echo '<small>';
+            echo 'ID: ' . $post_id . '<br>';
+            echo 'Status: ' . get_post_status($post_id) . '<br>';
+            echo 'Categories: ' . count($categories);
+            echo '</small>';
+            break;
     }
 }
 
@@ -402,7 +530,7 @@ add_filter('pre_get_posts', function($query) {
     }
 });
 
-// Add admin notice for setup
+// Add admin notice for setup with debug info
 add_action('admin_notices', function() {
     if (!current_user_can('manage_woocommerce')) return;
     
@@ -415,13 +543,20 @@ add_action('admin_notices', function() {
     
     if ($categories_count == 0 || $cards_count->publish == 0) {
         ?>
-        <div class="notice notice-info">
+        <div class="notice notice-warning">
             <p><strong>Greeting Cards Setup:</strong></p>
             <ol>
                 <li>First, create card categories in <a href="<?php echo admin_url('edit-tags.php?taxonomy=wcflow_card_category&post_type=wcflow_card'); ?>">Card Categories</a></li>
                 <li>Then, create greeting cards and assign them to categories in <a href="<?php echo admin_url('edit.php?post_type=wcflow_card'); ?>">Greeting Cards</a></li>
                 <li>Set prices and upload images for each card</li>
             </ol>
+            <p><strong>Debug Info:</strong> Categories: <?php echo $categories_count; ?>, Published Cards: <?php echo $cards_count->publish; ?></p>
+        </div>
+        <?php
+    } else {
+        ?>
+        <div class="notice notice-success">
+            <p><strong>✅ Greeting Cards Ready!</strong> You have <?php echo $categories_count; ?> categories and <?php echo $cards_count->publish; ?> published cards.</p>
         </div>
         <?php
     }

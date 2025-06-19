@@ -156,6 +156,17 @@ class WooCommerce_Gifting_Flow {
         if (strpos($hook, 'wcflow') !== false || $hook === 'post.php' || $hook === 'post-new.php') {
             wp_enqueue_style('wcflow-admin-style', WCFLOW_URL . 'assets/admin.css', [], WCFLOW_VERSION);
             wp_enqueue_script('wcflow-admin-script', WCFLOW_URL . 'assets/admin.js', ['jquery'], WCFLOW_VERSION, true);
+            
+            // Admin localization
+            wp_localize_script('wcflow-admin-script', 'wcflow_admin', [
+                'ajax_url' => admin_url('admin-ajax.php'),
+                'nonce' => wp_create_nonce('wcflow_admin_nonce'),
+                'strings' => [
+                    'confirm_delete' => __('Are you sure you want to delete this item?', 'wcflow'),
+                    'order_updated' => __('Order updated successfully.', 'wcflow'),
+                    'error_occurred' => __('An error occurred. Please try again.', 'wcflow')
+                ]
+            ]);
         }
     }
     
@@ -266,9 +277,10 @@ class WooCommerce_Gifting_Flow {
      */
     public function add_action_links($links) {
         $settings_link = '<a href="' . admin_url('admin.php?page=wc-settings&tab=wcflow_settings') . '">' . __('Settings', 'wcflow') . '</a>';
-        $docs_link = '<a href="#" target="_blank">' . __('Documentation', 'wcflow') . '</a>';
+        $cards_link = '<a href="' . admin_url('edit.php?post_type=wcflow_card') . '">' . __('Cards', 'wcflow') . '</a>';
+        $debug_link = '<a href="#" onclick="wcflowDebugData()" style="color: #d63638;">' . __('Debug', 'wcflow') . '</a>';
         
-        array_unshift($links, $settings_link, $docs_link);
+        array_unshift($links, $settings_link, $cards_link, $debug_link);
         return $links;
     }
     
@@ -310,6 +322,25 @@ class WooCommerce_Gifting_Flow {
             </div>
             <?php
         }
+        
+        // Add debug script
+        ?>
+        <script>
+        function wcflowDebugData() {
+            if (confirm('This will show debug information about your greeting cards setup. Continue?')) {
+                jQuery.post(ajaxurl, {
+                    action: 'wcflow_debug_admin_data',
+                    nonce: '<?php echo wp_create_nonce('wcflow_nonce'); ?>'
+                }, function(response) {
+                    if (response.success) {
+                        console.log('🎯 WCFlow Debug Data:', response.data);
+                        alert('Debug data logged to console. Press F12 to view.');
+                    }
+                });
+            }
+        }
+        </script>
+        <?php
     }
     
     /**
@@ -339,6 +370,10 @@ class WooCommerce_Gifting_Flow {
             if (!get_option('wcflow_allowed_delivery_days')) {
                 update_option('wcflow_allowed_delivery_days', [1,2,3,4,5]);
             }
+            
+            // Force recreation of default data
+            delete_option('wcflow_default_data_created');
+            delete_option('wcflow_flush_rewrite_rules');
         }
         
         // Clear any caches
@@ -364,6 +399,10 @@ class WooCommerce_Gifting_Flow {
         
         // Set version
         update_option('wcflow_version', WCFLOW_VERSION);
+        
+        // Force recreation of post types and default data
+        delete_option('wcflow_default_data_created');
+        delete_option('wcflow_flush_rewrite_rules');
         
         // Create database tables if needed
         $this->create_tables();
@@ -438,11 +477,13 @@ function wcflow_get_setting($key, $default = '') {
 }
 
 /**
- * Helper function to log messages
+ * Helper function to log messages - FIXED to avoid redeclaration
  */
-function wcflow_log($message) {
-    if (get_option('wcflow_enable_debug') === 'yes' || (defined('WP_DEBUG') && WP_DEBUG)) {
-        error_log('[WooCommerce Gifting Flow] ' . $message);
+if (!function_exists('wcflow_log')) {
+    function wcflow_log($message) {
+        if (get_option('wcflow_enable_debug') === 'yes' || (defined('WP_DEBUG') && WP_DEBUG)) {
+            error_log('[WooCommerce Gifting Flow] ' . $message);
+        }
     }
 }
 
