@@ -34,11 +34,19 @@ if (!in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get
     return;
 }
 
-// Include required files
-require_once WCFLOW_PATH . 'includes/settings.php';
-require_once WCFLOW_PATH . 'includes/cpt.php';
-require_once WCFLOW_PATH . 'includes/ajax.php';
-require_once WCFLOW_PATH . 'includes/checkout-handler.php';
+// Include required files - only include files that exist
+$required_files = [
+    'includes/settings.php',
+    'includes/cpt.php', 
+    'includes/ajax.php'
+];
+
+foreach ($required_files as $file) {
+    $file_path = WCFLOW_PATH . $file;
+    if (file_exists($file_path)) {
+        require_once $file_path;
+    }
+}
 
 // Set default settings on activation
 register_activation_hook(__FILE__, 'wcflow_set_default_settings');
