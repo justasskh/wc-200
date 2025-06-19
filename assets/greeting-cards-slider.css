@@ -1,23 +1,15 @@
-/* Greeting Cards Slider Styles - Updated to match exact design */
+/* Greeting Cards Slider Styles - Fixed layout alignment */
 .greeting-cards-section {
     margin: 60px 0;
     position: relative;
 }
 
+/* FIXED: Left side aligns with inner content, right side extends to page edge */
 .greeting-cards-container {
-    max-width: none;
-    margin: 0;
+    max-width: 1200px;
+    margin: 0 auto;
     padding-left: 20px;
     position: relative;
-    margin-left: calc((100vw - 1200px) / 2);
-}
-
-/* Ensure proper alignment on smaller screens */
-@media (max-width: 1240px) {
-    .greeting-cards-container {
-        margin-left: 0;
-        padding-left: 20px;
-    }
 }
 
 .greeting-cards-header {
@@ -25,7 +17,7 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 16px;
-    max-width: 1160px;
+    padding-right: 20px;
 }
 
 .greeting-cards-title {
@@ -54,24 +46,28 @@
     font-size: 16px;
     line-height: 1.5;
     margin: 0 0 32px 0;
-    max-width: 1160px;
+    padding-right: 20px;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
+/* FIXED: Slider extends to right edge while maintaining left alignment */
 .greeting-cards-slider-wrapper {
     position: relative;
     overflow: hidden;
-    width: 100vw;
-    margin-left: calc(-1 * ((100vw - 1200px) / 2));
-    padding-left: calc((100vw - 1200px) / 2 + 20px);
+    /* Extend to right edge of page */
+    width: calc(100vw - ((100vw - 1200px) / 2) - 20px);
+    margin-right: calc(-1 * ((100vw - 1200px) / 2));
 }
 
 /* Adjust for smaller screens */
 @media (max-width: 1240px) {
-    .greeting-cards-slider-wrapper {
-        width: 100vw;
-        margin-left: -20px;
+    .greeting-cards-container {
         padding-left: 20px;
+    }
+    
+    .greeting-cards-slider-wrapper {
+        width: calc(100vw - 20px);
+        margin-right: -20px;
     }
 }
 
@@ -85,19 +81,9 @@
 }
 
 /* Grid view for "See All" mode */
-.greeting-cards-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: 20px;
-    padding: 20px;
-    max-width: 1200px;
-    margin: 0 auto;
-}
-
 .greeting-cards-section.grid-view .greeting-cards-slider-wrapper {
     width: 100%;
-    margin-left: 0;
-    padding-left: 0;
+    margin-right: 0;
     overflow: visible;
 }
 
@@ -105,7 +91,7 @@
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
     gap: 20px;
-    padding: 20px 0;
+    padding: 20px 20px 20px 0;
     transform: none !important;
 }
 
@@ -176,7 +162,7 @@
     color: #333;
 }
 
-/* Navigation Arrows - Updated design */
+/* Navigation Arrows - Overlay style */
 .slider-nav {
     position: absolute;
     top: 50%;
@@ -230,13 +216,13 @@
     color: #333;
 }
 
-/* Progress bar and controls - positioned as in the image */
+/* FIXED: Progress bar and controls positioned as in the image */
 .slider-controls {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-top: 24px;
-    max-width: 1160px;
+    padding-right: 20px;
 }
 
 .slider-progress-container {
@@ -289,12 +275,10 @@
     }
     
     .greeting-cards-header {
-        max-width: none;
         padding-right: 16px;
     }
     
     .greeting-cards-description {
-        max-width: none;
         padding-right: 16px;
     }
     
@@ -314,14 +298,13 @@
         gap: 12px;
     }
     
-    .greeting-cards-grid {
+    .greeting-cards-section.grid-view .greeting-cards-slider {
         grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
         gap: 16px;
-        padding: 16px;
+        padding: 16px 16px 16px 0;
     }
     
     .slider-controls {
-        max-width: none;
         padding-right: 16px;
     }
     
@@ -341,6 +324,11 @@
     
     .slider-nav-next {
         right: 16px;
+    }
+    
+    .greeting-cards-slider-wrapper {
+        width: calc(100vw - 16px);
+        margin-right: -16px;
     }
 }
 
@@ -363,7 +351,7 @@
         gap: 12px;
     }
     
-    .greeting-cards-grid {
+    .greeting-cards-section.grid-view .greeting-cards-slider {
         grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
         gap: 12px;
     }

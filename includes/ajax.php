@@ -340,7 +340,7 @@ function wcflow_get_addons_data() {
 add_action('wp_ajax_wcflow_get_addons', 'wcflow_get_addons_data');
 add_action('wp_ajax_nopriv_wcflow_get_addons', 'wcflow_get_addons_data');
 
-// FIXED: Get cards data organized by categories with proper ordering
+// FIXED: Get cards data organized by categories with proper data structure
 function wcflow_get_cards_data() {
     try {
         check_ajax_referer('wcflow_nonce', 'nonce');
@@ -384,10 +384,7 @@ function wcflow_get_cards_data() {
                         $category_description = $category->description;
                     }
                     
-                    $cards_by_category[$category->name] = [
-                        'description' => $category_description,
-                        'cards' => []
-                    ];
+                    $category_cards = [];
                     
                     foreach ($cards as $card) {
                         $price_value = get_post_meta($card->ID, '_wcflow_price', true);
@@ -400,7 +397,7 @@ function wcflow_get_cards_data() {
                             $image_url = $image_data ? $image_data[0] : $image_url;
                         }
                         
-                        $cards_by_category[$category->name]['cards'][] = [
+                        $category_cards[] = [
                             'id' => $card->ID,
                             'title' => $card->post_title,
                             'price' => $price_value > 0 ? wc_price($price_value) : 'FREE',
@@ -409,12 +406,18 @@ function wcflow_get_cards_data() {
                         ];
                     }
                     
+                    // FIXED: Use the correct data structure expected by JavaScript
+                    $cards_by_category[$category->name] = [
+                        'description' => $category_description,
+                        'cards' => $category_cards
+                    ];
+                    
                     wcflow_log('Added ' . count($cards) . ' cards to category: ' . $category->name);
                 }
             }
         }
         
-        // FIXED: Always provide sample data to ensure cards display
+        // FIXED: Always provide sample data to ensure cards display with correct structure
         if (empty($cards_by_category)) {
             wcflow_log('No cards found in database, providing sample data');
             
@@ -431,28 +434,28 @@ function wcflow_get_cards_data() {
                     [
                         'id' => 'sample-2',
                         'title' => 'June Birth Flower',
-                        'price' => wc_price(1.50),
+                        'price' => '£1.50',
                         'price_value' => 1.50,
                         'img' => 'https://images.pexels.com/photos/1040173/pexels-photo-1040173.jpeg?auto=compress&cs=tinysrgb&w=400'
                     ],
                     [
                         'id' => 'sample-3',
                         'title' => 'Happy Birthday by Lucy Sherston',
-                        'price' => wc_price(2.50),
+                        'price' => '£2.50',
                         'price_value' => 2.50,
                         'img' => 'https://images.pexels.com/photos/1729931/pexels-photo-1729931.jpeg?auto=compress&cs=tinysrgb&w=400'
                     ],
                     [
                         'id' => 'sample-4',
                         'title' => 'Happy Birthday',
-                        'price' => wc_price(1.50),
+                        'price' => '£1.50',
                         'price_value' => 1.50,
                         'img' => 'https://images.pexels.com/photos/1666065/pexels-photo-1666065.jpeg?auto=compress&cs=tinysrgb&w=400'
                     ],
                     [
                         'id' => 'sample-5',
                         'title' => 'Cheers to Another Year',
-                        'price' => wc_price(1.50),
+                        'price' => '£1.50',
                         'price_value' => 1.50,
                         'img' => 'https://images.pexels.com/photos/1040173/pexels-photo-1040173.jpeg?auto=compress&cs=tinysrgb&w=400'
                     ]
@@ -465,7 +468,7 @@ function wcflow_get_cards_data() {
         
     } catch (Exception $e) {
         wcflow_log('Error loading cards: ' . $e->getMessage());
-        // Return sample data even on error
+        // Return sample data even on error with correct structure
         $sample_cards = [
             'Birthday' => [
                 'description' => "Because it wouldn't be a birthday without a card. Pick your fave design, and add your own celebratory note.",

@@ -320,7 +320,7 @@ jQuery(function($) {
         setTimeout(initializeSlider, 200);
     }
     
-    // Render cards in slider format with categories
+    // FIXED: Render cards in slider format with proper data structure handling
     function renderCardsInSlider(cardsByCategory) {
         const $slider = $('#wcflow-cards-slider');
         $slider.empty();
@@ -338,27 +338,38 @@ jQuery(function($) {
         
         // Update category title and description
         $('.greeting-cards-title').text(firstCategory);
-        if (categoryData.description) {
+        if (categoryData && categoryData.description) {
             $('.greeting-cards-description').text(categoryData.description);
         }
         
-        // Render cards from the first category
-        const cards = categoryData.cards || categoryData; // Handle both formats
-        
-        if (Array.isArray(cards)) {
-            cards.forEach(function(card) {
-                const $cardItem = $(`
-                    <div class="greeting-card" data-card-id="${card.id}" data-price-value="${card.price_value}" role="listitem" tabindex="0">
-                        ${card.img ? `<img src="${card.img}" alt="${card.title}" class="greeting-card-image" loading="lazy">` : ''}
-                        <div class="greeting-card-content">
-                            <h4 class="greeting-card-title">${card.title}</h4>
-                            <p class="greeting-card-price ${card.price_value == 0 ? 'free' : ''}">${card.price}</p>
-                        </div>
-                    </div>
-                `);
-                $slider.append($cardItem);
-            });
+        // FIXED: Handle both data structures - with and without 'cards' wrapper
+        let cards = [];
+        if (categoryData && categoryData.cards && Array.isArray(categoryData.cards)) {
+            cards = categoryData.cards;
+        } else if (Array.isArray(categoryData)) {
+            cards = categoryData;
+        } else {
+            debug('Unexpected data structure', categoryData);
+            return;
         }
+        
+        if (cards.length === 0) {
+            $slider.html('<p style="text-align:center;color:#666;padding:40px;">No cards found.</p>');
+            return;
+        }
+        
+        cards.forEach(function(card) {
+            const $cardItem = $(`
+                <div class="greeting-card" data-card-id="${card.id}" data-price-value="${card.price_value}" role="listitem" tabindex="0">
+                    ${card.img ? `<img src="${card.img}" alt="${card.title}" class="greeting-card-image" loading="lazy">` : ''}
+                    <div class="greeting-card-content">
+                        <h4 class="greeting-card-title">${card.title}</h4>
+                        <p class="greeting-card-price ${card.price_value == 0 ? 'free' : ''}">${card.price}</p>
+                    </div>
+                </div>
+            `);
+            $slider.append($cardItem);
+        });
         
         // Handle card selection with toggle functionality
         $(document).off('click', '.greeting-card').on('click', '.greeting-card', function() {
