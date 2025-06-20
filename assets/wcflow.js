@@ -1,6 +1,6 @@
 /**
- * WooCommerce Gifting Flow - CATEGORY-BASED SLIDERS
- * 2025-01-27 - Multiple sliders, one per category
+ * WooCommerce Gifting Flow - CATEGORY-BASED SLIDERS IMPLEMENTATION
+ * 2025-01-27 - Real category-based sliders with proper admin connection
  */
 
 jQuery(function($) {
@@ -12,7 +12,7 @@ jQuery(function($) {
     
     let orderState = window.wcflow.orderState;
     let currentStep = 1;
-    let categorySliders = {}; // Store slider instances by category
+    let categorySliders = {}; // Store individual slider instances
     
     // Debug helper
     function debug(message, data) {
@@ -32,14 +32,12 @@ jQuery(function($) {
         $('.wcflow-addon-card.selected').each(function() {
             const priceValue = parseFloat($(this).data('price-value') || 0);
             addonsTotal += priceValue;
-            debug('Addon selected', {id: $(this).data('addon-id'), price: priceValue});
         });
         
         // Calculate card price
         const $selectedCard = $('.greeting-card.selected');
         if ($selectedCard.length) {
             cardPrice = parseFloat($selectedCard.data('price-value') || 0);
-            debug('Card selected', {id: $selectedCard.data('card-id'), price: cardPrice});
         }
         
         const subtotal = basePrice + addonsTotal + cardPrice;
@@ -140,14 +138,14 @@ jQuery(function($) {
         }
     }
     
-    // Step 1 initialization - CATEGORY-BASED SLIDERS
+    // Step 1 initialization
     function initStep1() {
-        debug('Initializing step 1 with category-based sliders');
+        debug('Initializing step 1');
         
         // Load addons first
         loadAddons();
         
-        // Load cards with category-based sliders
+        // Load cards and initialize category-based sliders
         loadCardsWithCategorySliders();
         
         // Message textarea functionality
@@ -248,12 +246,12 @@ jQuery(function($) {
         });
     }
     
-    // 🎯 NEW: Load cards with category-based sliders
+    // FIXED: Load cards with category-based sliders
     function loadCardsWithCategorySliders() {
         const $container = $('#wcflow-cards-container');
         $container.html('<div class="wcflow-loader"></div>');
         
-        console.log('🎯 === LOADING CATEGORY-BASED SLIDERS ===');
+        debug('🎯 Loading cards for category-based sliders...');
         
         $.ajax({
             url: wcflow_params.ajax_url,
@@ -264,221 +262,266 @@ jQuery(function($) {
             },
             timeout: 15000,
             success: function(response) {
-                console.log('🎯 === CARDS AJAX SUCCESS ===');
-                console.log('📦 Raw response:', response);
+                debug('📦 Cards AJAX response received', response);
                 
-                try {
-                    if (response && response.success && response.data) {
-                        console.log('🎯 === PROCESSING VALID RESPONSE ===');
-                        renderCategoryBasedSliders(response.data);
-                    } else {
-                        console.log('❌ === INVALID RESPONSE - USING FALLBACK ===');
-                        renderFallbackCategorySliders();
-                    }
-                } catch (error) {
-                    console.error('💥 === ERROR PROCESSING RESPONSE ===', error);
+                if (response && response.success && response.data) {
+                    debug('✅ Cards data received successfully', response.data);
+                    renderCategoryBasedSliders(response.data);
+                } else {
+                    debug('❌ No cards data in response, using fallback');
                     renderFallbackCategorySliders();
                 }
             },
             error: function(xhr, status, error) {
-                console.log('❌ === CARDS AJAX ERROR ===');
-                console.log('📊 Status:', status);
-                console.log('⚠️ Error:', error);
-                console.log('📄 Response text:', xhr.responseText);
+                debug('💥 Cards loading failed', {status: status, error: error});
+                console.error('Cards AJAX Error:', xhr.responseText);
                 renderFallbackCategorySliders();
             }
         });
     }
     
-    // 🎯 NEW: Render category-based sliders
+    // FIXED: Render category-based sliders
     function renderCategoryBasedSliders(cardsByCategory) {
         const $container = $('#wcflow-cards-container');
         $container.empty();
         
-        console.log('🎨 === RENDER CATEGORY-BASED SLIDERS ===');
-        console.log('📦 Input data:', cardsByCategory);
+        debug('🎨 Rendering category-based sliders', cardsByCategory);
         
-        if (!cardsByCategory || typeof cardsByCategory !== 'object' || Object.keys(cardsByCategory).length === 0) {
-            console.log('❌ === NO CATEGORIES FOUND ===');
+        if (!cardsByCategory || Object.keys(cardsByCategory).length === 0) {
             $container.html('<p style="text-align:center;color:#666;padding:40px;">No cards available at this time.</p>');
             return;
         }
         
-        // Define category order priority
-        const categoryOrder = ['Birthday Cards', 'Holiday Cards', 'Thank You Cards'];
-        const processedCategories = [];
-        
-        // Process categories in priority order first
-        categoryOrder.forEach(function(categoryName) {
-            if (cardsByCategory[categoryName] && cardsByCategory[categoryName].length > 0) {
-                processedCategories.push({
-                    name: categoryName,
-                    cards: cardsByCategory[categoryName]
-                });
-            }
-        });
-        
-        // Add any remaining categories
+        // Create a slider for each category
         Object.entries(cardsByCategory).forEach(function([categoryName, cards]) {
-            if (!categoryOrder.includes(categoryName) && cards && cards.length > 0) {
-                processedCategories.push({
-                    name: categoryName,
-                    cards: cards
-                });
+            if (!cards || cards.length === 0) {
+                debug('⚠️ Skipping empty category:', categoryName);
+                return;
             }
-        });
-        
-        console.log('📊 Categories to process:', processedCategories.length);
-        
-        if (processedCategories.length === 0) {
-            console.log('❌ === NO VALID CATEGORIES ===');
-            $container.html('<p style="text-align:center;color:#666;padding:40px;">No cards found.</p>');
-            return;
-        }
-        
-        // Create slider for each category
-        processedCategories.forEach(function(category, categoryIndex) {
-            console.log(`🎨 === CREATING SLIDER FOR: ${category.name} ===`);
             
-            const categoryId = 'category-' + categoryIndex;
-            const categoryDescription = getCategoryDescription(category.name);
+            debug('🎨 Creating slider for category:', categoryName, 'with', cards.length, 'cards');
             
             // Create category slider HTML
-            const categorySliderHtml = `
-                <section class="greeting-cards-section" id="${categoryId}" role="region" aria-label="${category.name}">
-                    <div class="greeting-cards-container">
-                        <div class="greeting-cards-header">
-                            <h2 class="greeting-cards-title">${category.name}</h2>
-                            <a href="#" class="greeting-cards-see-all" data-category="${categoryId}">See all</a>
+            const categoryId = 'category-' + categoryName.toLowerCase().replace(/[^a-z0-9]/g, '-');
+            const sliderHtml = createCategorySliderHTML(categoryId, categoryName, cards);
+            
+            $container.append(sliderHtml);
+            
+            // Initialize slider for this category
+            setTimeout(() => initializeCategorySlider(categoryId, cards), 100);
+        });
+        
+        debug('✅ All category sliders rendered');
+    }
+    
+    // Create HTML for a category slider
+    function createCategorySliderHTML(categoryId, categoryName, cards) {
+        let cardsHtml = '';
+        
+        cards.forEach(function(card) {
+            cardsHtml += `
+                <div class="greeting-card" data-card-id="${card.id}" data-price-value="${card.price_value}" role="listitem" tabindex="0">
+                    ${card.img ? `<img src="${card.img}" alt="${card.title}" class="greeting-card-image" loading="lazy">` : ''}
+                    <div class="greeting-card-content">
+                        <h4 class="greeting-card-title">${card.title}</h4>
+                        <p class="greeting-card-price ${card.price_value == 0 ? 'free' : ''}">${card.price}</p>
+                    </div>
+                </div>
+            `;
+        });
+        
+        return `
+            <section class="greeting-cards-section" id="${categoryId}" role="region" aria-label="${categoryName}">
+                <div class="greeting-cards-container">
+                    <div class="greeting-cards-header">
+                        <h2 class="greeting-cards-title">${categoryName}</h2>
+                        <a href="#" class="greeting-cards-see-all">See all</a>
+                    </div>
+                    
+                    <p class="greeting-cards-description">
+                        Select a beautiful card to accompany your gift.
+                    </p>
+                    
+                    <div class="greeting-cards-slider-wrapper">
+                        <button class="slider-nav slider-nav-prev" aria-label="Previous cards" type="button">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M15 18l-6-6 6-6"/>
+                            </svg>
+                        </button>
+                        
+                        <button class="slider-nav slider-nav-next" aria-label="Next cards" type="button">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M9 18l6-6-6-6"/>
+                            </svg>
+                        </button>
+                        
+                        <div class="greeting-cards-slider" role="list">
+                            ${cardsHtml}
                         </div>
-                        
-                        <p class="greeting-cards-description">
-                            ${categoryDescription}
-                        </p>
-                        
-                        <div class="greeting-cards-slider-wrapper">
-                            <button class="slider-nav slider-nav-prev" aria-label="Previous ${category.name}" type="button">
+                    </div>
+                    
+                    <div class="slider-controls">
+                        <div class="slider-progress-container">
+                            <div class="slider-progress-bar" role="progressbar" aria-label="Slider progress">
+                                <div class="slider-progress-fill"></div>
+                            </div>
+                        </div>
+                        <div class="slider-nav-controls">
+                            <button class="slider-nav slider-nav-prev" aria-label="Previous" type="button">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M15 18l-6-6 6-6"/>
                                 </svg>
                             </button>
-                            
-                            <button class="slider-nav slider-nav-next" aria-label="Next ${category.name}" type="button">
+                            <button class="slider-nav slider-nav-next" aria-label="Next" type="button">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M9 18l6-6-6-6"/>
                                 </svg>
                             </button>
-                            
-                            <div class="greeting-cards-slider" role="list">
-                                <!-- Cards will be inserted here -->
-                            </div>
-                        </div>
-                        
-                        <div class="slider-controls">
-                            <div class="slider-progress-container">
-                                <div class="slider-progress-bar" role="progressbar" aria-label="${category.name} progress">
-                                    <div class="slider-progress-fill"></div>
-                                </div>
-                            </div>
-                            <div class="slider-nav-controls">
-                                <button class="slider-nav slider-nav-prev" aria-label="Previous ${category.name}" type="button">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M15 18l-6-6 6-6"/>
-                                    </svg>
-                                </button>
-                                <button class="slider-nav slider-nav-next" aria-label="Next ${category.name}" type="button">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M9 18l6-6-6-6"/>
-                                    </svg>
-                                </button>
-                            </div>
                         </div>
                     </div>
-                </section>
-            `;
+                </div>
+            </section>
+        `;
+    }
+    
+    // Initialize slider for a specific category
+    function initializeCategorySlider(categoryId, cards) {
+        const $section = $('#' + categoryId);
+        const $slider = $section.find('.greeting-cards-slider');
+        const $prevBtn = $section.find('.slider-nav-prev');
+        const $nextBtn = $section.find('.slider-nav-next');
+        const $progressFill = $section.find('.slider-progress-fill');
+        const $seeAllBtn = $section.find('.greeting-cards-see-all');
+        
+        if (!$slider.length || cards.length === 0) {
+            debug('❌ Cannot initialize slider for category:', categoryId);
+            return;
+        }
+        
+        let currentIndex = 0;
+        const cardWidth = 256; // 240px + 16px gap
+        const containerWidth = $section.find('.greeting-cards-slider-wrapper').width();
+        const visibleCards = Math.floor(containerWidth / cardWidth);
+        const maxIndex = Math.max(0, cards.length - visibleCards);
+        let isGridView = false;
+        
+        debug('🎯 Initializing slider for', categoryId, {
+            cards: cards.length,
+            visibleCards: visibleCards,
+            maxIndex: maxIndex
+        });
+        
+        function updateSlider() {
+            if (isGridView) return;
             
-            // Add category slider to container
-            $container.append(categorySliderHtml);
+            const translateX = -currentIndex * cardWidth;
+            $slider.css('transform', `translateX(${translateX}px)`);
             
-            // Get the slider element for this category
-            const $categorySection = $container.find('#' + categoryId);
-            const $slider = $categorySection.find('.greeting-cards-slider');
+            // Update navigation
+            $prevBtn.toggleClass('disabled', currentIndex === 0);
+            $nextBtn.toggleClass('disabled', currentIndex >= maxIndex);
             
-            // Render cards for this category
-            let renderedCount = 0;
-            category.cards.forEach(function(card, cardIndex) {
-                console.log(`🎨 === RENDERING CARD ${cardIndex} FOR ${category.name} ===`);
-                
-                try {
-                    // Extract card properties with fallbacks
-                    const cardId = String(card.id || card.ID || `${categoryId}-card-${cardIndex}`);
-                    const cardTitle = String(card.title || card.name || card.post_title || `Card ${cardIndex + 1}`);
-                    const cardPrice = String(card.price || 'FREE');
-                    const cardPriceValue = parseFloat(card.price_value || card.priceValue || 0);
-                    const cardImg = String(card.img || card.image || card.thumbnail || 'https://images.pexels.com/photos/1666065/pexels-photo-1666065.jpeg?auto=compress&cs=tinysrgb&w=400');
-                    
-                    console.log('✅ Card properties extracted:');
-                    console.log('🆔 ID:', cardId);
-                    console.log('📛 Title:', cardTitle);
-                    console.log('💰 Price:', cardPrice);
-                    console.log('🔢 Price Value:', cardPriceValue);
-                    console.log('🖼️ Image:', cardImg);
-                    
-                    // Create card HTML
-                    const $cardItem = $(`
-                        <div class="greeting-card" data-card-id="${cardId}" data-price-value="${cardPriceValue}" data-category="${category.name}" role="listitem" tabindex="0">
-                            <img src="${cardImg}" alt="${cardTitle}" class="greeting-card-image" loading="lazy" onerror="this.src='https://images.pexels.com/photos/1666065/pexels-photo-1666065.jpeg?auto=compress&cs=tinysrgb&w=400'">
-                            <div class="greeting-card-content">
-                                <h4 class="greeting-card-title">${cardTitle}</h4>
-                                <p class="greeting-card-price ${cardPriceValue == 0 ? 'free' : ''}">${cardPrice}</p>
-                            </div>
-                        </div>
-                    `);
-                    
-                    $slider.append($cardItem);
-                    renderedCount++;
-                    
-                    console.log(`✅ Card ${cardIndex} rendered successfully for ${category.name}`);
-                    
-                } catch (cardError) {
-                    console.error(`💥 Error rendering card ${cardIndex} for ${category.name}:`, cardError);
-                }
-            });
+            // Update progress
+            if (maxIndex > 0) {
+                const progress = (currentIndex / maxIndex) * 100;
+                $progressFill.css('width', progress + '%');
+            } else {
+                $progressFill.css('width', '100%');
+            }
+        }
+        
+        function toggleGridView() {
+            isGridView = !isGridView;
             
-            console.log(`🎉 === CATEGORY ${category.name} COMPLETE ===`);
-            console.log('📊 Cards rendered:', renderedCount);
-            
-            // Initialize slider for this category
-            if (renderedCount > 0) {
-                setTimeout(() => initializeCategorySlider(categoryId), 100);
+            if (isGridView) {
+                $section.addClass('grid-view');
+                $seeAllBtn.text('See less');
+            } else {
+                $section.removeClass('grid-view');
+                $seeAllBtn.text('See all');
+                updateSlider();
+            }
+        }
+        
+        // Navigation handlers
+        $prevBtn.on('click', function() {
+            if (isGridView) return;
+            if (currentIndex > 0) {
+                currentIndex--;
+                updateSlider();
             }
         });
         
-        // Setup global card selection handling
-        setupGlobalCardSelection();
+        $nextBtn.on('click', function() {
+            if (isGridView) return;
+            if (currentIndex < maxIndex) {
+                currentIndex++;
+                updateSlider();
+            }
+        });
         
-        console.log('🎉 === ALL CATEGORY SLIDERS RENDERED ===');
-    }
-    
-    // 🎯 NEW: Get category description
-    function getCategoryDescription(categoryName) {
-        const descriptions = {
-            'Birthday Cards': 'Perfect cards to celebrate another year of life and joy.',
-            'Holiday Cards': 'Festive cards for special occasions and seasonal celebrations.',
-            'Thank You Cards': 'Express your gratitude with these heartfelt cards.',
-            'Wedding Cards': 'Beautiful cards for celebrating love and new beginnings.',
-            'Anniversary Cards': 'Commemorate special milestones and memories.',
-            'Sympathy Cards': 'Thoughtful cards to offer comfort and support.',
-            'Congratulations Cards': 'Celebrate achievements and special moments.',
-            'Get Well Cards': 'Send healing thoughts and warm wishes.'
+        // See all toggle
+        $seeAllBtn.on('click', function(e) {
+            e.preventDefault();
+            toggleGridView();
+        });
+        
+        // Card selection (global - only one card can be selected across all categories)
+        $section.find('.greeting-card').on('click', function() {
+            // Remove selection from all cards in all categories
+            $('.greeting-card').removeClass('selected');
+            
+            // Select this card
+            $(this).addClass('selected');
+            
+            // Enable message textarea
+            $('#wcflow-card-message').prop('disabled', false);
+            $('.wcflow-message-note').hide();
+            
+            updateOrderState();
+            updatePricing();
+            
+            debug('🎯 Card selected', {
+                id: $(this).data('card-id'),
+                price: $(this).data('price-value'),
+                category: categoryId
+            });
+        });
+        
+        // Keyboard navigation
+        $section.on('keydown', function(e) {
+            if (isGridView) return;
+            
+            switch (e.key) {
+                case 'ArrowLeft':
+                    e.preventDefault();
+                    $prevBtn.click();
+                    break;
+                case 'ArrowRight':
+                    e.preventDefault();
+                    $nextBtn.click();
+                    break;
+            }
+        });
+        
+        // Initial update
+        updateSlider();
+        
+        // Store slider instance
+        categorySliders[categoryId] = {
+            currentIndex: currentIndex,
+            maxIndex: maxIndex,
+            updateSlider: updateSlider,
+            toggleGridView: toggleGridView,
+            isGridView: () => isGridView
         };
         
-        return descriptions[categoryName] || 'Beautiful greeting cards for every occasion.';
+        debug('✅ Slider initialized for category:', categoryId);
     }
     
-    // 🎯 NEW: Render fallback category sliders
+    // Render fallback category sliders
     function renderFallbackCategorySliders() {
-        console.log('🔄 === RENDERING FALLBACK CATEGORY SLIDERS ===');
+        debug('🔄 Rendering fallback category sliders');
         
         const fallbackData = {
             'Birthday Cards': [
@@ -502,20 +545,6 @@ jQuery(function($) {
                     price: '€2.50',
                     price_value: 2.50,
                     img: 'https://images.pexels.com/photos/1729931/pexels-photo-1729931.jpeg?auto=compress&cs=tinysrgb&w=400'
-                },
-                {
-                    id: 'fallback-birthday-4',
-                    title: 'Party Time',
-                    price: '€1.75',
-                    price_value: 1.75,
-                    img: 'https://images.pexels.com/photos/1040173/pexels-photo-1040173.jpeg?auto=compress&cs=tinysrgb&w=400'
-                },
-                {
-                    id: 'fallback-birthday-5',
-                    title: 'Another Year Older',
-                    price: '€2.00',
-                    price_value: 2.00,
-                    img: 'https://images.pexels.com/photos/1666065/pexels-photo-1666065.jpeg?auto=compress&cs=tinysrgb&w=400'
                 }
             ],
             'Holiday Cards': [
@@ -532,170 +561,11 @@ jQuery(function($) {
                     price: '€1.25',
                     price_value: 1.25,
                     img: 'https://images.pexels.com/photos/1040173/pexels-photo-1040173.jpeg?auto=compress&cs=tinysrgb&w=400'
-                },
-                {
-                    id: 'fallback-holiday-3',
-                    title: 'Holiday Cheer',
-                    price: '€1.50',
-                    price_value: 1.50,
-                    img: 'https://images.pexels.com/photos/1666065/pexels-photo-1666065.jpeg?auto=compress&cs=tinysrgb&w=400'
                 }
             ]
         };
         
         renderCategoryBasedSliders(fallbackData);
-    }
-    
-    // 🎯 NEW: Initialize slider for specific category
-    function initializeCategorySlider(categoryId) {
-        const $categorySection = $('#' + categoryId);
-        const $sliderWrapper = $categorySection.find('.greeting-cards-slider-wrapper');
-        const $slider = $categorySection.find('.greeting-cards-slider');
-        const $prevBtns = $categorySection.find('.slider-nav-prev');
-        const $nextBtns = $categorySection.find('.slider-nav-next');
-        const $progressFill = $categorySection.find('.slider-progress-fill');
-        
-        if (!$slider.length || $slider.find('.greeting-card').length === 0) {
-            console.log(`❌ Slider not found or no cards available for ${categoryId}`);
-            return;
-        }
-        
-        let currentIndex = 0;
-        const cardWidth = 256; // 240px + 16px gap
-        const containerWidth = $sliderWrapper.width();
-        const visibleCards = Math.floor(containerWidth / cardWidth);
-        const totalCards = $slider.find('.greeting-card').length;
-        const maxIndex = Math.max(0, totalCards - visibleCards);
-        
-        console.log(`🎯 ${categoryId} slider initialized:`, {
-            containerWidth: containerWidth,
-            visibleCards: visibleCards,
-            totalCards: totalCards,
-            maxIndex: maxIndex
-        });
-        
-        function updateSlider() {
-            const translateX = -currentIndex * cardWidth;
-            $slider.css('transform', `translateX(${translateX}px)`);
-            
-            // Update navigation
-            $prevBtns.toggleClass('disabled', currentIndex === 0);
-            $nextBtns.toggleClass('disabled', currentIndex >= maxIndex);
-            
-            // Update progress
-            if (maxIndex > 0) {
-                const progress = (currentIndex / maxIndex) * 100;
-                $progressFill.css('width', progress + '%');
-            } else {
-                $progressFill.css('width', '100%');
-            }
-            
-            console.log(`🎯 ${categoryId} slider updated:`, {currentIndex: currentIndex, translateX: translateX});
-        }
-        
-        // Navigation handlers
-        $prevBtns.off('click').on('click', function() {
-            if (currentIndex > 0) {
-                currentIndex--;
-                updateSlider();
-            }
-        });
-        
-        $nextBtns.off('click').on('click', function() {
-            if (currentIndex < maxIndex) {
-                currentIndex++;
-                updateSlider();
-            }
-        });
-        
-        // Window resize handler for this category
-        $(window).off(`resize.${categoryId}`).on(`resize.${categoryId}`, function() {
-            clearTimeout(window[`${categoryId}ResizeTimeout`]);
-            window[`${categoryId}ResizeTimeout`] = setTimeout(function() {
-                const newContainerWidth = $sliderWrapper.width();
-                const newVisibleCards = Math.floor(newContainerWidth / cardWidth);
-                const newMaxIndex = Math.max(0, totalCards - newVisibleCards);
-                
-                if (currentIndex > newMaxIndex) {
-                    currentIndex = newMaxIndex;
-                }
-                
-                updateSlider();
-            }, 150);
-        });
-        
-        // Initial update
-        updateSlider();
-        
-        // Store slider instance
-        categorySliders[categoryId] = {
-            currentIndex: currentIndex,
-            maxIndex: maxIndex,
-            updateSlider: updateSlider,
-            goToSlide: function(index) {
-                currentIndex = Math.max(0, Math.min(index, maxIndex));
-                updateSlider();
-            }
-        };
-        
-        console.log(`✅ ${categoryId} slider fully initialized`);
-    }
-    
-    // 🎯 NEW: Setup global card selection handling
-    function setupGlobalCardSelection() {
-        console.log('🎯 === SETTING UP GLOBAL CARD SELECTION ===');
-        
-        // Handle card selection with toggle functionality across all categories
-        $(document).off('click', '.greeting-card').on('click', '.greeting-card', function() {
-            const $card = $(this);
-            
-            console.log('🎯 Card clicked:', {
-                id: $card.data('card-id'),
-                category: $card.data('category'),
-                currentlySelected: $card.hasClass('selected')
-            });
-            
-            // Toggle selection
-            if ($card.hasClass('selected')) {
-                // Deselect current card
-                $card.removeClass('selected');
-                
-                // Disable message textarea
-                $('#wcflow-card-message').prop('disabled', true).val('');
-                $('.wcflow-message-note').show();
-                $('#wcflow-message-count').text('0');
-                
-                // Clear card from order state
-                delete orderState.card_id;
-                delete orderState.card_message;
-                
-                console.log('🎯 Card deselected');
-            } else {
-                // Remove previous selection from ALL categories
-                $('.greeting-card').removeClass('selected');
-                
-                // Select new card
-                $card.addClass('selected');
-                
-                // Enable message textarea
-                $('#wcflow-card-message').prop('disabled', false);
-                $('.wcflow-message-note').hide();
-                
-                console.log('🎯 Card selected:', $card.data('card-id'));
-            }
-            
-            updateOrderState();
-            updatePricing();
-            
-            debug('Card selection toggled', {
-                id: $card.data('card-id'),
-                category: $card.data('category'),
-                selected: $card.hasClass('selected'),
-                price: $card.data('price-value')
-            });
-        });
-        
-        console.log('✅ Global card selection setup complete');
     }
     
     // Initialize floating labels
@@ -1107,10 +977,6 @@ jQuery(function($) {
         if ($selectedCard.length) {
             orderState.card_id = $selectedCard.data('card-id');
             orderState.card_message = $('#wcflow-card-message').val();
-        } else {
-            // Clear card data if no card selected
-            delete orderState.card_id;
-            delete orderState.card_message;
         }
         
         // Payment method
