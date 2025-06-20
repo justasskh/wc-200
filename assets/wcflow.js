@@ -1,29 +1,40 @@
 /**
- * WooCommerce Gifting Flow - ENHANCED INTERFACE WITH DESELECTABLE CARDS
- * 2025-01-27 - Fixed greeting card deselection and enhanced add-ons functionality
+ * WooCommerce Gifting Flow - CONSISTENT BOTTOM BAR & ENHANCED SHIPPING
+ * 2025-01-27 - Persistent pricing, enhanced shipping section, date picker
  */
 
 jQuery(function($) {
     'use strict';
     
-    // Global state
+    // Global state with persistent pricing
     window.wcflow = window.wcflow || {};
     window.wcflow.orderState = window.wcflow.orderState || {};
+    window.wcflow.priceState = window.wcflow.priceState || {
+        basePrice: 0,
+        addonsTotal: 0,
+        cardPrice: 0,
+        shippingCost: 0,
+        total: 0,
+        isLoaded: false
+    };
     
     let orderState = window.wcflow.orderState;
+    let priceState = window.wcflow.priceState;
     let currentStep = 1;
     
     // Debug helper
     function debug(message, data) {
-        console.log('[WCFlow ENHANCED]', message, data || '');
+        if (wcflow_params.debug) {
+            console.log('[WCFlow ENHANCED]', message, data || '');
+        }
     }
     
-    // Enhanced price calculation
+    // ENHANCED: Persistent price calculation with state management
     function updatePricing() {
         let basePrice = parseFloat(wcflow_params.base_product_price || 0);
         let addonsTotal = 0;
         let cardPrice = 0;
-        let shippingPrice = parseFloat(orderState.shipping_cost || 0);
+        let shippingPrice = parseFloat(orderState.shipping_cost || priceState.shippingCost || 0);
         
         // Calculate addons total
         $('.wcflow-addon-card.selected').each(function() {
@@ -40,17 +51,15 @@ jQuery(function($) {
         const subtotal = basePrice + addonsTotal + cardPrice;
         const total = subtotal + shippingPrice;
         
-        // Update display with proper formatting
-        const currencySymbol = wcflow_params.currency_symbol || '€';
-        $('#wcflow-dynamic-total').text(currencySymbol + total.toFixed(2));
+        // Update persistent price state
+        priceState.basePrice = basePrice;
+        priceState.addonsTotal = addonsTotal;
+        priceState.cardPrice = cardPrice;
+        priceState.shippingCost = shippingPrice;
+        priceState.total = total;
+        priceState.isLoaded = true;
         
-        if (shippingPrice > 0) {
-            $('#wcflow-shipping-details').text('Including ' + currencySymbol + shippingPrice.toFixed(2) + ' delivery');
-        } else {
-            $('#wcflow-shipping-details').text('Free delivery included');
-        }
-        
-        // Store in order state
+        // Store in order state as well
         orderState.base_price = basePrice;
         orderState.addons_total = addonsTotal;
         orderState.card_price = cardPrice;
@@ -58,13 +67,46 @@ jQuery(function($) {
         orderState.shipping_cost = shippingPrice;
         orderState.total = total;
         
-        debug('Pricing updated', {
+        // Update display with proper formatting
+        const currencySymbol = wcflow_params.currency_symbol || '€';
+        updateBottomBarDisplay(total, shippingPrice, currencySymbol);
+        
+        debug('Pricing updated and persisted', {
             base: basePrice,
             addons: addonsTotal,
             card: cardPrice,
             shipping: shippingPrice,
             total: total
         });
+    }
+    
+    // ENHANCED: Update bottom bar display with consistent formatting
+    function updateBottomBarDisplay(total, shippingPrice, currencySymbol) {
+        const $totalElement = $('#wcflow-dynamic-total');
+        const $shippingElement = $('#wcflow-shipping-details');
+        
+        if ($totalElement.length) {
+            // Format: "Order total [price] [currency symbol]"
+            $totalElement.text(`${total.toFixed(2)} ${currencySymbol}`);
+        }
+        
+        if ($shippingElement.length) {
+            // Format: "Įskaičiuotas [price] [currency symbol] pristatymo mokestis"
+            if (shippingPrice > 0) {
+                $shippingElement.text(`Įskaičiuotas ${shippingPrice.toFixed(2)} ${currencySymbol} pristatymo mokestis`);
+            } else {
+                $shippingElement.text('Nemokamas pristatymas');
+            }
+        }
+    }
+    
+    // ENHANCED: Restore pricing state when loading steps
+    function restorePricingState() {
+        if (priceState.isLoaded) {
+            const currencySymbol = wcflow_params.currency_symbol || '€';
+            updateBottomBarDisplay(priceState.total, priceState.shippingCost, currencySymbol);
+            debug('Pricing state restored', priceState);
+        }
     }
     
     // Modal management
@@ -75,6 +117,9 @@ jQuery(function($) {
         $('.wcflow-modal-container').html(html).addClass('visible');
         $('body').addClass('wcflow-modal-open');
         debug('Modal shown');
+        
+        // Restore pricing state after modal is shown
+        setTimeout(restorePricingState, 100);
     }
     
     function closeModal() {
@@ -135,9 +180,9 @@ jQuery(function($) {
         }
     }
     
-    // ENHANCED: Step 1 initialization with improved add-ons and deselectable cards
+    // Step 1 initialization
     function initStep1() {
-        debug('Initializing ENHANCED step 1');
+        debug('Initializing step 1');
         
         // Load enhanced addons
         loadEnhancedAddons();
@@ -156,9 +201,9 @@ jQuery(function($) {
         setTimeout(updatePricing, 500);
     }
     
-    // Step 2 initialization
+    // ENHANCED: Step 2 initialization with improved shipping section
     function initStep2() {
-        debug('Initializing step 2');
+        debug('Initializing enhanced step 2');
         
         // Initialize floating labels
         initFloatingLabels();
@@ -166,11 +211,17 @@ jQuery(function($) {
         // Form validation
         setupFormValidation();
         
-        // Load delivery options
-        loadDeliveryOptions();
+        // ENHANCED: Load delivery options with date picker
+        loadEnhancedDeliveryOptions();
         
-        // Load shipping methods
-        loadShippingMethodsForStep2();
+        // ENHANCED: Load shipping methods with proper state management
+        loadEnhancedShippingMethods();
+        
+        // Country change handler for dynamic shipping updates
+        setupCountryChangeHandler();
+        
+        // Restore pricing state
+        setTimeout(restorePricingState, 200);
     }
     
     // Step 3 initialization
@@ -185,9 +236,12 @@ jQuery(function($) {
         
         // Setup billing form toggle
         setupBillingToggle();
+        
+        // Restore pricing state
+        setTimeout(restorePricingState, 200);
     }
     
-    // ENHANCED: Load addons with improved functionality
+    // Load enhanced addons
     function loadEnhancedAddons() {
         $.ajax({
             url: wcflow_params.ajax_url,
@@ -211,7 +265,7 @@ jQuery(function($) {
         });
     }
     
-    // ENHANCED: Render addons with improved UI and functionality
+    // Render enhanced addons
     function renderEnhancedAddons(addons) {
         const $grid = $('#wcflow-addons-grid');
         $grid.empty();
@@ -245,29 +299,25 @@ jQuery(function($) {
             $grid.append($card);
         });
         
-        // ENHANCED: Handle addon selection with toggle functionality
+        // Handle addon selection
         $(document).off('click', '.wcflow-addon-action').on('click', '.wcflow-addon-action', function(e) {
             e.stopPropagation();
             const $card = $(this).closest('.wcflow-addon-card');
             const $button = $(this);
             
             if ($card.hasClass('selected')) {
-                // Remove addon
                 $card.removeClass('selected');
                 $button.removeClass('remove-btn').addClass('add-btn').text('Add');
-                debug('Addon removed', {id: $card.data('addon-id')});
             } else {
-                // Add addon
                 $card.addClass('selected');
                 $button.removeClass('add-btn').addClass('remove-btn').text('Remove');
-                debug('Addon added', {id: $card.data('addon-id')});
             }
             
             updateOrderState();
             updatePricing();
         });
         
-        // ENHANCED: Handle "More information" popup
+        // Handle "More information" popup
         $(document).off('click', '.wcflow-addon-more-info').on('click', '.wcflow-addon-more-info', function(e) {
             e.stopPropagation();
             const addonId = $(this).data('addon-id');
@@ -279,20 +329,10 @@ jQuery(function($) {
             }
         });
         
-        // ENHANCED: Handle card click (for selection) - only if not clicking on buttons
-        $(document).off('click', '.wcflow-addon-card').on('click', '.wcflow-addon-card', function(e) {
-            // Only trigger if not clicking on buttons
-            if (!$(e.target).hasClass('wcflow-addon-action') && 
-                !$(e.target).hasClass('wcflow-addon-more-info') &&
-                !$(e.target).closest('.wcflow-addon-actions').length) {
-                $(this).find('.wcflow-addon-action').click();
-            }
-        });
-        
         debug('Enhanced addons rendered', {count: addons.length});
     }
     
-    // Helper function to truncate description
+    // Helper functions
     function truncateDescription(description) {
         if (!description) return 'No description available';
         const words = description.split(' ');
@@ -302,14 +342,12 @@ jQuery(function($) {
         return description;
     }
     
-    // Helper function to escape HTML
     function escapeHtml(text) {
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
     }
     
-    // ENHANCED: Show addon information popup
     function showAddonInfoPopup(addon, fullDescription) {
         const popupHtml = `
             <div class="wcflow-addon-popup">
@@ -324,26 +362,21 @@ jQuery(function($) {
         
         $('body').append(popupHtml);
         
-        // Close popup handlers
         $(document).off('click', '.wcflow-addon-popup-close, .wcflow-addon-popup').on('click', '.wcflow-addon-popup-close, .wcflow-addon-popup', function(e) {
             if (e.target === this) {
                 $('.wcflow-addon-popup').remove();
             }
         });
         
-        // Prevent popup content clicks from closing
         $(document).off('click', '.wcflow-addon-popup-content').on('click', '.wcflow-addon-popup-content', function(e) {
             e.stopPropagation();
         });
-        
-        debug('Addon popup shown', {addon: addon.title});
     }
     
-    // ENHANCED: Load cards and setup enhanced selection with deselectable functionality
+    // Load cards with enhanced selection
     function loadCardsWithEnhancedSelection() {
-        debug('Loading cards with ENHANCED deselectable functionality');
+        debug('Loading cards with enhanced selection');
         
-        // Load cards from database
         $.ajax({
             url: wcflow_params.ajax_url,
             type: 'POST',
@@ -353,28 +386,19 @@ jQuery(function($) {
             },
             timeout: 15000,
             success: function(response) {
-                debug('Cards AJAX response received', response);
-                
                 if (response && response.success && response.data) {
-                    debug('Cards data received successfully', response.data);
                     renderCardsWithEnhancedSelection(response.data);
                 } else {
-                    debug('No cards data in response, using fallback');
                     renderFallbackCards();
                 }
             },
-            error: function(xhr, status, error) {
-                debug('Cards loading failed', {status: status, error: error, xhr: xhr});
-                console.error('Cards AJAX Error:', xhr.responseText);
+            error: function() {
                 renderFallbackCards();
             }
         });
     }
     
-    // ENHANCED: Render cards with deselectable functionality
     function renderCardsWithEnhancedSelection(cardsByCategory) {
-        debug('Rendering cards with ENHANCED deselectable selection', cardsByCategory);
-        
         const $container = $('#wcflow-dynamic-cards-container');
         $container.empty();
         
@@ -383,11 +407,8 @@ jQuery(function($) {
             return;
         }
         
-        // Create a slider for each category
         Object.entries(cardsByCategory).forEach(function([categoryName, cards]) {
             if (!cards || cards.length === 0) return;
-            
-            debug('Creating ENHANCED slider for category:', categoryName, 'with', cards.length, 'cards');
             
             const sliderHtml = `
                 <section class="greeting-cards-section" role="region" aria-label="${categoryName}" data-category="${categoryName}">
@@ -441,107 +462,50 @@ jQuery(function($) {
             $container.append(sliderHtml);
         });
         
-        debug('All ENHANCED category sliders rendered successfully');
-        
-        // Initialize enhanced card selection after rendering
         setTimeout(function() {
             setupEnhancedCardSelection();
             initializeAllCategorySliders();
         }, 100);
     }
     
-    // ENHANCED: Setup card selection with deselectable functionality
     function setupEnhancedCardSelection() {
-        debug('Setting up ENHANCED card selection with deselection capability');
-        
-        // Remove any existing handlers to prevent duplicates
         $(document).off('click', '.greeting-card');
-        $(document).off('keydown', '.greeting-card');
         
-        // ENHANCED: Card click handler with deselection
         $(document).on('click', '.greeting-card', function(e) {
             e.preventDefault();
             e.stopPropagation();
             
             const $clickedCard = $(this);
-            const cardId = $clickedCard.data('card-id');
-            const cardPrice = $clickedCard.data('price-value');
             
-            debug('Card clicked', {id: cardId, currentlySelected: $clickedCard.hasClass('selected')});
-            
-            // ENHANCED: Check if card is already selected
             if ($clickedCard.hasClass('selected')) {
-                // Deselect the card
                 $clickedCard.removeClass('selected');
-                
-                // Disable message textarea
                 $('#wcflow-card-message').prop('disabled', true).val('');
                 $('.wcflow-message-note').show();
                 $('#wcflow-message-count').text('0');
-                
-                // Clear card from order state
                 orderState.card_id = null;
                 orderState.card_message = '';
-                
-                debug('Card deselected', {id: cardId});
             } else {
-                // Remove selection from all other cards
                 $('.greeting-card').removeClass('selected');
-                
-                // Select this card
                 $clickedCard.addClass('selected');
-                
-                // Enable message textarea
                 $('#wcflow-card-message').prop('disabled', false);
                 $('.wcflow-message-note').hide();
-                
-                // Update order state
-                orderState.card_id = cardId;
-                
-                debug('Card selected', {id: cardId, price: cardPrice});
+                orderState.card_id = $clickedCard.data('card-id');
             }
             
             updateOrderState();
             updatePricing();
         });
-        
-        // Also handle keyboard events for accessibility
-        $(document).on('keydown', '.greeting-card', function(e) {
-            if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                $(this).click();
-            }
-        });
-        
-        debug('ENHANCED card selection setup complete');
     }
     
-    // Render fallback cards when AJAX fails
     function renderFallbackCards() {
-        debug('Rendering fallback cards');
-        
         const fallbackCards = {
-            'Birthday Cards' => [
+            'Birthday Cards': [
                 {
                     id: 'fallback-1',
                     title: 'Happy Birthday Balloons',
                     price: 'FREE',
                     price_value: 0,
                     img: 'https://images.pexels.com/photos/1666065/pexels-photo-1666065.jpeg?auto=compress&cs=tinysrgb&w=400'
-                },
-                {
-                    id: 'fallback-2',
-                    title: 'Birthday Cake Celebration',
-                    price: '€1.50',
-                    price_value: 1.50,
-                    img: 'https://images.pexels.com/photos/1040173/pexels-photo-1040173.jpeg?auto=compress&cs=tinysrgb&w=400'
-                },
-                {
-                    id: 'fallback-3',
-                    title: 'Birthday Wishes',
-                    price: '€2.50',
-                    price_value: 2.50,
-                    img: 'https://images.pexels.com/photos/1729931/pexels-photo-1729931.jpeg?auto=compress&cs=tinysrgb&w=400'
                 }
             ]
         };
@@ -549,7 +513,6 @@ jQuery(function($) {
         renderCardsWithEnhancedSelection(fallbackCards);
     }
     
-    // Get category description
     function getCategoryDescription(categoryName) {
         const descriptions = {
             'Birthday Cards': 'Perfect cards for birthday celebrations and special moments',
@@ -560,78 +523,12 @@ jQuery(function($) {
         return descriptions[categoryName] || 'Beautiful greeting cards for every occasion';
     }
     
-    // ENHANCED: Initialize all category sliders
     function initializeAllCategorySliders() {
-        debug('Initializing all ENHANCED category sliders...');
-        
         $('.greeting-cards-section').each(function() {
-            const $section = $(this);
-            const categoryName = $section.data('category') || $section.find('.greeting-cards-title').text();
-            
-            debug('Initializing ENHANCED slider for category:', categoryName);
-            
-            // Initialize individual slider
             if (window.GreetingCardsSlider) {
-                new window.GreetingCardsSlider($section[0]);
-            } else {
-                // Fallback initialization
-                initializeSingleSlider($section);
+                new window.GreetingCardsSlider(this);
             }
         });
-        
-        debug('All ENHANCED category sliders initialized!');
-    }
-    
-    // ENHANCED: Fallback slider initialization
-    function initializeSingleSlider($section) {
-        const $slider = $section.find('.greeting-cards-slider');
-        const $cards = $slider.find('.greeting-card');
-        
-        if ($cards.length === 0) return;
-        
-        let currentIndex = 0;
-        const cardWidth = 256; // 240px + 16px gap
-        const containerWidth = $section.find('.greeting-cards-slider-wrapper').width();
-        const visibleCards = Math.floor(containerWidth / cardWidth);
-        const maxIndex = Math.max(0, $cards.length - visibleCards);
-        
-        function updateSlider() {
-            const translateX = -currentIndex * cardWidth;
-            $slider.css('transform', `translateX(${translateX}px)`);
-            
-            // Update navigation
-            $section.find('.slider-nav-prev').toggleClass('disabled', currentIndex === 0);
-            $section.find('.slider-nav-next').toggleClass('disabled', currentIndex >= maxIndex);
-            
-            // Update progress
-            const progress = maxIndex > 0 ? (currentIndex / maxIndex) * 100 : 100;
-            $section.find('.slider-progress-fill').css('width', progress + '%');
-        }
-        
-        // Navigation handlers
-        $section.find('.slider-nav-prev').on('click', function() {
-            if (currentIndex > 0) {
-                currentIndex--;
-                updateSlider();
-            }
-        });
-        
-        $section.find('.slider-nav-next').on('click', function() {
-            if (currentIndex < maxIndex) {
-                currentIndex++;
-                updateSlider();
-            }
-        });
-        
-        // See all toggle
-        $section.find('.greeting-cards-see-all').on('click', function(e) {
-            e.preventDefault();
-            $section.toggleClass('grid-view');
-            $(this).text($section.hasClass('grid-view') ? 'See less' : 'See all');
-        });
-        
-        // Initial update
-        updateSlider();
     }
     
     // Initialize floating labels
@@ -651,20 +548,16 @@ jQuery(function($) {
     
     // Setup form validation
     function setupFormValidation() {
-        // Real-time validation
         $('.wcflow-form-group input, .wcflow-form-group select').on('blur', function() {
             validateField($(this));
         });
         
-        // Form submission validation
         window.wcflowValidateStep2 = function() {
             let isValid = true;
             
-            // Clear previous errors
             $('.wcflow-form-group').removeClass('has-error');
             $('.wcflow-field-error').text('');
             
-            // Required fields
             const requiredFields = [
                 '#wcflow-customer-email',
                 '#wcflow-shipping-first-name',
@@ -683,27 +576,22 @@ jQuery(function($) {
                 }
             });
             
-            // Update order state
             updateOrderStateFromForm();
-            
             return isValid;
         };
     }
     
-    // Validate individual field
     function validateField($field) {
         const $group = $field.closest('.wcflow-form-group');
         const $error = $group.find('.wcflow-field-error');
         const value = $field.val().trim();
         
-        // Required field check
         if ($field.prop('required') && value === '') {
             $group.addClass('has-error');
             $error.text('This field is required');
             return false;
         }
         
-        // Email validation
         if ($field.attr('type') === 'email' && value !== '') {
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!emailRegex.test(value)) {
@@ -713,33 +601,118 @@ jQuery(function($) {
             }
         }
         
-        // Clear error if valid
         $group.removeClass('has-error');
         $error.text('');
         return true;
     }
     
-    // Load delivery options
-    function loadDeliveryOptions() {
-        // Setup date picker
+    // ENHANCED: Load delivery options with improved date picker
+    function loadEnhancedDeliveryOptions() {
+        debug('Loading enhanced delivery options');
+        
+        // Setup enhanced date picker
         $(document).on('click', '#wcflow-delivery-date-selector', function() {
-            showDatePicker();
+            showEnhancedDatePicker();
         });
     }
     
-    // Load shipping methods for Step 2
-    function loadShippingMethodsForStep2() {
+    // ENHANCED: Show date picker with Lithuanian formatting
+    function showEnhancedDatePicker() {
+        debug('Showing enhanced date picker');
+        
+        const today = new Date();
+        const minDate = new Date(today.getTime() + (2 * 24 * 60 * 60 * 1000)); // 2 days from now
+        
+        const dateOptions = [];
+        const lithuanianDays = ['sekmadienis', 'pirmadienis', 'antradienis', 'trečiadienis', 'ketvirtadienis', 'penktadienis', 'šeštadienis'];
+        const lithuanianMonths = ['sausio', 'vasario', 'kovo', 'balandžio', 'gegužės', 'birželio', 'liepos', 'rugpjūčio', 'rugsėjo', 'spalio', 'lapkričio', 'gruodžio'];
+        
+        for (let i = 0; i < 14; i++) {
+            const date = new Date(minDate.getTime() + (i * 24 * 60 * 60 * 1000));
+            const dayOfWeek = date.getDay();
+            
+            // Skip weekends
+            if (dayOfWeek === 0 || dayOfWeek === 6) continue;
+            
+            const dayName = lithuanianDays[dayOfWeek];
+            const monthName = lithuanianMonths[date.getMonth()];
+            const dayNumber = date.getDate();
+            
+            // Format: "Pirmadienis, birželio 23 d."
+            const formattedDate = `${dayName.charAt(0).toUpperCase() + dayName.slice(1)}, ${monthName} ${dayNumber} d.`;
+            
+            dateOptions.push({
+                value: date.toISOString().split('T')[0],
+                label: formattedDate,
+                date: date
+            });
+        }
+        
+        let html = '<div class="wcflow-popup-content wcflow-calendar-popup">';
+        html += '<button class="wcflow-popup-close">&times;</button>';
+        html += '<h3>Pasirinkite pristatymo datą</h3>';
+        html += '<div class="wcflow-date-grid">';
+        
+        dateOptions.forEach(function(option) {
+            html += `<div class="wcflow-date-option" data-date="${option.value}" style="padding:16px;border:2px solid #e0e0e0;margin:8px 0;cursor:pointer;border-radius:8px;transition:all 0.3s ease;background:#fff;">
+                <div style="font-weight:600;color:#333;margin-bottom:4px;">${option.label}</div>
+                <div style="font-size:14px;color:#666;">Darbo diena</div>
+            </div>`;
+        });
+        
+        html += '</div></div>';
+        
+        showPopup(html);
+        
+        // Enhanced date selection with visual feedback
+        $(document).on('click', '.wcflow-date-option', function() {
+            const date = $(this).data('date');
+            const label = $(this).find('div:first').text();
+            
+            // Update selector display
+            $('#wcflow-delivery-date-selector .selectable-box-value').text(label);
+            orderState.delivery_date = date;
+            
+            // Visual feedback
+            $(this).css({
+                'border-color': '#007cba',
+                'background': '#f0f8ff'
+            });
+            
+            setTimeout(closePopup, 300);
+            
+            debug('Delivery date selected', {date: date, label: label});
+        });
+        
+        // Hover effects
+        $(document).on('mouseenter', '.wcflow-date-option', function() {
+            $(this).css({
+                'border-color': '#007cba',
+                'background': '#f8f9fa'
+            });
+        }).on('mouseleave', '.wcflow-date-option', function() {
+            $(this).css({
+                'border-color': '#e0e0e0',
+                'background': '#fff'
+            });
+        });
+    }
+    
+    // ENHANCED: Load shipping methods with state management and caching
+    function loadEnhancedShippingMethods() {
         const $selector = $('#wcflow-shipping-method-selector');
         const $valueSpan = $selector.find('.selectable-box-value');
         
-        debug('Loading shipping methods for Step 2...');
+        debug('Loading enhanced shipping methods');
         
-        // Show loading state
-        $valueSpan.text('Loading shipping methods...');
+        // Show loading state with better UX
+        $valueSpan.html('<span style="color:#666;">Kraunami pristatymo būdai...</span>');
         
-        // Set timeout for loading state
+        // Add loading indicator
+        $selector.addClass('loading');
+        
         const loadingTimeout = setTimeout(function() {
-            $valueSpan.text('Taking longer than expected...');
+            $valueSpan.html('<span style="color:#ff9800;">Užtrunka ilgiau nei tikėtasi...</span>');
         }, 8000);
         
         $.ajax({
@@ -747,54 +720,60 @@ jQuery(function($) {
             type: 'POST',
             data: {
                 action: 'wcflow_get_shipping_methods',
-                nonce: wcflow_params.nonce
+                nonce: wcflow_params.nonce,
+                country: orderState.shipping_country || 'LT'
             },
             timeout: 15000,
             success: function(response) {
                 clearTimeout(loadingTimeout);
-                debug('Shipping methods response received', response);
+                $selector.removeClass('loading');
+                
+                debug('Enhanced shipping methods response', response);
                 
                 if (response.success && response.data && response.data.length > 0) {
-                    // Set first method as default
                     const firstMethod = response.data[0];
                     const currencySymbol = wcflow_params.currency_symbol || '€';
-                    $valueSpan.text(firstMethod.label + ' - ' + currencySymbol + firstMethod.cost_with_tax);
                     
+                    // Update display
+                    $valueSpan.html(`<span style="color:#333;">${firstMethod.label} - ${currencySymbol}${firstMethod.cost_with_tax}</span>`);
+                    
+                    // Update state
                     orderState.shipping_method = firstMethod.id;
                     orderState.shipping_cost = parseFloat(firstMethod.cost_with_tax);
+                    priceState.shippingCost = parseFloat(firstMethod.cost_with_tax);
                     
                     // Update pricing immediately
                     updatePricing();
                     
-                    // Setup click handler for popup
+                    // Setup click handler
                     $selector.off('click').on('click', function() {
-                        showShippingMethodsPopup(response.data);
+                        showEnhancedShippingMethodsPopup(response.data);
                     });
                     
-                    debug('Shipping methods loaded for Step 2', {
+                    debug('Enhanced shipping methods loaded', {
                         count: response.data.length,
-                        selected: firstMethod,
-                        cost: firstMethod.cost_with_tax
+                        selected: firstMethod
                     });
                 } else {
-                    $valueSpan.text('No shipping methods available');
-                    debug('No shipping methods available in response');
+                    $valueSpan.html('<span style="color:#dc3545;">Pristatymo būdai neprieinami</span>');
+                    debug('No shipping methods available');
                 }
             },
             error: function(xhr, status, error) {
                 clearTimeout(loadingTimeout);
-                $valueSpan.text('Failed to load shipping methods');
-                debug('Shipping methods loading failed', {status: status, error: error});
-                console.error('Shipping methods error:', xhr.responseText);
+                $selector.removeClass('loading');
+                $valueSpan.html('<span style="color:#dc3545;">Nepavyko įkelti pristatymo būdų</span>');
+                debug('Enhanced shipping methods loading failed', {status: status, error: error});
             }
         });
     }
     
-    // Show shipping methods popup
-    function showShippingMethodsPopup(methods) {
+    // ENHANCED: Show shipping methods popup with improved design
+    function showEnhancedShippingMethodsPopup(methods) {
         let html = '<div class="wcflow-popup-content wcflow-shipping-popup">';
         html += '<button class="wcflow-popup-close">&times;</button>';
-        html += '<h3>Select Shipping Method</h3>';
+        html += '<h3>Pasirinkite pristatymo būdą</h3>';
+        html += '<div class="wcflow-shipping-methods-grid">';
         
         const currencySymbol = wcflow_params.currency_symbol || '€';
         
@@ -804,94 +783,96 @@ jQuery(function($) {
                           data-method="${method.id}" 
                           data-cost="${method.cost_with_tax}" 
                           data-label="${method.label}"
-                          style="padding:16px;border:2px solid ${isSelected ? '#007cba' : '#e0e0e0'};margin:12px 0;cursor:pointer;border-radius:8px;background:${isSelected ? '#f0f8ff' : '#fff'};transition:all 0.3s ease;">
+                          style="padding:20px;border:2px solid ${isSelected ? '#007cba' : '#e0e0e0'};margin:12px 0;cursor:pointer;border-radius:12px;background:${isSelected ? '#f0f8ff' : '#fff'};transition:all 0.3s ease;">
                 <div style="display:flex;justify-content:space-between;align-items:center;">
-                    <div>
-                        <strong style="font-size:16px;color:#333;">${method.label}</strong>
-                        <div style="font-size:14px;color:#666;margin-top:4px;">Delivery cost</div>
+                    <div style="flex:1;">
+                        <div style="font-size:18px;font-weight:600;color:#333;margin-bottom:4px;">${method.label}</div>
+                        <div style="font-size:14px;color:#666;">Pristatymo kaina</div>
                     </div>
                     <div style="text-align:right;">
-                        <div style="font-size:18px;font-weight:bold;color:#007cba;">${currencySymbol}${method.cost_with_tax}</div>
+                        <div style="font-size:24px;font-weight:700;color:#007cba;">${currencySymbol}${method.cost_with_tax}</div>
+                        ${isSelected ? '<div style="font-size:12px;color:#007cba;margin-top:4px;">✓ Pasirinkta</div>' : ''}
                     </div>
                 </div>
             </div>`;
         });
         
-        html += '</div>';
+        html += '</div></div>';
         
         showPopup(html);
         
-        // Handle method selection
+        // Enhanced method selection with visual feedback
         $(document).on('click', '.wcflow-shipping-option', function() {
             const methodId = $(this).data('method');
             const methodCost = parseFloat($(this).data('cost'));
             const methodLabel = $(this).data('label');
             
-            // Update main selector display
-            $('#wcflow-shipping-method-selector .selectable-box-value').text(methodLabel + ' - ' + currencySymbol + methodCost.toFixed(2));
+            // Visual feedback
+            $('.wcflow-shipping-option').removeClass('selected').css({
+                'border-color': '#e0e0e0',
+                'background': '#fff'
+            });
             
-            // Update order state
+            $(this).addClass('selected').css({
+                'border-color': '#007cba',
+                'background': '#f0f8ff'
+            });
+            
+            // Update main selector display
+            $('#wcflow-shipping-method-selector .selectable-box-value').html(`<span style="color:#333;">${methodLabel} - ${currencySymbol}${methodCost.toFixed(2)}</span>`);
+            
+            // Update state
             orderState.shipping_method = methodId;
             orderState.shipping_cost = methodCost;
+            priceState.shippingCost = methodCost;
             
             // Update pricing
             updatePricing();
             
-            debug('Shipping method selected', {
+            debug('Enhanced shipping method selected', {
                 id: methodId,
                 label: methodLabel,
                 cost: methodCost
             });
             
-            closePopup();
+            setTimeout(closePopup, 300);
+        });
+        
+        // Hover effects
+        $(document).on('mouseenter', '.wcflow-shipping-option:not(.selected)', function() {
+            $(this).css({
+                'border-color': '#007cba',
+                'background': '#f8f9fa'
+            });
+        }).on('mouseleave', '.wcflow-shipping-option:not(.selected)', function() {
+            $(this).css({
+                'border-color': '#e0e0e0',
+                'background': '#fff'
+            });
         });
     }
     
-    // Show date picker
-    function showDatePicker() {
-        // Simple date picker implementation
-        const today = new Date();
-        const minDate = new Date(today.getTime() + (2 * 24 * 60 * 60 * 1000)); // 2 days from now
-        
-        const dateOptions = [];
-        for (let i = 0; i < 14; i++) {
-            const date = new Date(minDate.getTime() + (i * 24 * 60 * 60 * 1000));
-            const dayOfWeek = date.getDay();
+    // ENHANCED: Setup country change handler for dynamic shipping updates
+    function setupCountryChangeHandler() {
+        $(document).on('change', '#wcflow-shipping-country', function() {
+            const selectedCountry = $(this).val();
             
-            // Skip weekends (assuming delivery only on weekdays)
-            if (dayOfWeek === 0 || dayOfWeek === 6) continue;
-            
-            dateOptions.push({
-                value: date.toISOString().split('T')[0],
-                label: date.toLocaleDateString('en-US', { 
-                    weekday: 'long', 
-                    month: 'long', 
-                    day: 'numeric' 
-                })
-            });
-        }
-        
-        let html = '<div class="wcflow-popup-content wcflow-calendar-popup">';
-        html += '<button class="wcflow-popup-close">&times;</button>';
-        html += '<h3>Select Delivery Date</h3>';
-        
-        dateOptions.forEach(function(option) {
-            html += `<div class="wcflow-date-option" data-date="${option.value}" style="padding:12px;border:1px solid #ddd;margin:8px 0;cursor:pointer;border-radius:4px;">${option.label}</div>`;
-        });
-        
-        html += '</div>';
-        
-        showPopup(html);
-        
-        // Handle date selection
-        $(document).on('click', '.wcflow-date-option', function() {
-            const date = $(this).data('date');
-            const label = $(this).text();
-            
-            $('#wcflow-delivery-date-selector .selectable-box-value').text(label);
-            orderState.delivery_date = date;
-            
-            closePopup();
+            if (selectedCountry) {
+                debug('Country changed, updating shipping methods', selectedCountry);
+                
+                // Update order state
+                orderState.shipping_country = selectedCountry;
+                
+                // Show loading state for shipping methods
+                const $selector = $('#wcflow-shipping-method-selector');
+                const $valueSpan = $selector.find('.selectable-box-value');
+                $valueSpan.html('<span style="color:#666;">Atnaujinami pristatymo būdai...</span>');
+                
+                // Reload shipping methods for new country
+                setTimeout(function() {
+                    loadEnhancedShippingMethods();
+                }, 500);
+            }
         });
     }
     
@@ -902,7 +883,6 @@ jQuery(function($) {
         }
         $('#wcflow-popup-overlay').html(html).show();
         
-        // Close popup handlers
         $(document).on('click', '.wcflow-popup-close, #wcflow-popup-overlay', function(e) {
             if (e.target === this) {
                 closePopup();
@@ -910,7 +890,6 @@ jQuery(function($) {
         });
     }
     
-    // Close popup
     function closePopup() {
         $('#wcflow-popup-overlay').hide().empty();
     }
@@ -945,12 +924,10 @@ jQuery(function($) {
                 if (response.success) {
                     $('#wcflow-payment-options-container').html(response.data.html);
                     
-                    // Initialize payment forms
                     setTimeout(function() {
                         $(document.body).trigger('init_checkout');
                         $(document.body).trigger('update_checkout');
                         
-                        // Select first payment method
                         if ($('input[name="payment_method"]:checked').length === 0) {
                             $('input[name="payment_method"]:first').prop('checked', true).trigger('change');
                         }
@@ -974,7 +951,6 @@ jQuery(function($) {
             }
         });
         
-        // Monitor billing form changes
         $(document).on('input change', '#wcflow-billing-form input, #wcflow-billing-form select', function() {
             const key = $(this).data('wcflow-billing');
             if (key) {
@@ -983,7 +959,6 @@ jQuery(function($) {
         });
     }
     
-    // Copy shipping to billing
     function copyShippingToBilling() {
         orderState.billing_first_name = orderState.shipping_first_name || '';
         orderState.billing_last_name = orderState.shipping_last_name || '';
@@ -995,7 +970,6 @@ jQuery(function($) {
         orderState.billing_email = orderState.customer_email || '';
     }
     
-    // Prefill billing form
     function prefillBillingForm() {
         $('input[data-wcflow-billing="billing_first_name"]').val(orderState.shipping_first_name || '');
         $('input[data-wcflow-billing="billing_last_name"]').val(orderState.shipping_last_name || '');
@@ -1007,12 +981,8 @@ jQuery(function($) {
         $('input[data-wcflow-billing="billing_email"]').val(orderState.customer_email || '');
     }
     
-    // Update order state from form
     function updateOrderStateFromForm() {
-        // Customer email
         orderState.customer_email = $('#wcflow-customer-email').val();
-        
-        // Shipping fields
         orderState.shipping_first_name = $('#wcflow-shipping-first-name').val();
         orderState.shipping_last_name = $('#wcflow-shipping-last-name').val();
         orderState.shipping_address_1 = $('#wcflow-shipping-address-1').val();
@@ -1021,7 +991,6 @@ jQuery(function($) {
         orderState.shipping_country = $('#wcflow-shipping-country').val();
         orderState.shipping_phone = $('#wcflow-shipping-phone').val();
         
-        // Ensure billing email is set
         if (!orderState.billing_email) {
             orderState.billing_email = orderState.customer_email;
         }
@@ -1029,27 +998,22 @@ jQuery(function($) {
         debug('Order state updated from form', orderState);
     }
     
-    // Update order state
     function updateOrderState() {
-        // Selected addons
         const selectedAddons = [];
         $('.wcflow-addon-card.selected').each(function() {
             selectedAddons.push($(this).data('addon-id'));
         });
         orderState.addons = selectedAddons;
         
-        // Selected card
         const $selectedCard = $('.greeting-card.selected');
         if ($selectedCard.length) {
             orderState.card_id = $selectedCard.data('card-id');
             orderState.card_message = $('#wcflow-card-message').val();
         } else {
-            // Clear card data if no card selected
             orderState.card_id = null;
             orderState.card_message = '';
         }
         
-        // Payment method
         const selectedPaymentMethod = $('input[name="payment_method"]:checked').val();
         if (selectedPaymentMethod) {
             orderState.payment_method = selectedPaymentMethod;
@@ -1062,7 +1026,6 @@ jQuery(function($) {
     $(document).on('click', '.wcflow-btn-next:not(#wcflow-place-order-btn)', function() {
         const step = $(this).closest('.wcflow-modal').data('step');
         
-        // Validate step 2
         if (step === 2 && window.wcflowValidateStep2) {
             if (!window.wcflowValidateStep2()) {
                 return;
@@ -1099,13 +1062,13 @@ jQuery(function($) {
             },
             success: function(response) {
                 if (response.success) {
-                    // Set base product price and real shipping cost from WooCommerce
                     wcflow_params.base_product_price = response.data.product_price || 0;
+                    priceState.basePrice = response.data.product_price || 0;
+                    priceState.shippingCost = response.data.shipping_cost || 0;
                     orderState.base_price = response.data.product_price || 0;
                     orderState.shipping_cost = response.data.shipping_cost || 0;
                     
-                    debug('Flow started with base price', wcflow_params.base_product_price);
-                    debug('Default shipping cost from WooCommerce', orderState.shipping_cost);
+                    debug('Flow started with persistent pricing', priceState);
                     
                     loadStep(1);
                 } else {
@@ -1124,22 +1087,18 @@ jQuery(function($) {
         
         const $button = $(this);
         
-        // Update order state
         updateOrderState();
         updateOrderStateFromForm();
         
-        // Handle buyer same checkbox
         if ($('#wcflow-buyer-same').is(':checked')) {
             copyShippingToBilling();
         }
         
-        // Get payment method
         const selectedMethod = $('input[name="payment_method"]:checked').val();
         if (selectedMethod) {
             orderState.payment_method = selectedMethod;
         }
         
-        // Validate required fields
         const requiredFields = [
             'shipping_first_name', 'shipping_last_name', 'shipping_address_1',
             'shipping_city', 'shipping_postcode', 'shipping_country'
@@ -1152,12 +1111,10 @@ jQuery(function($) {
             }
         });
         
-        // Check email
         if (!orderState.customer_email && !orderState.billing_email) {
             missingFields.push('email address');
         }
         
-        // Check payment method
         if (!orderState.payment_method) {
             missingFields.push('payment method');
         }
@@ -1167,11 +1124,9 @@ jQuery(function($) {
             return;
         }
         
-        // Disable button and show loading
         $button.prop('disabled', true).text('Processing...');
         $('#wcflow-payment-error').hide();
         
-        // Create order
         $.ajax({
             url: wcflow_params.ajax_url,
             type: 'POST',
@@ -1213,5 +1168,5 @@ jQuery(function($) {
         }
     });
     
-    debug('ENHANCED WCFlow JavaScript initialized with deselectable cards and improved add-ons');
+    debug('Enhanced WCFlow JavaScript initialized with persistent pricing and enhanced shipping');
 });

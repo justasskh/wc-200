@@ -1,5 +1,5 @@
-/* WooCommerce Gifting Flow - ENHANCED STYLES */
-/* ENHANCED: 2025-01-27 - Deselectable cards, enhanced add-ons, improved spacing */
+/* WooCommerce Gifting Flow - ENHANCED STYLES WITH CONSISTENT BOTTOM BAR */
+/* ENHANCED: 2025-01-27 - Persistent pricing, enhanced shipping section, improved layout */
 
 /* Reset and base styles */
 * {
@@ -155,7 +155,7 @@ body.wcflow-modal-open {
     z-index: 100;
 }
 
-/* Bottom Bar */
+/* ENHANCED: Consistent Bottom Bar with Persistent Pricing */
 .wcflow-bottom-bar {
     position: sticky;
     bottom: 0;
@@ -164,6 +164,7 @@ body.wcflow-modal-open {
     padding: 20px 0;
     z-index: 10;
     flex-shrink: 0;
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .wcflow-bottom-bar-inner {
@@ -190,10 +191,13 @@ body.wcflow-modal-open {
     font-weight: 500;
 }
 
+/* ENHANCED: Order amount with consistent formatting */
 .wcflow-order-amount {
-    font-size: 18px;
+    font-size: 20px;
     font-weight: 700;
     color: #333;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    letter-spacing: -0.5px;
 }
 
 .wcflow-order-details {
@@ -212,6 +216,7 @@ body.wcflow-modal-open {
     cursor: pointer;
     transition: all 0.2s ease;
     white-space: nowrap;
+    min-width: 200px;
 }
 
 .wcflow-bottom-bar-btn:hover {
@@ -230,9 +235,9 @@ body.wcflow-modal-open {
     padding-bottom: 100px;
 }
 
-/* ENHANCED: Add-ons Gallery with improved spacing */
+/* Enhanced Add-ons Gallery */
 .wcflow-addons-gallery {
-    margin-bottom: 80px; /* Increased spacing between sections */
+    margin-bottom: 80px;
 }
 
 .wcflow-addons-grid {
@@ -242,7 +247,7 @@ body.wcflow-modal-open {
     margin-top: 32px;
 }
 
-/* ENHANCED: Add-ons with improved styling and functionality */
+/* Enhanced Add-ons with improved styling */
 .wcflow-addon-card {
     border: 2px solid #e0e0e0;
     border-radius: 12px;
@@ -251,7 +256,6 @@ body.wcflow-modal-open {
     cursor: pointer;
     background: #fff;
     position: relative;
-    /* ENHANCED: Non-selected styling */
     opacity: 0.5;
     transform: scale(0.95);
 }
@@ -265,7 +269,6 @@ body.wcflow-modal-open {
 .wcflow-addon-card.selected {
     border-color: #007cba;
     background: #f0f8ff;
-    /* ENHANCED: Selected styling - full opacity and scale */
     opacity: 1;
     transform: scale(1);
 }
@@ -282,7 +285,7 @@ body.wcflow-modal-open {
 
 .wcflow-addon-content {
     padding: 20px;
-    padding-bottom: 10px; /* Reduced to make space for actions */
+    padding-bottom: 10px;
 }
 
 .wcflow-addon-title {
@@ -304,14 +307,12 @@ body.wcflow-modal-open {
     color: #666;
     line-height: 1.4;
     margin: 0;
-    /* ENHANCED: Truncated description for "More information" popup */
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
 
-/* ENHANCED: Actions container for buttons */
 .wcflow-addon-actions {
     padding: 0 20px 20px 20px;
     display: flex;
@@ -319,7 +320,6 @@ body.wcflow-modal-open {
     gap: 8px;
 }
 
-/* ENHANCED: More information button */
 .wcflow-addon-more-info {
     background: none;
     border: 1px solid #007cba;
@@ -337,7 +337,6 @@ body.wcflow-modal-open {
     color: #fff;
 }
 
-/* ENHANCED: Add/Remove toggle button */
 .wcflow-addon-action {
     padding: 10px 16px;
     border: none;
@@ -367,7 +366,7 @@ body.wcflow-modal-open {
     background: #c82333;
 }
 
-/* ENHANCED: Add-on Information Popup */
+/* Add-on Information Popup */
 .wcflow-addon-popup {
     position: fixed;
     top: 0;
@@ -437,13 +436,13 @@ body.wcflow-modal-open {
     margin: 0;
 }
 
-/* ENHANCED: Cards Container with proper spacing */
+/* Cards Container */
 .wcflow-cards-container {
-    margin: 80px 0 60px 0; /* Increased top margin for better separation */
+    margin: 80px 0 60px 0;
     position: relative;
 }
 
-/* ENHANCED: Greeting Cards Section with proper heading and description */
+/* Greeting Cards Section */
 .greeting-cards-section {
     margin: 60px 0;
     position: relative;
@@ -464,7 +463,6 @@ body.wcflow-modal-open {
     padding-right: 20px;
 }
 
-/* ENHANCED: Choose your card heading */
 .greeting-cards-title {
     font-size: 32px;
     font-weight: 700;
@@ -486,7 +484,6 @@ body.wcflow-modal-open {
     color: #007cba;
 }
 
-/* ENHANCED: Sustainability message description */
 .greeting-cards-description {
     color: #666;
     font-size: 16px;
@@ -496,16 +493,13 @@ body.wcflow-modal-open {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
-/* ENHANCED: Slider extends to right edge while maintaining left alignment */
 .greeting-cards-slider-wrapper {
     position: relative;
     overflow: hidden;
-    /* Extend to right edge of page */
     width: calc(100vw - ((100vw - 1200px) / 2) - 20px);
     margin-right: calc(-1 * ((100vw - 1200px) / 2));
 }
 
-/* Adjust for smaller screens */
 @media (max-width: 1240px) {
     .greeting-cards-container {
         padding-left: 20px;
@@ -526,29 +520,6 @@ body.wcflow-modal-open {
     min-width: 100%;
 }
 
-/* Grid view for "See All" mode */
-.greeting-cards-section.grid-view .greeting-cards-slider-wrapper {
-    width: 100%;
-    margin-right: 0;
-    overflow: visible;
-}
-
-.greeting-cards-section.grid-view .greeting-cards-slider {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: 20px;
-    padding: 20px 20px 20px 0;
-    transform: none !important;
-}
-
-.greeting-cards-section.grid-view .slider-nav {
-    display: none;
-}
-
-.greeting-cards-section.grid-view .slider-controls {
-    display: none;
-}
-
 .greeting-card {
     flex: 0 0 auto;
     width: 240px;
@@ -567,14 +538,12 @@ body.wcflow-modal-open {
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
 }
 
-/* ENHANCED: Deselectable greeting cards with visual feedback */
 .greeting-card.selected {
     border: 3px solid #007cba;
     transform: translateY(-2px);
     box-shadow: 0 8px 25px rgba(0, 124, 186, 0.25);
 }
 
-/* ENHANCED: Add checkmark indicator for selected cards */
 .greeting-card.selected::after {
     content: '✓';
     position: absolute;
@@ -628,7 +597,7 @@ body.wcflow-modal-open {
     color: #333;
 }
 
-/* ENHANCED: Progress bar and controls positioned properly */
+/* Slider Controls */
 .slider-controls {
     display: flex;
     justify-content: space-between;
@@ -686,24 +655,9 @@ body.wcflow-modal-open {
     transform: scale(1.05);
 }
 
-.slider-nav-controls .slider-nav:active {
-    transform: scale(0.95);
-}
-
-.slider-nav-controls .slider-nav.disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-    pointer-events: none;
-}
-
 .slider-nav-controls .slider-nav svg {
     width: 16px;
     height: 16px;
-    color: #333;
-    transition: color 0.3s ease;
-}
-
-.slider-nav-controls .slider-nav:hover svg {
     color: #333;
 }
 
@@ -849,6 +803,16 @@ body.wcflow-modal-open {
     min-height: 16px;
 }
 
+/* ENHANCED: Field Labels Above Selectable Boxes */
+.wcflow-field-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 8px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
 /* Floating Labels */
 .floating-label {
     position: relative;
@@ -901,41 +865,67 @@ body.wcflow-modal-open {
     padding-right: 40px;
 }
 
-/* Selectable Boxes */
+/* ENHANCED: Selectable Boxes with Improved Design */
 .selectable-box {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 16px;
     border: 2px solid #e0e0e0;
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.3s ease;
     background: #fff;
+    position: relative;
+    overflow: hidden;
 }
 
 .selectable-box:hover {
     border-color: #007cba;
+    box-shadow: 0 2px 8px rgba(0, 124, 186, 0.1);
 }
 
-.selectable-box-label {
-    font-size: 14px;
-    color: #666;
-    font-weight: 600;
+.selectable-box.loading {
+    pointer-events: none;
+}
+
+.selectable-box.loading::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(0, 124, 186, 0.1), transparent);
+    animation: loading-shimmer 1.5s infinite;
+}
+
+@keyframes loading-shimmer {
+    0% { left: -100%; }
+    100% { left: 100%; }
+}
+
+.selectable-box-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px;
 }
 
 .selectable-box-value {
     font-size: 16px;
     color: #333;
     font-weight: 500;
+    flex: 1;
 }
 
 .selectable-box-arrow {
     color: #666;
-    font-size: 18px;
+    margin-left: 12px;
+    transition: transform 0.3s ease;
 }
 
-/* Popups */
+.selectable-box:hover .selectable-box-arrow {
+    transform: translateY(2px);
+}
+
+/* ENHANCED: Popups with Improved Design */
 .wcflow-popup-overlay {
     position: fixed;
     top: 0;
@@ -948,16 +938,30 @@ body.wcflow-modal-open {
     align-items: center;
     justify-content: center;
     padding: 20px;
+    backdrop-filter: blur(4px);
 }
 
 .wcflow-popup-content {
     background: #fff;
     border-radius: 12px;
-    max-width: 500px;
+    max-width: 600px;
     width: 100%;
     max-height: 80vh;
     overflow-y: auto;
     position: relative;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    animation: popup-appear 0.3s ease-out;
+}
+
+@keyframes popup-appear {
+    from {
+        opacity: 0;
+        transform: scale(0.9) translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
 }
 
 .wcflow-popup-close {
@@ -976,40 +980,47 @@ body.wcflow-modal-open {
     justify-content: center;
     border-radius: 50%;
     transition: background 0.2s ease;
+    z-index: 10;
 }
 
 .wcflow-popup-close:hover {
     background: #f5f5f5;
 }
 
-/* Calendar Popup */
+/* ENHANCED: Calendar Popup */
 .wcflow-calendar-popup {
     padding: 24px;
 }
 
-/* Shipping Popup */
+.wcflow-calendar-popup h3 {
+    margin: 0 0 20px 0;
+    font-size: 24px;
+    color: #333;
+    text-align: center;
+    padding-right: 40px;
+}
+
+.wcflow-date-grid {
+    display: grid;
+    gap: 12px;
+}
+
+/* ENHANCED: Shipping Popup */
 .wcflow-shipping-popup {
     padding: 24px;
 }
 
-.wcflow-shipping-option {
-    padding: 12px;
-    border: 1px solid #ddd;
-    margin: 8px 0;
-    cursor: pointer;
-    border-radius: 4px;
-    background: #fff;
-    transition: all 0.2s ease;
+.wcflow-shipping-popup h3 {
+    margin: 0 0 20px 0;
+    font-size: 24px;
+    color: #333;
+    text-align: center;
+    padding-right: 40px;
 }
 
-.wcflow-shipping-option:hover {
-    border-color: #007cba;
-    background: #f8f9fa;
-}
-
-.wcflow-shipping-option.selected {
-    border-color: #007cba;
-    background: #f0f8ff;
+.wcflow-shipping-methods-grid {
+    display: grid;
+    gap: 12px;
 }
 
 /* Step 3 Styles */
@@ -1186,24 +1197,8 @@ body.wcflow-modal-open {
         gap: 12px;
     }
     
-    .greeting-cards-section.grid-view .greeting-cards-slider {
-        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-        gap: 16px;
-        padding: 16px 16px 16px 0;
-    }
-    
     .slider-controls {
         padding-right: 16px;
-    }
-    
-    .slider-nav-controls .slider-nav {
-        width: 36px;
-        height: 36px;
-    }
-    
-    .slider-nav-controls .slider-nav svg {
-        width: 14px;
-        height: 14px;
     }
     
     .greeting-cards-slider-wrapper {
@@ -1229,6 +1224,11 @@ body.wcflow-modal-open {
     
     .wcflow-bottom-bar-btn {
         width: 100%;
+        min-width: auto;
+    }
+    
+    .wcflow-order-amount {
+        font-size: 18px;
     }
 }
 
@@ -1248,11 +1248,6 @@ body.wcflow-modal-open {
     }
     
     .greeting-cards-slider {
-        gap: 12px;
-    }
-    
-    .greeting-cards-section.grid-view .greeting-cards-slider {
-        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
         gap: 12px;
     }
     
