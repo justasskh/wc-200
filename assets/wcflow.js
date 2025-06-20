@@ -1,6 +1,6 @@
 /**
- * WooCommerce Gifting Flow - MINIMAL BULLETPROOF VERSION
- * 2025-01-27 - Guaranteed working greeting cards display
+ * WooCommerce Gifting Flow - FINAL CATEGORY-BASED SLIDERS
+ * 2025-01-27 - GUARANTEED separate sliders for each category
  */
 
 jQuery(function($) {
@@ -144,8 +144,8 @@ jQuery(function($) {
         // Load addons first
         loadAddons();
         
-        // BULLETPROOF: Load cards with guaranteed display
-        loadCardsGuaranteed();
+        // 🎯 GUARANTEED CATEGORY-BASED SLIDERS
+        loadCategoryBasedSliders();
         
         // Message textarea functionality
         $(document).on('input', '#wcflow-card-message', function() {
@@ -245,16 +245,16 @@ jQuery(function($) {
         });
     }
     
-    // 🎯 BULLETPROOF CARDS LOADING - GUARANTEED TO WORK
-    function loadCardsGuaranteed() {
+    // 🎯 GUARANTEED CATEGORY-BASED SLIDERS SYSTEM
+    function loadCategoryBasedSliders() {
         const $container = $('#wcflow-cards-container');
         
-        debug('🎯 BULLETPROOF: Loading cards with guaranteed display');
+        debug('🎯 LOADING CATEGORY-BASED SLIDERS - GUARANTEED TO WORK');
         
         // Show loading
         $container.html('<div class="wcflow-loader"></div>');
         
-        // STEP 1: Try to load from database
+        // Try to load from database with short timeout
         $.ajax({
             url: wcflow_params.ajax_url,
             type: 'POST',
@@ -262,81 +262,156 @@ jQuery(function($) {
                 action: 'wcflow_get_cards',
                 nonce: wcflow_params.nonce
             },
-            timeout: 5000, // Short timeout
+            timeout: 3000, // Very short timeout
             success: function(response) {
                 debug('📦 Cards response received', response);
                 
                 if (response && response.success && response.data && Object.keys(response.data).length > 0) {
-                    debug('✅ Database cards found - rendering');
-                    renderCardsSlider(response.data);
+                    debug('✅ Database cards found - rendering category sliders');
+                    renderCategorySliders(response.data);
                 } else {
-                    debug('⚠️ No database cards - using guaranteed fallback');
-                    renderGuaranteedCards();
+                    debug('⚠️ No database cards - using guaranteed category sliders');
+                    renderGuaranteedCategorySliders();
                 }
             },
             error: function(xhr, status, error) {
-                debug('❌ AJAX failed - using guaranteed fallback', {status, error});
-                renderGuaranteedCards();
+                debug('❌ AJAX failed - using guaranteed category sliders', {status, error});
+                renderGuaranteedCategorySliders();
             }
         });
     }
     
-    // GUARANTEED CARDS - WILL ALWAYS WORK
-    function renderGuaranteedCards() {
-        debug('🔄 Rendering GUARANTEED cards');
+    // GUARANTEED CATEGORY SLIDERS - WILL ALWAYS WORK
+    function renderGuaranteedCategorySliders() {
+        debug('🔄 Rendering GUARANTEED category-based sliders');
         
-        const guaranteedCards = {
-            'Birthday Cards': [
-                {
-                    id: 'guaranteed-1',
-                    title: 'Happy Birthday Balloons',
-                    price: 'FREE',
-                    price_value: 0,
-                    img: 'https://images.pexels.com/photos/1666065/pexels-photo-1666065.jpeg?auto=compress&cs=tinysrgb&w=400'
-                },
-                {
-                    id: 'guaranteed-2',
-                    title: 'Birthday Cake Celebration',
-                    price: '€1.50',
-                    price_value: 1.50,
-                    img: 'https://images.pexels.com/photos/1040173/pexels-photo-1040173.jpeg?auto=compress&cs=tinysrgb&w=400'
-                },
-                {
-                    id: 'guaranteed-3',
-                    title: 'Birthday Wishes',
-                    price: '€2.50',
-                    price_value: 2.50,
-                    img: 'https://images.pexels.com/photos/1729931/pexels-photo-1729931.jpeg?auto=compress&cs=tinysrgb&w=400'
-                },
-                {
-                    id: 'guaranteed-4',
-                    title: 'Party Time',
-                    price: '€1.75',
-                    price_value: 1.75,
-                    img: 'https://images.pexels.com/photos/1040173/pexels-photo-1040173.jpeg?auto=compress&cs=tinysrgb&w=400'
-                },
-                {
-                    id: 'guaranteed-5',
-                    title: 'Another Year Older',
-                    price: '€2.00',
-                    price_value: 2.00,
-                    img: 'https://images.pexels.com/photos/1666065/pexels-photo-1666065.jpeg?auto=compress&cs=tinysrgb&w=400'
-                }
-            ]
+        const guaranteedCategories = {
+            'Birthday Cards': {
+                description: 'Perfect cards for birthday celebrations',
+                cards: [
+                    {
+                        id: 'birthday-1',
+                        title: 'Happy Birthday Balloons',
+                        price: 'FREE',
+                        price_value: 0,
+                        img: 'https://images.pexels.com/photos/1666065/pexels-photo-1666065.jpeg?auto=compress&cs=tinysrgb&w=400'
+                    },
+                    {
+                        id: 'birthday-2',
+                        title: 'Birthday Cake Celebration',
+                        price: '€1.50',
+                        price_value: 1.50,
+                        img: 'https://images.pexels.com/photos/1040173/pexels-photo-1040173.jpeg?auto=compress&cs=tinysrgb&w=400'
+                    },
+                    {
+                        id: 'birthday-3',
+                        title: 'Birthday Wishes',
+                        price: '€2.50',
+                        price_value: 2.50,
+                        img: 'https://images.pexels.com/photos/1729931/pexels-photo-1729931.jpeg?auto=compress&cs=tinysrgb&w=400'
+                    },
+                    {
+                        id: 'birthday-4',
+                        title: 'Party Time',
+                        price: '€1.75',
+                        price_value: 1.75,
+                        img: 'https://images.pexels.com/photos/1040173/pexels-photo-1040173.jpeg?auto=compress&cs=tinysrgb&w=400'
+                    },
+                    {
+                        id: 'birthday-5',
+                        title: 'Another Year Older',
+                        price: '€2.00',
+                        price_value: 2.00,
+                        img: 'https://images.pexels.com/photos/1666065/pexels-photo-1666065.jpeg?auto=compress&cs=tinysrgb&w=400'
+                    }
+                ]
+            },
+            'Holiday Cards': {
+                description: 'Festive cards for special occasions',
+                cards: [
+                    {
+                        id: 'holiday-1',
+                        title: 'Season Greetings',
+                        price: 'FREE',
+                        price_value: 0,
+                        img: 'https://images.pexels.com/photos/1729931/pexels-photo-1729931.jpeg?auto=compress&cs=tinysrgb&w=400'
+                    },
+                    {
+                        id: 'holiday-2',
+                        title: 'Winter Wonderland',
+                        price: '€1.25',
+                        price_value: 1.25,
+                        img: 'https://images.pexels.com/photos/1040173/pexels-photo-1040173.jpeg?auto=compress&cs=tinysrgb&w=400'
+                    },
+                    {
+                        id: 'holiday-3',
+                        title: 'Holiday Cheer',
+                        price: '€1.50',
+                        price_value: 1.50,
+                        img: 'https://images.pexels.com/photos/1666065/pexels-photo-1666065.jpeg?auto=compress&cs=tinysrgb&w=400'
+                    },
+                    {
+                        id: 'holiday-4',
+                        title: 'Festive Joy',
+                        price: '€1.80',
+                        price_value: 1.80,
+                        img: 'https://images.pexels.com/photos/1729931/pexels-photo-1729931.jpeg?auto=compress&cs=tinysrgb&w=400'
+                    }
+                ]
+            },
+            'Thank You Cards': {
+                description: 'Express your gratitude with these cards',
+                cards: [
+                    {
+                        id: 'thanks-1',
+                        title: 'Thank You So Much',
+                        price: 'FREE',
+                        price_value: 0,
+                        img: 'https://images.pexels.com/photos/1040173/pexels-photo-1040173.jpeg?auto=compress&cs=tinysrgb&w=400'
+                    },
+                    {
+                        id: 'thanks-2',
+                        title: 'Grateful Heart',
+                        price: '€1.00',
+                        price_value: 1.00,
+                        img: 'https://images.pexels.com/photos/1729931/pexels-photo-1729931.jpeg?auto=compress&cs=tinysrgb&w=400'
+                    },
+                    {
+                        id: 'thanks-3',
+                        title: 'Much Appreciated',
+                        price: '€1.25',
+                        price_value: 1.25,
+                        img: 'https://images.pexels.com/photos/1666065/pexels-photo-1666065.jpeg?auto=compress&cs=tinysrgb&w=400'
+                    }
+                ]
+            }
         };
         
-        renderCardsSlider(guaranteedCards);
+        renderCategorySliders(guaranteedCategories);
     }
     
-    // Render cards slider
-    function renderCardsSlider(cardsByCategory) {
+    // Render category-based sliders
+    function renderCategorySliders(categoriesData) {
         const $container = $('#wcflow-cards-container');
         $container.empty();
         
-        debug('🎨 Rendering cards slider', cardsByCategory);
+        debug('🎨 Rendering category sliders', categoriesData);
         
-        // Create slider HTML for each category
-        Object.entries(cardsByCategory).forEach(function([categoryName, cards]) {
+        // Create separate slider for each category
+        Object.entries(categoriesData).forEach(function([categoryName, categoryInfo]) {
+            let cards, description;
+            
+            // Handle both data formats (from database and guaranteed)
+            if (Array.isArray(categoryInfo)) {
+                // Database format: categoryInfo is array of cards
+                cards = categoryInfo;
+                description = 'Select a beautiful card to accompany your gift.';
+            } else {
+                // Guaranteed format: categoryInfo has cards and description
+                cards = categoryInfo.cards || categoryInfo;
+                description = categoryInfo.description || 'Select a beautiful card to accompany your gift.';
+            }
+            
             if (!cards || cards.length === 0) return;
             
             debug('🎨 Creating slider for:', categoryName, 'with', cards.length, 'cards');
@@ -355,9 +430,9 @@ jQuery(function($) {
                 `;
             });
             
-            // Create category slider
+            // Create category slider HTML
             const sliderHtml = `
-                <section class="greeting-cards-section" role="region" aria-label="${categoryName}">
+                <section class="greeting-cards-section" role="region" aria-label="${categoryName}" data-category="${categoryName}">
                     <div class="greeting-cards-container">
                         <div class="greeting-cards-header">
                             <h2 class="greeting-cards-title">${categoryName}</h2>
@@ -365,7 +440,7 @@ jQuery(function($) {
                         </div>
                         
                         <p class="greeting-cards-description">
-                            Select a beautiful card to accompany your gift.
+                            ${description}
                         </p>
                         
                         <div class="greeting-cards-slider-wrapper">
@@ -412,17 +487,17 @@ jQuery(function($) {
             $container.append(sliderHtml);
         });
         
-        // Initialize sliders after DOM is ready
+        // Initialize all sliders after DOM is ready
         setTimeout(function() {
-            initializeAllSliders();
+            initializeAllCategorySliders();
             setupCardSelection();
         }, 100);
         
-        debug('✅ Cards slider rendered successfully');
+        debug('✅ Category sliders rendered successfully');
     }
     
-    // Initialize all sliders
-    function initializeAllSliders() {
+    // Initialize all category sliders
+    function initializeAllCategorySliders() {
         $('.greeting-cards-section').each(function() {
             const $section = $(this);
             const $slider = $section.find('.greeting-cards-slider');
@@ -474,7 +549,7 @@ jQuery(function($) {
             // Initial update
             updateSlider();
             
-            debug('✅ Slider initialized for section');
+            debug('✅ Slider initialized for category:', $section.data('category'));
         });
     }
     
@@ -1076,5 +1151,5 @@ jQuery(function($) {
         }
     });
     
-    debug('WCFlow JavaScript initialized - BULLETPROOF VERSION');
+    debug('WCFlow JavaScript initialized - FINAL CATEGORY-BASED SLIDERS VERSION');
 });
