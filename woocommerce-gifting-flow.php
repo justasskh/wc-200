@@ -280,8 +280,9 @@ class WooCommerce_Gifting_Flow {
         $cards_link = '<a href="' . admin_url('edit.php?post_type=wcflow_card') . '">' . __('Cards', 'wcflow') . '</a>';
         $debug_link = '<a href="#" onclick="wcflowDebugData()" style="color: #d63638;">' . __('Debug', 'wcflow') . '</a>';
         $create_sample_link = '<a href="#" onclick="wcflowCreateSampleData()" style="color: #00a32a;">' . __('Create Sample', 'wcflow') . '</a>';
+        $reset_link = '<a href="#" onclick="wcflowResetSystem()" style="color: #d63638;">' . __('Reset', 'wcflow') . '</a>';
         
-        array_unshift($links, $settings_link, $cards_link, $debug_link, $create_sample_link);
+        array_unshift($links, $settings_link, $cards_link, $debug_link, $create_sample_link, $reset_link);
         return $links;
     }
     
@@ -328,14 +329,14 @@ class WooCommerce_Gifting_Flow {
         ?>
         <script>
         function wcflowDebugData() {
-            if (confirm('This will show debug information about your greeting cards setup. Continue?')) {
+            if (confirm('This will show comprehensive debug information about your greeting cards setup. Continue?')) {
                 jQuery.post(ajaxurl, {
                     action: 'wcflow_debug_admin_data',
                     nonce: '<?php echo wp_create_nonce('wcflow_nonce'); ?>'
                 }, function(response) {
                     if (response.success) {
                         console.log('🎯 WCFlow Debug Data:', response.data);
-                        alert('Debug data logged to console. Press F12 to view.');
+                        alert('Debug data logged to console. Press F12 to view detailed information.');
                     }
                 });
             }
@@ -348,10 +349,28 @@ class WooCommerce_Gifting_Flow {
                     nonce: '<?php echo wp_create_nonce('wcflow_nonce'); ?>'
                 }, function(response) {
                     if (response.success) {
-                        alert('Sample data created! Check Greeting Cards menu.');
+                        console.log('✅ Sample Data Created:', response.data);
+                        alert('Sample data created! Check Greeting Cards menu. Debug info in console.');
                         location.reload();
                     } else {
                         alert('Error creating sample data.');
+                    }
+                });
+            }
+        }
+        
+        function wcflowResetSystem() {
+            if (confirm('⚠️ WARNING: This will DELETE ALL existing cards and categories and recreate sample data. This action cannot be undone. Continue?')) {
+                jQuery.post(ajaxurl, {
+                    action: 'wcflow_cleanup_and_reset',
+                    nonce: '<?php echo wp_create_nonce('wcflow_nonce'); ?>'
+                }, function(response) {
+                    if (response.success) {
+                        console.log('🧹 System Reset:', response.data);
+                        alert('System reset complete! Fresh sample data created. Debug info in console.');
+                        location.reload();
+                    } else {
+                        alert('Error resetting system.');
                     }
                 });
             }
