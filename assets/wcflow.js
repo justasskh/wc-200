@@ -1,6 +1,6 @@
 /**
- * WooCommerce Gifting Flow - ENHANCED USER INTERFACE
- * 2025-01-27 - Deselectable cards, enhanced add-ons, improved functionality
+ * WooCommerce Gifting Flow - DATABASE CONNECTED INTERFACE
+ * 2025-01-27 - Real database connection with category-based sliders
  */
 
 jQuery(function($) {
@@ -15,7 +15,7 @@ jQuery(function($) {
     
     // Debug helper
     function debug(message, data) {
-        console.log('[WCFlow ENHANCED UI]', message, data || '');
+        console.log('[WCFlow DATABASE]', message, data || '');
     }
     
     // Enhanced price calculation
@@ -135,18 +135,15 @@ jQuery(function($) {
         }
     }
     
-    // Step 1 initialization with enhanced features
+    // Step 1 initialization with database connection
     function initStep1() {
-        debug('Initializing enhanced step 1');
+        debug('Initializing DATABASE CONNECTED step 1');
         
         // Load addons with enhanced functionality
         loadEnhancedAddons();
         
         // Setup enhanced card selection (deselectable)
         setupEnhancedCardSelection();
-        
-        // Initialize all category sliders
-        initializeAllCategorySliders();
         
         // Message textarea functionality
         $(document).on('input', '#wcflow-card-message', function() {
@@ -301,79 +298,6 @@ jQuery(function($) {
                 $('.wcflow-addon-popup').remove();
             }
         });
-    }
-    
-    // Initialize all category sliders
-    function initializeAllCategorySliders() {
-        debug('Initializing all category sliders...');
-        
-        $('.greeting-cards-section').each(function() {
-            const $section = $(this);
-            const categoryName = $section.data('category') || $section.find('.greeting-cards-title').text();
-            
-            debug('Initializing slider for category:', categoryName);
-            
-            initializeSingleSlider($section);
-        });
-        
-        debug('All category sliders initialized!');
-    }
-    
-    // Initialize a single slider
-    function initializeSingleSlider($section) {
-        const $slider = $section.find('.greeting-cards-slider');
-        const $cards = $slider.find('.greeting-card');
-        
-        if ($cards.length === 0) {
-            debug('No cards found in slider');
-            return;
-        }
-        
-        let currentIndex = 0;
-        const cardWidth = 256; // 240px + 16px gap
-        const containerWidth = $section.find('.greeting-cards-slider-wrapper').width();
-        const visibleCards = Math.floor(containerWidth / cardWidth);
-        const maxIndex = Math.max(0, $cards.length - visibleCards);
-        
-        function updateSlider() {
-            const translateX = -currentIndex * cardWidth;
-            $slider.css('transform', `translateX(${translateX}px)`);
-            
-            // Update navigation
-            $section.find('.slider-nav-prev').toggleClass('disabled', currentIndex === 0);
-            $section.find('.slider-nav-next').toggleClass('disabled', currentIndex >= maxIndex);
-            
-            // Update progress
-            const progress = maxIndex > 0 ? (currentIndex / maxIndex) * 100 : 100;
-            $section.find('.slider-progress-fill').css('width', progress + '%');
-        }
-        
-        // Navigation handlers
-        $section.find('.slider-nav-prev').on('click', function() {
-            if (currentIndex > 0) {
-                currentIndex--;
-                updateSlider();
-            }
-        });
-        
-        $section.find('.slider-nav-next').on('click', function() {
-            if (currentIndex < maxIndex) {
-                currentIndex++;
-                updateSlider();
-            }
-        });
-        
-        // See all toggle
-        $section.find('.greeting-cards-see-all').on('click', function(e) {
-            e.preventDefault();
-            $section.toggleClass('grid-view');
-            $(this).text($section.hasClass('grid-view') ? 'See less' : 'See all');
-        });
-        
-        // Initial update
-        updateSlider();
-        
-        debug('Slider initialized for category:', $section.data('category'));
     }
     
     // ENHANCED: Setup card selection with deselectable functionality
@@ -997,5 +921,5 @@ jQuery(function($) {
         }
     });
     
-    debug('ENHANCED WCFlow JavaScript initialized with improved UI');
+    debug('DATABASE CONNECTED WCFlow JavaScript initialized');
 });

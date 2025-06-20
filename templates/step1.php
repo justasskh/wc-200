@@ -1,7 +1,7 @@
 <?php
 /**
- * WooCommerce Gifting Flow Step 1 - ENHANCED with proper spacing and headings
- * Updated: 2025-01-27 - Added spacing, headings, and sustainability message
+ * WooCommerce Gifting Flow Step 1 - DATABASE CONNECTED with Category Sliders
+ * Updated: 2025-01-27 - Real database connection with separate sliders per category
  */
 ?>
 <div class="wcflow-modal wcflow-fullscreen" data-step="1">
@@ -56,217 +56,12 @@
                 </div>
             </div>
             
-            <!-- Multiple Category Sliders Container -->
-            <div id="wcflow-cards-container">
-                <!-- Birthday Cards Slider -->
-                <section class="greeting-cards-section" role="region" aria-label="Birthday Cards" data-category="Birthday Cards">
-                    <div class="greeting-cards-container">
-                        <div class="greeting-cards-header">
-                            <h3 class="greeting-cards-title">Birthday Cards</h3>
-                            <a href="#" class="greeting-cards-see-all">See all</a>
-                        </div>
-                        
-                        <p class="greeting-cards-description">
-                            Perfect cards for birthday celebrations and special moments
-                        </p>
-                        
-                        <div class="greeting-cards-slider-wrapper">
-                            <div class="greeting-cards-slider" role="list">
-                                <div class="greeting-card" data-card-id="birthday-1" data-price-value="0" role="listitem" tabindex="0">
-                                    <img src="https://images.pexels.com/photos/1666065/pexels-photo-1666065.jpeg?auto=compress&cs=tinysrgb&w=400" alt="Happy Birthday Balloons" class="greeting-card-image" loading="lazy">
-                                    <div class="greeting-card-content">
-                                        <h4 class="greeting-card-title">Happy Birthday Balloons</h4>
-                                        <p class="greeting-card-price free">FREE</p>
-                                    </div>
-                                </div>
-                                
-                                <div class="greeting-card" data-card-id="birthday-2" data-price-value="1.50" role="listitem" tabindex="0">
-                                    <img src="https://images.pexels.com/photos/1040173/pexels-photo-1040173.jpeg?auto=compress&cs=tinysrgb&w=400" alt="Birthday Cake Celebration" class="greeting-card-image" loading="lazy">
-                                    <div class="greeting-card-content">
-                                        <h4 class="greeting-card-title">Birthday Cake Celebration</h4>
-                                        <p class="greeting-card-price">€1.50</p>
-                                    </div>
-                                </div>
-                                
-                                <div class="greeting-card" data-card-id="birthday-3" data-price-value="2.50" role="listitem" tabindex="0">
-                                    <img src="https://images.pexels.com/photos/1729931/pexels-photo-1729931.jpeg?auto=compress&cs=tinysrgb&w=400" alt="Birthday Wishes" class="greeting-card-image" loading="lazy">
-                                    <div class="greeting-card-content">
-                                        <h4 class="greeting-card-title">Birthday Wishes</h4>
-                                        <p class="greeting-card-price">€2.50</p>
-                                    </div>
-                                </div>
-                                
-                                <div class="greeting-card" data-card-id="birthday-4" data-price-value="1.75" role="listitem" tabindex="0">
-                                    <img src="https://images.pexels.com/photos/1040173/pexels-photo-1040173.jpeg?auto=compress&cs=tinysrgb&w=400" alt="Party Time" class="greeting-card-image" loading="lazy">
-                                    <div class="greeting-card-content">
-                                        <h4 class="greeting-card-title">Party Time</h4>
-                                        <p class="greeting-card-price">€1.75</p>
-                                    </div>
-                                </div>
-                                
-                                <div class="greeting-card" data-card-id="birthday-5" data-price-value="2.00" role="listitem" tabindex="0">
-                                    <img src="https://images.pexels.com/photos/1666065/pexels-photo-1666065.jpeg?auto=compress&cs=tinysrgb&w=400" alt="Another Year Older" class="greeting-card-image" loading="lazy">
-                                    <div class="greeting-card-content">
-                                        <h4 class="greeting-card-title">Another Year Older</h4>
-                                        <p class="greeting-card-price">€2.00</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="slider-controls">
-                            <div class="slider-progress-container">
-                                <div class="slider-progress-bar" role="progressbar" aria-label="Slider progress">
-                                    <div class="slider-progress-fill"></div>
-                                </div>
-                            </div>
-                            <div class="slider-nav-controls">
-                                <button class="slider-nav slider-nav-prev" aria-label="Previous" type="button">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M15 18l-6-6 6-6"/>
-                                    </svg>
-                                </button>
-                                <button class="slider-nav slider-nav-next" aria-label="Next" type="button">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M9 18l6-6-6-6"/>
-                                    </svg>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-                
-                <!-- Holiday Cards Slider -->
-                <section class="greeting-cards-section" role="region" aria-label="Holiday Cards" data-category="Holiday Cards">
-                    <div class="greeting-cards-container">
-                        <div class="greeting-cards-header">
-                            <h3 class="greeting-cards-title">Holiday Cards</h3>
-                            <a href="#" class="greeting-cards-see-all">See all</a>
-                        </div>
-                        
-                        <p class="greeting-cards-description">
-                            Festive cards for special occasions and celebrations
-                        </p>
-                        
-                        <div class="greeting-cards-slider-wrapper">
-                            <div class="greeting-cards-slider" role="list">
-                                <div class="greeting-card" data-card-id="holiday-1" data-price-value="0" role="listitem" tabindex="0">
-                                    <img src="https://images.pexels.com/photos/1729931/pexels-photo-1729931.jpeg?auto=compress&cs=tinysrgb&w=400" alt="Season Greetings" class="greeting-card-image" loading="lazy">
-                                    <div class="greeting-card-content">
-                                        <h4 class="greeting-card-title">Season Greetings</h4>
-                                        <p class="greeting-card-price free">FREE</p>
-                                    </div>
-                                </div>
-                                
-                                <div class="greeting-card" data-card-id="holiday-2" data-price-value="1.25" role="listitem" tabindex="0">
-                                    <img src="https://images.pexels.com/photos/1040173/pexels-photo-1040173.jpeg?auto=compress&cs=tinysrgb&w=400" alt="Winter Wonderland" class="greeting-card-image" loading="lazy">
-                                    <div class="greeting-card-content">
-                                        <h4 class="greeting-card-title">Winter Wonderland</h4>
-                                        <p class="greeting-card-price">€1.25</p>
-                                    </div>
-                                </div>
-                                
-                                <div class="greeting-card" data-card-id="holiday-3" data-price-value="1.50" role="listitem" tabindex="0">
-                                    <img src="https://images.pexels.com/photos/1666065/pexels-photo-1666065.jpeg?auto=compress&cs=tinysrgb&w=400" alt="Holiday Cheer" class="greeting-card-image" loading="lazy">
-                                    <div class="greeting-card-content">
-                                        <h4 class="greeting-card-title">Holiday Cheer</h4>
-                                        <p class="greeting-card-price">€1.50</p>
-                                    </div>
-                                </div>
-                                
-                                <div class="greeting-card" data-card-id="holiday-4" data-price-value="1.80" role="listitem" tabindex="0">
-                                    <img src="https://images.pexels.com/photos/1729931/pexels-photo-1729931.jpeg?auto=compress&cs=tinysrgb&w=400" alt="Festive Joy" class="greeting-card-image" loading="lazy">
-                                    <div class="greeting-card-content">
-                                        <h4 class="greeting-card-title">Festive Joy</h4>
-                                        <p class="greeting-card-price">€1.80</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="slider-controls">
-                            <div class="slider-progress-container">
-                                <div class="slider-progress-bar" role="progressbar" aria-label="Slider progress">
-                                    <div class="slider-progress-fill"></div>
-                                </div>
-                            </div>
-                            <div class="slider-nav-controls">
-                                <button class="slider-nav slider-nav-prev" aria-label="Previous" type="button">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M15 18l-6-6 6-6"/>
-                                    </svg>
-                                </button>
-                                <button class="slider-nav slider-nav-next" aria-label="Next" type="button">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M9 18l6-6-6-6"/>
-                                    </svg>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-                
-                <!-- Thank You Cards Slider -->
-                <section class="greeting-cards-section" role="region" aria-label="Thank You Cards" data-category="Thank You Cards">
-                    <div class="greeting-cards-container">
-                        <div class="greeting-cards-header">
-                            <h3 class="greeting-cards-title">Thank You Cards</h3>
-                            <a href="#" class="greeting-cards-see-all">See all</a>
-                        </div>
-                        
-                        <p class="greeting-cards-description">
-                            Express your gratitude with these beautiful cards
-                        </p>
-                        
-                        <div class="greeting-cards-slider-wrapper">
-                            <div class="greeting-cards-slider" role="list">
-                                <div class="greeting-card" data-card-id="thanks-1" data-price-value="0" role="listitem" tabindex="0">
-                                    <img src="https://images.pexels.com/photos/1040173/pexels-photo-1040173.jpeg?auto=compress&cs=tinysrgb&w=400" alt="Thank You So Much" class="greeting-card-image" loading="lazy">
-                                    <div class="greeting-card-content">
-                                        <h4 class="greeting-card-title">Thank You So Much</h4>
-                                        <p class="greeting-card-price free">FREE</p>
-                                    </div>
-                                </div>
-                                
-                                <div class="greeting-card" data-card-id="thanks-2" data-price-value="1.00" role="listitem" tabindex="0">
-                                    <img src="https://images.pexels.com/photos/1729931/pexels-photo-1729931.jpeg?auto=compress&cs=tinysrgb&w=400" alt="Grateful Heart" class="greeting-card-image" loading="lazy">
-                                    <div class="greeting-card-content">
-                                        <h4 class="greeting-card-title">Grateful Heart</h4>
-                                        <p class="greeting-card-price">€1.00</p>
-                                    </div>
-                                </div>
-                                
-                                <div class="greeting-card" data-card-id="thanks-3" data-price-value="1.25" role="listitem" tabindex="0">
-                                    <img src="https://images.pexels.com/photos/1666065/pexels-photo-1666065.jpeg?auto=compress&cs=tinysrgb&w=400" alt="Much Appreciated" class="greeting-card-image" loading="lazy">
-                                    <div class="greeting-card-content">
-                                        <h4 class="greeting-card-title">Much Appreciated</h4>
-                                        <p class="greeting-card-price">€1.25</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="slider-controls">
-                            <div class="slider-progress-container">
-                                <div class="slider-progress-bar" role="progressbar" aria-label="Slider progress">
-                                    <div class="slider-progress-fill"></div>
-                                </div>
-                            </div>
-                            <div class="slider-nav-controls">
-                                <button class="slider-nav slider-nav-prev" aria-label="Previous" type="button">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M15 18l-6-6 6-6"/>
-                                    </svg>
-                                </button>
-                                <button class="slider-nav slider-nav-next" aria-label="Next" type="button">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M9 18l6-6-6-6"/>
-                                    </svg>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </section>
+            <!-- DATABASE CONNECTED: Dynamic Category Sliders Container -->
+            <div id="wcflow-dynamic-cards-container">
+                <!-- This will be populated by JavaScript with real database data -->
+                <div class="wcflow-loader" style="text-align: center; padding: 40px;">
+                    <p>Loading greeting cards from database...</p>
+                </div>
             </div>
         </div>
 
@@ -304,3 +99,216 @@
         </div>
     </footer>
 </div>
+
+<script>
+// DATABASE CONNECTION: Load cards dynamically from admin dashboard
+jQuery(document).ready(function($) {
+    console.log('🎯 Loading cards from database...');
+    
+    // Load cards from database via AJAX
+    $.ajax({
+        url: wcflow_params.ajax_url,
+        type: 'POST',
+        data: {
+            action: 'wcflow_get_cards',
+            nonce: wcflow_params.nonce
+        },
+        timeout: 15000,
+        success: function(response) {
+            console.log('📦 Database response received:', response);
+            
+            if (response && response.success && response.data) {
+                renderDynamicCategorySliders(response.data);
+            } else {
+                console.log('⚠️ No data received, showing fallback message');
+                $('#wcflow-dynamic-cards-container').html(
+                    '<div style="text-align: center; padding: 40px; color: #666;">' +
+                    '<p>No greeting cards available at this time.</p>' +
+                    '<p><small>Please add cards in the admin dashboard.</small></p>' +
+                    '</div>'
+                );
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('❌ Failed to load cards:', error);
+            $('#wcflow-dynamic-cards-container').html(
+                '<div style="text-align: center; padding: 40px; color: #dc3545;">' +
+                '<p>Failed to load greeting cards.</p>' +
+                '<p><small>Please check your database connection.</small></p>' +
+                '</div>'
+            );
+        }
+    });
+    
+    // Render category sliders dynamically
+    function renderDynamicCategorySliders(cardsByCategory) {
+        console.log('🎨 Rendering category sliders:', Object.keys(cardsByCategory));
+        
+        const $container = $('#wcflow-dynamic-cards-container');
+        $container.empty();
+        
+        if (!cardsByCategory || Object.keys(cardsByCategory).length === 0) {
+            $container.html(
+                '<div style="text-align: center; padding: 40px; color: #666;">' +
+                '<p>No greeting card categories found.</p>' +
+                '</div>'
+            );
+            return;
+        }
+        
+        // Create a slider for each category
+        Object.entries(cardsByCategory).forEach(function([categoryName, cards]) {
+            if (!cards || cards.length === 0) return;
+            
+            console.log('🎴 Creating slider for category:', categoryName, 'with', cards.length, 'cards');
+            
+            const categorySlug = categoryName.toLowerCase().replace(/[^a-z0-9]/g, '-');
+            
+            const sliderHtml = `
+                <section class="greeting-cards-section" role="region" aria-label="${categoryName}" data-category="${categoryName}">
+                    <div class="greeting-cards-container">
+                        <div class="greeting-cards-header">
+                            <h3 class="greeting-cards-title">${categoryName}</h3>
+                            <a href="#" class="greeting-cards-see-all">See all</a>
+                        </div>
+                        
+                        <p class="greeting-cards-description">
+                            ${getCategoryDescription(categoryName)}
+                        </p>
+                        
+                        <div class="greeting-cards-slider-wrapper">
+                            <div class="greeting-cards-slider" role="list">
+                                ${cards.map(card => `
+                                    <div class="greeting-card" data-card-id="${card.id}" data-price-value="${card.price_value}" role="listitem" tabindex="0">
+                                        <img src="${card.img}" alt="${card.title}" class="greeting-card-image" loading="lazy">
+                                        <div class="greeting-card-content">
+                                            <h4 class="greeting-card-title">${card.title}</h4>
+                                            <p class="greeting-card-price ${card.price_value == 0 ? 'free' : ''}">${card.price}</p>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                        
+                        <div class="slider-controls">
+                            <div class="slider-progress-container">
+                                <div class="slider-progress-bar" role="progressbar" aria-label="Slider progress">
+                                    <div class="slider-progress-fill"></div>
+                                </div>
+                            </div>
+                            <div class="slider-nav-controls">
+                                <button class="slider-nav slider-nav-prev" aria-label="Previous" type="button">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M15 18l-6-6 6-6"/>
+                                    </svg>
+                                </button>
+                                <button class="slider-nav slider-nav-next" aria-label="Next" type="button">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M9 18l6-6-6-6"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            `;
+            
+            $container.append(sliderHtml);
+        });
+        
+        console.log('✅ All category sliders rendered successfully');
+        
+        // Initialize sliders after rendering
+        setTimeout(function() {
+            initializeAllCategorySliders();
+        }, 100);
+    }
+    
+    // Get category description
+    function getCategoryDescription(categoryName) {
+        const descriptions = {
+            'Birthday Cards': 'Perfect cards for birthday celebrations and special moments',
+            'Holiday Cards': 'Festive cards for special occasions and celebrations',
+            'Thank You Cards': 'Express your gratitude with these beautiful cards',
+            'Gimtadienio ir švenčių atvirukai': 'Šventiniai atvirukai ypatingoms progoms ir šventėms',
+            'Populiariausi atvirukai': 'Mūsų populiariausi ir dažniausiai perkamieji atvirukai'
+        };
+        
+        return descriptions[categoryName] || 'Beautiful greeting cards for every occasion';
+    }
+    
+    // Initialize all category sliders
+    function initializeAllCategorySliders() {
+        console.log('🔧 Initializing all category sliders...');
+        
+        $('.greeting-cards-section').each(function() {
+            const $section = $(this);
+            const categoryName = $section.data('category') || $section.find('.greeting-cards-title').text();
+            
+            console.log('🎛️ Initializing slider for category:', categoryName);
+            
+            // Initialize individual slider
+            if (window.GreetingCardsSlider) {
+                new window.GreetingCardsSlider($section[0]);
+            } else {
+                // Fallback initialization
+                initializeSingleSlider($section);
+            }
+        });
+        
+        console.log('✅ All category sliders initialized!');
+    }
+    
+    // Fallback slider initialization
+    function initializeSingleSlider($section) {
+        const $slider = $section.find('.greeting-cards-slider');
+        const $cards = $slider.find('.greeting-card');
+        
+        if ($cards.length === 0) return;
+        
+        let currentIndex = 0;
+        const cardWidth = 256; // 240px + 16px gap
+        const containerWidth = $section.find('.greeting-cards-slider-wrapper').width();
+        const visibleCards = Math.floor(containerWidth / cardWidth);
+        const maxIndex = Math.max(0, $cards.length - visibleCards);
+        
+        function updateSlider() {
+            const translateX = -currentIndex * cardWidth;
+            $slider.css('transform', `translateX(${translateX}px)`);
+            
+            // Update navigation
+            $section.find('.slider-nav-prev').toggleClass('disabled', currentIndex === 0);
+            $section.find('.slider-nav-next').toggleClass('disabled', currentIndex >= maxIndex);
+            
+            // Update progress
+            const progress = maxIndex > 0 ? (currentIndex / maxIndex) * 100 : 100;
+            $section.find('.slider-progress-fill').css('width', progress + '%');
+        }
+        
+        // Navigation handlers
+        $section.find('.slider-nav-prev').on('click', function() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                updateSlider();
+            }
+        });
+        
+        $section.find('.slider-nav-next').on('click', function() {
+            if (currentIndex < maxIndex) {
+                currentIndex++;
+                updateSlider();
+            }
+        });
+        
+        // See all toggle
+        $section.find('.greeting-cards-see-all').on('click', function(e) {
+            e.preventDefault();
+            $section.toggleClass('grid-view');
+            $(this).text($section.hasClass('grid-view') ? 'See less' : 'See all');
+        });
+        
+        // Initial update
+        updateSlider();
+    }
+});
+</script>
