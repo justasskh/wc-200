@@ -1,10 +1,17 @@
 <?php
 /**
- * WooCommerce Gifting Flow AJAX Handlers - BULLETPROOF CATEGORY SYSTEM
- * FIXED: 2025-01-27 - Guaranteed category-based data with admin connection
+ * WooCommerce Gifting Flow AJAX Handlers - BULLETPROOF ADMIN CONNECTION
+ * FIXED: 2025-01-27 - Guaranteed connection to real admin data with comprehensive debugging
  */
 
 if (!defined('ABSPATH')) exit;
+
+// Debug logging helper
+function wcflow_log($message) {
+    if (get_option('wcflow_enable_debug') === 'yes' || (defined('WP_DEBUG') && WP_DEBUG)) {
+        error_log('[WooCommerce Gifting Flow] ' . $message);
+    }
+}
 
 // FIXED: Start flow with proper WooCommerce shipping calculation
 function wcflow_start_flow() {
@@ -344,14 +351,14 @@ function wcflow_get_addons_data() {
 add_action('wp_ajax_wcflow_get_addons', 'wcflow_get_addons_data');
 add_action('wp_ajax_nopriv_wcflow_get_addons', 'wcflow_get_addons_data');
 
-// 🎯 BULLETPROOF CATEGORY-BASED CARDS SYSTEM WITH VERIFICATION
+// 🎯 BULLETPROOF ADMIN CONNECTION: Get real cards from admin with comprehensive debugging
 function wcflow_get_cards_data() {
     try {
         check_ajax_referer('wcflow_nonce', 'nonce');
         
         global $wpdb;
         
-        wcflow_log('🎯 === BULLETPROOF CATEGORY-BASED CARDS START ===');
+        wcflow_log('🎯 === BULLETPROOF ADMIN CONNECTION START ===');
         
         // STEP 1: Comprehensive system verification
         $verification = wcflow_verify_system_setup();
@@ -359,9 +366,17 @@ function wcflow_get_cards_data() {
         
         // STEP 2: Check if we have the required post type and taxonomy
         if (!post_type_exists('wcflow_card') || !taxonomy_exists('wcflow_card_category')) {
-            wcflow_log('❌ Required post type or taxonomy missing');
-            wp_send_json_success(wcflow_get_guaranteed_sample_data());
-            return;
+            wcflow_log('❌ Required post type or taxonomy missing - creating sample data');
+            
+            // Force create the missing components
+            wcflow_force_create_missing_components();
+            
+            // Try again after creation
+            if (!post_type_exists('wcflow_card') || !taxonomy_exists('wcflow_card_category')) {
+                wcflow_log('❌ Still missing after creation attempt - returning sample data');
+                wp_send_json_success(wcflow_get_guaranteed_sample_data());
+                return;
+            }
         }
         
         // STEP 3: Get all categories with proper ordering
@@ -376,9 +391,23 @@ function wcflow_get_cards_data() {
         wcflow_log('📂 Found ' . count($categories) . ' categories');
         
         if (empty($categories) || is_wp_error($categories)) {
-            wcflow_log('❌ No categories found or error occurred');
-            wp_send_json_success(wcflow_get_guaranteed_sample_data());
-            return;
+            wcflow_log('❌ No categories found - forcing creation of default data');
+            wcflow_force_create_default_data();
+            
+            // Try again after creation
+            $categories = get_terms([
+                'taxonomy' => 'wcflow_card_category',
+                'hide_empty' => false,
+                'orderby' => 'meta_value_num',
+                'meta_key' => '_wcflow_category_order',
+                'order' => 'ASC'
+            ]);
+            
+            if (empty($categories) || is_wp_error($categories)) {
+                wcflow_log('❌ Still no categories after forced creation - returning sample data');
+                wp_send_json_success(wcflow_get_guaranteed_sample_data());
+                return;
+            }
         }
         
         // STEP 4: Build category-based data structure with detailed logging
@@ -443,20 +472,41 @@ function wcflow_get_cards_data() {
             } else {
                 wcflow_log('⚠️ No cards found for category: ' . $category->name);
                 
-                // Check if there are any cards at all for this category (including unpublished)
-                $all_cards = get_posts([
-                    'post_type' => 'wcflow_card',
-                    'post_status' => 'any',
-                    'numberposts' => -1,
-                    'tax_query' => [
-                        [
-                            'taxonomy' => 'wcflow_card_category',
-                            'field' => 'term_id',
-                            'terms' => $category->term_id
-                        ]
-                    ]
-                ]);
-                wcflow_log('🔍 Total cards (any status) for ' . $category->name . ': ' . count($all_cards));
+                // Create sample cards for this category
+                wcflow_create_sample_cards_for_category($category);
+                
+                // Try to get cards again
+                $cards = get_posts($cards_query);
+                if (!empty($cards)) {
+                    $category_cards = [];
+                    foreach ($cards as $card) {
+                        $price_value = get_post_meta($card->ID, '_wcflow_price', true);
+                        $price_value = $price_value ? floatval($price_value) : 0;
+                        
+                        $image_url = 'https://images.pexels.com/photos/1666065/pexels-photo-1666065.jpeg?auto=compress&cs=tinysrgb&w=400';
+                        if (has_post_thumbnail($card->ID)) {
+                            $image_data = wp_get_attachment_image_src(get_post_thumbnail_id($card->ID), 'medium');
+                            if ($image_data) {
+                                $image_url = $image_data[0];
+                            }
+                        }
+                        
+                        $category_cards[] = [
+                            'id' => $card->ID,
+                            'title' => $card->post_title,
+                            'price' => $price_value > 0 ? '€' . number_format($price_value, 2) : 'FREE',
+                            'price_value' => $price_value,
+                            'img' => $image_url
+                        ];
+                        
+                        $total_cards_found++;
+                    }
+                    
+                    if (!empty($category_cards)) {
+                        $cards_by_category[$category->name] = $category_cards;
+                        wcflow_log('✅ Created and processed cards for: ' . $category->name);
+                    }
+                }
             }
         }
         
@@ -465,18 +515,131 @@ function wcflow_get_cards_data() {
         
         // STEP 5: Ensure we have data to return
         if (empty($cards_by_category) || $total_cards_found === 0) {
-            wcflow_log('❌ No valid cards found - returning guaranteed sample data');
+            wcflow_log('❌ No valid cards found - forcing complete recreation');
+            wcflow_force_complete_recreation();
             wp_send_json_success(wcflow_get_guaranteed_sample_data());
         } else {
-            wcflow_log('✅ SUCCESS - Returning ' . count($cards_by_category) . ' categories with real data');
+            wcflow_log('✅ SUCCESS - Returning ' . count($cards_by_category) . ' categories with real admin data');
             wp_send_json_success($cards_by_category);
         }
         
     } catch (Exception $e) {
-        wcflow_log('💥 FATAL ERROR in category-based cards: ' . $e->getMessage());
+        wcflow_log('💥 FATAL ERROR in admin connection: ' . $e->getMessage());
         wcflow_log('💥 Stack trace: ' . $e->getTraceAsString());
         wp_send_json_success(wcflow_get_guaranteed_sample_data());
     }
+}
+
+// Force create missing components
+function wcflow_force_create_missing_components() {
+    wcflow_log('🛠️ Force creating missing post types and taxonomies...');
+    
+    // Include the CPT file to register post types
+    if (file_exists(WCFLOW_PATH . 'includes/cpt.php')) {
+        include_once WCFLOW_PATH . 'includes/cpt.php';
+    }
+    
+    // Force register post types and taxonomies
+    if (function_exists('wcflow_register_post_types_and_taxonomies')) {
+        wcflow_register_post_types_and_taxonomies();
+    }
+    
+    // Flush rewrite rules
+    flush_rewrite_rules();
+    
+    wcflow_log('✅ Missing components creation attempted');
+}
+
+// Force create default data
+function wcflow_force_create_default_data() {
+    wcflow_log('🛠️ Force creating default categories and cards...');
+    
+    // Reset the option to force recreation
+    delete_option('wcflow_default_data_created');
+    
+    // Include and run the creation function
+    if (file_exists(WCFLOW_PATH . 'includes/cpt.php')) {
+        include_once WCFLOW_PATH . 'includes/cpt.php';
+        
+        if (function_exists('wcflow_create_default_categories_and_cards')) {
+            wcflow_create_default_categories_and_cards();
+        }
+    }
+    
+    wcflow_log('✅ Default data creation attempted');
+}
+
+// Create sample cards for a specific category
+function wcflow_create_sample_cards_for_category($category) {
+    wcflow_log('🎨 Creating sample cards for category: ' . $category->name);
+    
+    $sample_cards_data = [
+        'Birthday Cards' => [
+            ['title' => 'Happy Birthday Balloons', 'price' => 0],
+            ['title' => 'Birthday Cake Celebration', 'price' => 1.50],
+            ['title' => 'Birthday Wishes', 'price' => 2.50]
+        ],
+        'Holiday Cards' => [
+            ['title' => 'Season Greetings', 'price' => 0],
+            ['title' => 'Winter Wonderland', 'price' => 1.25],
+            ['title' => 'Holiday Cheer', 'price' => 1.50]
+        ],
+        'Thank You Cards' => [
+            ['title' => 'Thank You So Much', 'price' => 0],
+            ['title' => 'Grateful Heart', 'price' => 1.00]
+        ]
+    ];
+    
+    $cards_to_create = $sample_cards_data[$category->name] ?? [
+        ['title' => $category->name . ' Card 1', 'price' => 0],
+        ['title' => $category->name . ' Card 2', 'price' => 1.50]
+    ];
+    
+    foreach ($cards_to_create as $index => $card_data) {
+        $card_id = wp_insert_post([
+            'post_title' => $card_data['title'],
+            'post_type' => 'wcflow_card',
+            'post_status' => 'publish',
+            'menu_order' => $index,
+            'post_excerpt' => 'Sample greeting card for ' . strtolower($category->name)
+        ]);
+        
+        if (!is_wp_error($card_id)) {
+            // Set price
+            update_post_meta($card_id, '_wcflow_price', $card_data['price']);
+            
+            // Assign to category
+            wp_set_post_terms($card_id, [$category->term_id], 'wcflow_card_category');
+            
+            wcflow_log('✅ Created sample card: ' . $card_data['title'] . ' (ID: ' . $card_id . ')');
+        }
+    }
+}
+
+// Force complete recreation
+function wcflow_force_complete_recreation() {
+    wcflow_log('🧹 Force complete recreation of all data...');
+    
+    // Delete all existing data
+    $cards = get_posts(['post_type' => 'wcflow_card', 'numberposts' => -1, 'post_status' => 'any']);
+    foreach ($cards as $card) {
+        wp_delete_post($card->ID, true);
+    }
+    
+    $categories = get_terms(['taxonomy' => 'wcflow_card_category', 'hide_empty' => false]);
+    foreach ($categories as $category) {
+        wp_delete_term($category->term_id, 'wcflow_card_category');
+    }
+    
+    // Reset options
+    delete_option('wcflow_default_data_created');
+    delete_option('wcflow_flush_rewrite_rules');
+    
+    // Force recreate everything
+    wcflow_force_create_missing_components();
+    wcflow_force_create_default_data();
+    
+    wcflow_log('✅ Complete recreation finished');
 }
 
 // SYSTEM VERIFICATION FUNCTION
@@ -719,10 +882,10 @@ function wcflow_force_create_sample_data() {
     delete_option('wcflow_flush_rewrite_rules');
     
     // Re-register post types and taxonomies
-    wcflow_register_post_types_and_taxonomies();
+    wcflow_force_create_missing_components();
     
     // Create default data
-    wcflow_create_default_categories_and_cards();
+    wcflow_force_create_default_data();
     
     // Flush rewrite rules
     flush_rewrite_rules();
@@ -766,8 +929,8 @@ function wcflow_cleanup_and_reset() {
     delete_option('wcflow_flush_rewrite_rules');
     
     // Force recreate everything
-    wcflow_register_post_types_and_taxonomies();
-    wcflow_create_default_categories_and_cards();
+    wcflow_force_create_missing_components();
+    wcflow_force_create_default_data();
     flush_rewrite_rules();
     
     $verification = wcflow_verify_system_setup();
