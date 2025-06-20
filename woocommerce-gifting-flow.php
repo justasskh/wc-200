@@ -2,7 +2,7 @@
 /*
 Plugin Name: WooCommerce Gifting Flow
 Description: A complete alternative checkout system for WooCommerce with gifting features, greeting cards, and streamlined user experience.
-Version: 5.0
+Version: 5.1
 Author: justasskh
 Author URI: https://github.com/justasskh
 Text Domain: wcflow
@@ -21,7 +21,7 @@ Developer: justasskh
 
 if (!defined('ABSPATH')) exit;
 
-define('WCFLOW_VERSION', '5.0');
+define('WCFLOW_VERSION', '5.1');
 define('WCFLOW_PATH', plugin_dir_path(__FILE__));
 define('WCFLOW_URL', plugin_dir_url(__FILE__));
 define('WCFLOW_PLUGIN_FILE', __FILE__);
@@ -70,6 +70,8 @@ class WooCommerce_Gifting_Flow {
             'includes/settings.php',
             'includes/cpt.php', 
             'includes/ajax.php',
+            'includes/database-connection.php',
+            'includes/admin-tools.php',
             'includes/checkout-handler.php',
             'includes/order-handler.php',
             'includes/product-integration.php',
@@ -278,11 +280,9 @@ class WooCommerce_Gifting_Flow {
     public function add_action_links($links) {
         $settings_link = '<a href="' . admin_url('admin.php?page=wc-settings&tab=wcflow_settings') . '">' . __('Settings', 'wcflow') . '</a>';
         $cards_link = '<a href="' . admin_url('edit.php?post_type=wcflow_card') . '">' . __('Cards', 'wcflow') . '</a>';
-        $debug_link = '<a href="#" onclick="wcflowDebugData()" style="color: #d63638;">' . __('Debug', 'wcflow') . '</a>';
-        $create_sample_link = '<a href="#" onclick="wcflowCreateSampleData()" style="color: #00a32a;">' . __('Create Sample', 'wcflow') . '</a>';
-        $reset_link = '<a href="#" onclick="wcflowResetSystem()" style="color: #d63638;">' . __('Reset', 'wcflow') . '</a>';
+        $tools_link = '<a href="' . admin_url('edit.php?post_type=wcflow_card&page=wcflow-database-tools') . '" style="color: #00a32a;">' . __('Database Tools', 'wcflow') . '</a>';
         
-        array_unshift($links, $settings_link, $cards_link, $debug_link, $create_sample_link, $reset_link);
+        array_unshift($links, $settings_link, $cards_link, $tools_link);
         return $links;
     }
     
@@ -325,58 +325,36 @@ class WooCommerce_Gifting_Flow {
             <?php
         }
         
-        // Add debug script
-        ?>
-        <script>
-        function wcflowDebugData() {
-            if (confirm('This will show comprehensive debug information about your greeting cards setup. Continue?')) {
-                jQuery.post(ajaxurl, {
-                    action: 'wcflow_debug_admin_data',
-                    nonce: '<?php echo wp_create_nonce('wcflow_nonce'); ?>'
-                }, function(response) {
-                    if (response.success) {
-                        console.log('🎯 WCFlow Debug Data:', response.data);
-                        alert('Debug data logged to console. Press F12 to view detailed information.');
-                    }
-                });
-            }
-        }
+        // Database connection status
+        global $wpdb;
+        $cards_count = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = 'wcflow_card' AND post_status = 'publish'");
+        $categories_count = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->term_taxonomy} WHERE taxonomy = 'wcflow_card_category'");
         
-        function wcflowCreateSampleData() {
-            if (confirm('This will create sample greeting cards and categories. Continue?')) {
-                jQuery.post(ajaxurl, {
-                    action: 'wcflow_force_create_sample_data',
-                    nonce: '<?php echo wp_create_nonce('wcflow_nonce'); ?>'
-                }, function(response) {
-                    if (response.success) {
-                        console.log('✅ Sample Data Created:', response.data);
-                        alert('Sample data created! Check Greeting Cards menu. Debug info in console.');
-                        location.reload();
-                    } else {
-                        alert('Error creating sample data.');
-                    }
-                });
-            }
+        if ($cards_count == 0 || $categories_count == 0) {
+            ?>
+            <div class="notice notice-info is-dismissible">
+                <p>
+                    <strong>🎯 WooCommerce Gifting Flow:</strong> 
+                    Ready to set up your greeting cards! 
+                    <a href="<?php echo admin_url('edit.php?post_type=wcflow_card&page=wcflow-database-tools'); ?>" class="button button-primary">
+                        Open Database Tools
+                    </a>
+                </p>
+            </div>
+            <?php
+        } else {
+            ?>
+            <div class="notice notice-success is-dismissible">
+                <p>
+                    <strong>✅ WooCommerce Gifting Flow:</strong> 
+                    Database connected! <?php echo $categories_count; ?> categories, <?php echo $cards_count; ?> cards ready.
+                    <a href="<?php echo admin_url('edit.php?post_type=wcflow_card&page=wcflow-database-tools'); ?>" class="button button-secondary">
+                        Manage Database
+                    </a>
+                </p>
+            </div>
+            <?php
         }
-        
-        function wcflowResetSystem() {
-            if (confirm('⚠️ WARNING: This will DELETE ALL existing cards and categories and recreate sample data. This action cannot be undone. Continue?')) {
-                jQuery.post(ajaxurl, {
-                    action: 'wcflow_cleanup_and_reset',
-                    nonce: '<?php echo wp_create_nonce('wcflow_nonce'); ?>'
-                }, function(response) {
-                    if (response.success) {
-                        console.log('🧹 System Reset:', response.data);
-                        alert('System reset complete! Fresh sample data created. Debug info in console.');
-                        location.reload();
-                    } else {
-                        alert('Error resetting system.');
-                    }
-                });
-            }
-        }
-        </script>
-        <?php
     }
     
     /**
@@ -398,8 +376,8 @@ class WooCommerce_Gifting_Flow {
         wcflow_log('Updating plugin from version ' . $from_version . ' to ' . WCFLOW_VERSION);
         
         // Run version-specific updates
-        if (version_compare($from_version, '5.0', '<')) {
-            // Update to 5.0 - ensure new settings exist
+        if (version_compare($from_version, '5.1', '<')) {
+            // Update to 5.1 - ensure database connection is working
             if (!get_option('wcflow_processing_time')) {
                 update_option('wcflow_processing_time', 2);
             }
@@ -407,9 +385,8 @@ class WooCommerce_Gifting_Flow {
                 update_option('wcflow_allowed_delivery_days', [1,2,3,4,5]);
             }
             
-            // Force recreation of default data
-            delete_option('wcflow_default_data_created');
-            delete_option('wcflow_flush_rewrite_rules');
+            // Clear cache to force fresh data
+            delete_transient('wcflow_cards_cache');
         }
         
         // Clear any caches
@@ -457,6 +434,9 @@ class WooCommerce_Gifting_Flow {
     public function deactivate() {
         // Clear scheduled events
         wp_clear_scheduled_hook('wcflow_daily_cleanup');
+        
+        // Clear cache
+        delete_transient('wcflow_cards_cache');
         
         // Flush rewrite rules
         flush_rewrite_rules();
