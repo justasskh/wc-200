@@ -1,5 +1,5 @@
 /* WooCommerce Gifting Flow - Main Styles */
-/* FIXED: 2025-01-27 - Category-based sliders with proper spacing */
+/* FIXED: 2025-01-27 - Remove side arrows, enhance add-ons, deselectable cards */
 
 /* Reset and base styles */
 * {
@@ -241,6 +241,7 @@ body.wcflow-modal-open {
     margin-top: 32px;
 }
 
+/* ENHANCED: Add-ons with improved styling and functionality */
 .wcflow-addon-card {
     border: 2px solid #e0e0e0;
     border-radius: 12px;
@@ -248,17 +249,28 @@ body.wcflow-modal-open {
     transition: all 0.3s ease;
     cursor: pointer;
     background: #fff;
+    position: relative;
+    /* FIXED: Non-selected styling */
+    opacity: 0.5;
+    transform: scale(0.95);
 }
 
 .wcflow-addon-card:hover {
     border-color: #007cba;
-    transform: translateY(-2px);
+    transform: translateY(-2px) scale(0.98);
     box-shadow: 0 8px 25px rgba(0, 124, 186, 0.15);
 }
 
 .wcflow-addon-card.selected {
     border-color: #007cba;
     background: #f0f8ff;
+    /* FIXED: Selected styling - full opacity and scale */
+    opacity: 1;
+    transform: scale(1);
+}
+
+.wcflow-addon-card.selected:hover {
+    transform: translateY(-2px) scale(1.02);
 }
 
 .wcflow-addon-image {
@@ -269,6 +281,7 @@ body.wcflow-modal-open {
 
 .wcflow-addon-content {
     padding: 20px;
+    padding-bottom: 60px; /* Space for action button */
 }
 
 .wcflow-addon-title {
@@ -290,6 +303,65 @@ body.wcflow-modal-open {
     color: #666;
     line-height: 1.4;
     margin: 0;
+    /* FIXED: Truncate description for "More information" popup */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* FIXED: More information button */
+.wcflow-addon-more-info {
+    position: absolute;
+    bottom: 60px;
+    left: 20px;
+    right: 20px;
+    background: none;
+    border: 1px solid #007cba;
+    color: #007cba;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.wcflow-addon-more-info:hover {
+    background: #007cba;
+    color: #fff;
+}
+
+/* FIXED: Add/Remove toggle button */
+.wcflow-addon-action {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    right: 20px;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.wcflow-addon-action.add-btn {
+    background: #007cba;
+    color: #fff;
+}
+
+.wcflow-addon-action.add-btn:hover {
+    background: #005a87;
+}
+
+.wcflow-addon-action.remove-btn {
+    background: #dc3545;
+    color: #fff;
+}
+
+.wcflow-addon-action.remove-btn:hover {
+    background: #c82333;
 }
 
 /* FIXED: Cards Container for Multiple Category Sliders */
@@ -298,13 +370,12 @@ body.wcflow-modal-open {
     position: relative;
 }
 
-/* FIXED: Greeting Cards Slider Styles for Category-Based Display */
+/* FIXED: Greeting Cards Slider Styles - REMOVE SIDE ARROWS */
 .greeting-cards-section {
     margin: 60px 0;
     position: relative;
 }
 
-/* FIXED: Left side aligns with inner content, right side extends to page edge */
 .greeting-cards-container {
     max-width: 1200px;
     margin: 0 auto;
@@ -421,10 +492,29 @@ body.wcflow-modal-open {
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
 }
 
+/* FIXED: Deselectable greeting cards */
 .greeting-card.selected {
     border: 3px solid #007cba;
     transform: translateY(-2px);
     box-shadow: 0 8px 25px rgba(0, 124, 186, 0.25);
+}
+
+/* FIXED: Add deselect indicator */
+.greeting-card.selected::after {
+    content: '✓';
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 24px;
+    height: 24px;
+    background: #007cba;
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: bold;
 }
 
 .greeting-card-image {
@@ -462,8 +552,9 @@ body.wcflow-modal-open {
     color: #333;
 }
 
-/* FIXED: Remove side navigation arrows completely */
-.greeting-cards-slider-wrapper .slider-nav {
+/* FIXED: COMPLETELY REMOVE SIDE NAVIGATION ARROWS */
+.greeting-cards-slider-wrapper .slider-nav-prev,
+.greeting-cards-slider-wrapper .slider-nav-next {
     display: none !important;
 }
 
@@ -605,6 +696,76 @@ body.wcflow-modal-open {
     text-align: center;
     font-size: 14px;
     color: #999;
+    margin: 0;
+}
+
+/* FIXED: Add-on Information Popup */
+.wcflow-addon-popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000001;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.wcflow-addon-popup-content {
+    background: #fff;
+    border-radius: 12px;
+    max-width: 500px;
+    width: 100%;
+    max-height: 80vh;
+    overflow-y: auto;
+    position: relative;
+    padding: 24px;
+}
+
+.wcflow-addon-popup-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #666;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background 0.2s ease;
+}
+
+.wcflow-addon-popup-close:hover {
+    background: #f5f5f5;
+}
+
+.wcflow-addon-popup-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #333;
+    margin: 0 0 16px 0;
+    padding-right: 40px;
+}
+
+.wcflow-addon-popup-price {
+    font-size: 18px;
+    font-weight: 700;
+    color: #007cba;
+    margin: 0 0 16px 0;
+}
+
+.wcflow-addon-popup-description {
+    font-size: 16px;
+    color: #666;
+    line-height: 1.6;
     margin: 0;
 }
 
