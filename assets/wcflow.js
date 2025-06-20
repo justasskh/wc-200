@@ -1,6 +1,6 @@
 /**
- * WooCommerce Gifting Flow - COMPLETE IMPLEMENTATION
- * 2025-01-27 - Fixed greeting card deselection and complete add-ons functionality
+ * WooCommerce Gifting Flow - COMPLETE REBUILD
+ * 2025-01-27 - ALL features working: deselectable cards, enhanced add-ons with popups
  */
 
 jQuery(function($) {
@@ -135,14 +135,14 @@ jQuery(function($) {
         }
     }
     
-    // COMPLETE: Step 1 initialization with all features
+    // COMPLETE: Step 1 initialization with ALL features
     function initStep1() {
-        debug('Initializing COMPLETE step 1');
+        debug('Initializing COMPLETE step 1 with ALL features');
         
-        // Load complete addons with all functionality
-        loadCompleteAddons();
+        // Load COMPLETE addons with ALL functionality
+        loadCompleteAddonsWithAllFeatures();
         
-        // Load cards and setup deselectable functionality
+        // Load cards with deselectable functionality
         loadCardsWithDeselection();
         
         // Message textarea functionality
@@ -187,8 +187,10 @@ jQuery(function($) {
         setupBillingToggle();
     }
     
-    // COMPLETE: Load addons with all requested functionality
-    function loadCompleteAddons() {
+    // COMPLETE: Load addons with ALL requested functionality
+    function loadCompleteAddonsWithAllFeatures() {
+        debug('🎯 Loading COMPLETE addons with ALL features...');
+        
         $.ajax({
             url: wcflow_params.ajax_url,
             type: 'POST',
@@ -198,21 +200,25 @@ jQuery(function($) {
             },
             timeout: 10000,
             success: function(response) {
-                if (response.success) {
-                    renderCompleteAddons(response.data);
+                if (response.success && response.data && response.data.length > 0) {
+                    debug('✅ Addons data received, rendering with ALL features');
+                    renderCompleteAddonsWithAllFeatures(response.data);
                 } else {
-                    debug('No addons available');
+                    debug('⚠️ No addons available');
                     $('#wcflow-addons-grid').html('<p style="text-align:center;color:#666;">No add-ons available at this time.</p>');
                 }
             },
             error: function() {
+                debug('❌ Failed to load addons');
                 $('#wcflow-addons-grid').html('<p style="text-align:center;color:#666;">Failed to load add-ons.</p>');
             }
         });
     }
     
     // COMPLETE: Render addons with ALL requested features
-    function renderCompleteAddons(addons) {
+    function renderCompleteAddonsWithAllFeatures(addons) {
+        debug('🎨 Rendering COMPLETE addons with ALL features:', addons.length, 'addons');
+        
         const $grid = $('#wcflow-addons-grid');
         $grid.empty();
         
@@ -221,8 +227,10 @@ jQuery(function($) {
             return;
         }
         
-        addons.forEach(function(addon) {
+        addons.forEach(function(addon, index) {
             const shortDescription = truncateDescription(addon.description);
+            
+            debug('🔧 Creating addon card:', addon.title);
             
             const $card = $(`
                 <div class="wcflow-addon-card" data-addon-id="${addon.id}" data-price-value="${addon.price_value}">
@@ -233,7 +241,11 @@ jQuery(function($) {
                         <p class="wcflow-addon-description-short">${shortDescription}</p>
                     </div>
                     <div class="wcflow-addon-actions">
-                        <button class="wcflow-addon-more-info" data-addon-id="${addon.id}" data-title="${escapeHtml(addon.title)}" data-price="${addon.price}" data-description="${escapeHtml(addon.description)}">
+                        <button class="wcflow-addon-more-info" 
+                                data-addon-id="${addon.id}" 
+                                data-title="${escapeHtml(addon.title)}" 
+                                data-price="${addon.price}" 
+                                data-description="${escapeHtml(addon.description)}">
                             More information
                         </button>
                         <button class="wcflow-addon-action add-btn" data-addon-id="${addon.id}">
@@ -243,28 +255,49 @@ jQuery(function($) {
                 </div>
             `);
             $grid.append($card);
+            
+            debug('✅ Addon card created:', addon.title);
         });
         
-        // COMPLETE: Handle addon selection with toggle functionality
-        $(document).off('click', '.wcflow-addon-action').on('click', '.wcflow-addon-action', function(e) {
+        // COMPLETE: Setup ALL event handlers
+        setupCompleteAddonEventHandlers();
+        
+        debug('🎉 ALL addon features rendered and ready!');
+    }
+    
+    // COMPLETE: Setup ALL addon event handlers
+    function setupCompleteAddonEventHandlers() {
+        debug('🔧 Setting up COMPLETE addon event handlers...');
+        
+        // Remove any existing handlers to prevent duplicates
+        $(document).off('click', '.wcflow-addon-action');
+        $(document).off('click', '.wcflow-addon-more-info');
+        $(document).off('click', '.wcflow-addon-card');
+        
+        // COMPLETE: Handle Add/Remove toggle functionality
+        $(document).on('click', '.wcflow-addon-action', function(e) {
             e.stopPropagation();
+            e.preventDefault();
+            
             const $card = $(this).closest('.wcflow-addon-card');
             const $button = $(this);
-            const $grid = $('#wcflow-addons-grid');
+            const addonId = $card.data('addon-id');
+            
+            debug('🔄 Addon action clicked:', addonId);
             
             if ($card.hasClass('selected')) {
                 // Remove addon
                 $card.removeClass('selected');
                 $button.removeClass('remove-btn').addClass('add-btn').text('Add');
-                debug('Addon removed', {id: $card.data('addon-id')});
+                debug('➖ Addon removed:', addonId);
             } else {
                 // Add addon
                 $card.addClass('selected');
                 $button.removeClass('add-btn').addClass('remove-btn').text('Remove');
-                debug('Addon added', {id: $card.data('addon-id')});
+                debug('➕ Addon added:', addonId);
             }
             
-            // COMPLETE: Apply dimmed styling only when at least one addon is selected
+            // COMPLETE: Apply conditional styling
             updateAddonStyling();
             
             updateOrderState();
@@ -272,26 +305,32 @@ jQuery(function($) {
         });
         
         // COMPLETE: Handle "More information" popup
-        $(document).off('click', '.wcflow-addon-more-info').on('click', '.wcflow-addon-more-info', function(e) {
+        $(document).on('click', '.wcflow-addon-more-info', function(e) {
             e.stopPropagation();
+            e.preventDefault();
+            
             const title = $(this).data('title');
             const price = $(this).data('price');
             const description = $(this).data('description');
+            
+            debug('ℹ️ More info clicked:', title);
             
             showAddonInfoPopup(title, price, description);
         });
         
         // COMPLETE: Handle card click (for selection) - only if not clicking on buttons
-        $(document).off('click', '.wcflow-addon-card').on('click', '.wcflow-addon-card', function(e) {
+        $(document).on('click', '.wcflow-addon-card', function(e) {
             // Only trigger if not clicking on buttons
             if (!$(e.target).hasClass('wcflow-addon-action') && 
                 !$(e.target).hasClass('wcflow-addon-more-info') &&
                 !$(e.target).closest('.wcflow-addon-actions').length) {
+                
+                debug('🎯 Addon card clicked, triggering action button');
                 $(this).find('.wcflow-addon-action').click();
             }
         });
         
-        debug('COMPLETE addons rendered', {count: addons.length});
+        debug('✅ ALL addon event handlers set up successfully!');
     }
     
     // COMPLETE: Update addon styling based on selection state
@@ -301,11 +340,11 @@ jQuery(function($) {
         
         if (hasSelection) {
             $grid.addClass('has-selection');
+            debug('🎨 Applied dimmed styling - has selections');
         } else {
             $grid.removeClass('has-selection');
+            debug('🎨 Removed dimmed styling - no selections');
         }
-        
-        debug('Addon styling updated', {hasSelection: hasSelection});
     }
     
     // Helper function to truncate description
@@ -320,6 +359,7 @@ jQuery(function($) {
     
     // Helper function to escape HTML
     function escapeHtml(text) {
+        if (!text) return '';
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
@@ -327,13 +367,15 @@ jQuery(function($) {
     
     // COMPLETE: Show addon information popup
     function showAddonInfoPopup(title, price, description) {
+        debug('📋 Showing addon popup:', title);
+        
         const popupHtml = `
             <div class="wcflow-addon-popup">
                 <div class="wcflow-addon-popup-content">
                     <button class="wcflow-addon-popup-close">&times;</button>
                     <h3 class="wcflow-addon-popup-title">${title}</h3>
                     <p class="wcflow-addon-popup-price">${price}</p>
-                    <div class="wcflow-addon-popup-description">${description}</div>
+                    <div class="wcflow-addon-popup-description">${description || 'No description available'}</div>
                 </div>
             </div>
         `;
@@ -344,6 +386,7 @@ jQuery(function($) {
         $(document).off('click', '.wcflow-addon-popup-close, .wcflow-addon-popup').on('click', '.wcflow-addon-popup-close, .wcflow-addon-popup', function(e) {
             if (e.target === this) {
                 $('.wcflow-addon-popup').remove();
+                debug('❌ Addon popup closed');
             }
         });
         
@@ -352,12 +395,12 @@ jQuery(function($) {
             e.stopPropagation();
         });
         
-        debug('Addon popup shown', {title: title});
+        debug('✅ Addon popup shown successfully');
     }
     
     // COMPLETE: Load cards with deselectable functionality
     function loadCardsWithDeselection() {
-        debug('Loading cards with COMPLETE deselectable functionality');
+        debug('🎴 Loading cards with COMPLETE deselectable functionality');
         
         // Load cards from database
         $.ajax({
@@ -369,18 +412,18 @@ jQuery(function($) {
             },
             timeout: 15000,
             success: function(response) {
-                debug('Cards AJAX response received', response);
+                debug('📦 Cards AJAX response received', response);
                 
                 if (response && response.success && response.data) {
-                    debug('Cards data received successfully', response.data);
+                    debug('✅ Cards data received successfully');
                     renderCardsWithDeselection(response.data);
                 } else {
-                    debug('No cards data in response, using fallback');
+                    debug('⚠️ No cards data in response, using fallback');
                     renderFallbackCards();
                 }
             },
             error: function(xhr, status, error) {
-                debug('Cards loading failed', {status: status, error: error, xhr: xhr});
+                debug('❌ Cards loading failed', {status: status, error: error});
                 console.error('Cards AJAX Error:', xhr.responseText);
                 renderFallbackCards();
             }
@@ -389,7 +432,7 @@ jQuery(function($) {
     
     // COMPLETE: Render cards with deselectable functionality
     function renderCardsWithDeselection(cardsByCategory) {
-        debug('Rendering cards with COMPLETE deselectable selection', cardsByCategory);
+        debug('🎨 Rendering cards with COMPLETE deselectable selection', cardsByCategory);
         
         const $container = $('#wcflow-dynamic-cards-container');
         $container.empty();
@@ -403,7 +446,7 @@ jQuery(function($) {
         Object.entries(cardsByCategory).forEach(function([categoryName, cards]) {
             if (!cards || cards.length === 0) return;
             
-            debug('Creating COMPLETE slider for category:', categoryName, 'with', cards.length, 'cards');
+            debug('🎴 Creating COMPLETE slider for category:', categoryName, 'with', cards.length, 'cards');
             
             const sliderHtml = `
                 <section class="greeting-cards-section" role="region" aria-label="${categoryName}" data-category="${categoryName}">
@@ -457,7 +500,7 @@ jQuery(function($) {
             $container.append(sliderHtml);
         });
         
-        debug('All COMPLETE category sliders rendered successfully');
+        debug('✅ All COMPLETE category sliders rendered successfully');
         
         // Initialize card selection after rendering
         setTimeout(function() {
@@ -468,7 +511,7 @@ jQuery(function($) {
     
     // COMPLETE: Setup card selection with deselectable functionality
     function setupCompleteCardSelection() {
-        debug('Setting up COMPLETE card selection with deselection capability');
+        debug('🎯 Setting up COMPLETE card selection with deselection capability');
         
         // Remove any existing handlers to prevent duplicates
         $(document).off('click', '.greeting-card');
@@ -483,7 +526,7 @@ jQuery(function($) {
             const cardId = $clickedCard.data('card-id');
             const cardPrice = $clickedCard.data('price-value');
             
-            debug('Card clicked', {id: cardId, currentlySelected: $clickedCard.hasClass('selected')});
+            debug('🎴 Card clicked', {id: cardId, currentlySelected: $clickedCard.hasClass('selected')});
             
             // COMPLETE: Check if card is already selected
             if ($clickedCard.hasClass('selected')) {
@@ -499,7 +542,7 @@ jQuery(function($) {
                 orderState.card_id = null;
                 orderState.card_message = '';
                 
-                debug('Card deselected', {id: cardId});
+                debug('➖ Card deselected', {id: cardId});
             } else {
                 // Remove selection from all other cards
                 $('.greeting-card').removeClass('selected');
@@ -514,7 +557,7 @@ jQuery(function($) {
                 // Update order state
                 orderState.card_id = cardId;
                 
-                debug('Card selected', {id: cardId, price: cardPrice});
+                debug('➕ Card selected', {id: cardId, price: cardPrice});
             }
             
             updateOrderState();
@@ -529,12 +572,12 @@ jQuery(function($) {
             }
         });
         
-        debug('COMPLETE card selection setup complete');
+        debug('✅ COMPLETE card selection setup complete');
     }
     
     // Render fallback cards when AJAX fails
     function renderFallbackCards() {
-        debug('Rendering fallback cards');
+        debug('🔄 Rendering fallback cards');
         
         const fallbackCards = {
             'Birthday Cards': [
@@ -578,13 +621,13 @@ jQuery(function($) {
     
     // COMPLETE: Initialize all category sliders
     function initializeAllCategorySliders() {
-        debug('Initializing all COMPLETE category sliders...');
+        debug('🔧 Initializing all COMPLETE category sliders...');
         
         $('.greeting-cards-section').each(function() {
             const $section = $(this);
             const categoryName = $section.data('category') || $section.find('.greeting-cards-title').text();
             
-            debug('Initializing COMPLETE slider for category:', categoryName);
+            debug('🎛️ Initializing COMPLETE slider for category:', categoryName);
             
             // Initialize individual slider
             if (window.GreetingCardsSlider) {
@@ -595,7 +638,7 @@ jQuery(function($) {
             }
         });
         
-        debug('All COMPLETE category sliders initialized!');
+        debug('✅ All COMPLETE category sliders initialized!');
     }
     
     // COMPLETE: Fallback slider initialization
@@ -1229,5 +1272,5 @@ jQuery(function($) {
         }
     });
     
-    debug('COMPLETE WCFlow JavaScript initialized with all features working');
+    debug('🎉 COMPLETE WCFlow JavaScript initialized with ALL features working!');
 });
