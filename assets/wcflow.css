@@ -462,58 +462,9 @@ body.wcflow-modal-open {
     color: #333;
 }
 
-/* Navigation Arrows - Overlay style */
-.slider-nav {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 48px;
-    height: 48px;
-    background: #fff;
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    z-index: 10;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.slider-nav:hover {
-    border-color: #333;
-    background: #f8f9fa;
-    transform: translateY(-50%) scale(1.05);
-}
-
-.slider-nav:active {
-    transform: translateY(-50%) scale(0.95);
-}
-
-.slider-nav.disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-    pointer-events: none;
-}
-
-.slider-nav-prev {
-    left: -24px;
-}
-
-.slider-nav-next {
-    right: 20px;
-}
-
-.slider-nav svg {
-    width: 20px;
-    height: 20px;
-    color: #333;
-    transition: color 0.3s ease;
-}
-
-.slider-nav:hover svg {
-    color: #333;
+/* FIXED: Remove side navigation arrows completely */
+.greeting-cards-slider-wrapper .slider-nav {
+    display: none !important;
 }
 
 /* FIXED: Progress bar and controls positioned as in the image */
@@ -557,15 +508,42 @@ body.wcflow-modal-open {
     transform: none;
     width: 40px;
     height: 40px;
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .slider-nav-controls .slider-nav:hover {
+    border-color: #333;
+    background: #f8f9fa;
     transform: scale(1.05);
+}
+
+.slider-nav-controls .slider-nav:active {
+    transform: scale(0.95);
+}
+
+.slider-nav-controls .slider-nav.disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    pointer-events: none;
 }
 
 .slider-nav-controls .slider-nav svg {
     width: 16px;
     height: 16px;
+    color: #333;
+    transition: color 0.3s ease;
+}
+
+.slider-nav-controls .slider-nav:hover svg {
+    color: #333;
 }
 
 /* Message Section */
@@ -1057,22 +1035,14 @@ body.wcflow-modal-open {
         padding-right: 16px;
     }
     
-    .slider-nav {
-        width: 40px;
-        height: 40px;
+    .slider-nav-controls .slider-nav {
+        width: 36px;
+        height: 36px;
     }
     
-    .slider-nav svg {
-        width: 16px;
-        height: 16px;
-    }
-    
-    .slider-nav-prev {
-        left: -20px;
-    }
-    
-    .slider-nav-next {
-        right: 16px;
+    .slider-nav-controls .slider-nav svg {
+        width: 14px;
+        height: 14px;
     }
     
     .greeting-cards-slider-wrapper {
@@ -1133,5 +1103,53 @@ body.wcflow-modal-open {
     
     .slider-progress-container {
         margin-right: 0;
+    }
+}
+
+/* Keyboard Navigation */
+.greeting-card:focus {
+    outline: 2px solid #007cba;
+    outline-offset: 2px;
+}
+
+.slider-nav:focus {
+    outline: 2px solid #007cba;
+    outline-offset: 2px;
+}
+
+/* Loading State */
+.greeting-cards-loading {
+    display: flex;
+    gap: 16px;
+    padding-bottom: 20px;
+}
+
+.greeting-card-skeleton {
+    flex: 0 0 auto;
+    width: 240px;
+    height: 380px;
+    background: #f0f0f0;
+    border-radius: 12px;
+    position: relative;
+    overflow: hidden;
+}
+
+.greeting-card-skeleton::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+    animation: skeleton-loading 1.5s infinite;
+}
+
+@keyframes skeleton-loading {
+    0% {
+        left: -100%;
+    }
+    100% {
+        left: 100%;
     }
 }

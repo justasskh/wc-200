@@ -61,18 +61,6 @@
                     </p>
                     
                     <div class="greeting-cards-slider-wrapper">
-                        <button class="slider-nav slider-nav-prev" aria-label="Previous cards" type="button">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M15 18l-6-6 6-6"/>
-                            </svg>
-                        </button>
-                        
-                        <button class="slider-nav slider-nav-next" aria-label="Next cards" type="button">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M9 18l6-6-6-6"/>
-                            </svg>
-                        </button>
-                        
                         <div class="greeting-cards-slider" role="list">
                             <div class="greeting-card" data-card-id="birthday-1" data-price-value="0" role="listitem" tabindex="0">
                                 <img src="https://images.pexels.com/photos/1666065/pexels-photo-1666065.jpeg?auto=compress&cs=tinysrgb&w=400" alt="Happy Birthday Balloons" class="greeting-card-image" loading="lazy">
@@ -151,18 +139,6 @@
                     </p>
                     
                     <div class="greeting-cards-slider-wrapper">
-                        <button class="slider-nav slider-nav-prev" aria-label="Previous cards" type="button">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M15 18l-6-6 6-6"/>
-                            </svg>
-                        </button>
-                        
-                        <button class="slider-nav slider-nav-next" aria-label="Next cards" type="button">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M9 18l6-6-6-6"/>
-                            </svg>
-                        </button>
-                        
                         <div class="greeting-cards-slider" role="list">
                             <div class="greeting-card" data-card-id="holiday-1" data-price-value="0" role="listitem" tabindex="0">
                                 <img src="https://images.pexels.com/photos/1729931/pexels-photo-1729931.jpeg?auto=compress&cs=tinysrgb&w=400" alt="Season Greetings" class="greeting-card-image" loading="lazy">
@@ -233,18 +209,6 @@
                     </p>
                     
                     <div class="greeting-cards-slider-wrapper">
-                        <button class="slider-nav slider-nav-prev" aria-label="Previous cards" type="button">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M15 18l-6-6 6-6"/>
-                            </svg>
-                        </button>
-                        
-                        <button class="slider-nav slider-nav-next" aria-label="Next cards" type="button">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M9 18l6-6-6-6"/>
-                            </svg>
-                        </button>
-                        
                         <div class="greeting-cards-slider" role="list">
                             <div class="greeting-card" data-card-id="thanks-1" data-price-value="0" role="listitem" tabindex="0">
                                 <img src="https://images.pexels.com/photos/1040173/pexels-photo-1040173.jpeg?auto=compress&cs=tinysrgb&w=400" alt="Thank You So Much" class="greeting-card-image" loading="lazy">
