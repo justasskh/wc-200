@@ -251,7 +251,13 @@ body.wcflow-modal-open {
     cursor: pointer;
     background: #fff;
     position: relative;
-    /* ENHANCED: Non-selected styling */
+    /* ENHANCED: Non-selected styling - only when at least one addon is selected */
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* ENHANCED: Apply dimmed styling only when at least one addon is selected */
+.wcflow-addons-grid.has-selection .wcflow-addon-card:not(.selected) {
     opacity: 0.5;
     transform: scale(0.95);
 }
@@ -266,12 +272,12 @@ body.wcflow-modal-open {
     border-color: #007cba;
     background: #f0f8ff;
     /* ENHANCED: Selected styling - full opacity and scale */
-    opacity: 1;
-    transform: scale(1);
+    opacity: 1 !important;
+    transform: scale(1) !important;
 }
 
 .wcflow-addon-card.selected:hover {
-    transform: translateY(-2px) scale(1.02);
+    transform: translateY(-2px) scale(1.02) !important;
 }
 
 .wcflow-addon-image {

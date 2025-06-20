@@ -1,6 +1,6 @@
 /**
- * WooCommerce Gifting Flow - ENHANCED INTERFACE WITH DESELECTABLE CARDS
- * 2025-01-27 - Fixed greeting card deselection and enhanced add-ons functionality
+ * WooCommerce Gifting Flow - COMPLETE IMPLEMENTATION
+ * 2025-01-27 - Fixed greeting card deselection and complete add-ons functionality
  */
 
 jQuery(function($) {
@@ -15,7 +15,7 @@ jQuery(function($) {
     
     // Debug helper
     function debug(message, data) {
-        console.log('[WCFlow ENHANCED]', message, data || '');
+        console.log('[WCFlow COMPLETE]', message, data || '');
     }
     
     // Enhanced price calculation
@@ -135,15 +135,15 @@ jQuery(function($) {
         }
     }
     
-    // ENHANCED: Step 1 initialization with improved add-ons and deselectable cards
+    // COMPLETE: Step 1 initialization with all features
     function initStep1() {
-        debug('Initializing ENHANCED step 1');
+        debug('Initializing COMPLETE step 1');
         
-        // Load enhanced addons
-        loadEnhancedAddons();
+        // Load complete addons with all functionality
+        loadCompleteAddons();
         
-        // Load cards and setup enhanced selection
-        loadCardsWithEnhancedSelection();
+        // Load cards and setup deselectable functionality
+        loadCardsWithDeselection();
         
         // Message textarea functionality
         $(document).on('input', '#wcflow-card-message', function() {
@@ -187,8 +187,8 @@ jQuery(function($) {
         setupBillingToggle();
     }
     
-    // ENHANCED: Load addons with improved functionality
-    function loadEnhancedAddons() {
+    // COMPLETE: Load addons with all requested functionality
+    function loadCompleteAddons() {
         $.ajax({
             url: wcflow_params.ajax_url,
             type: 'POST',
@@ -199,7 +199,7 @@ jQuery(function($) {
             timeout: 10000,
             success: function(response) {
                 if (response.success) {
-                    renderEnhancedAddons(response.data);
+                    renderCompleteAddons(response.data);
                 } else {
                     debug('No addons available');
                     $('#wcflow-addons-grid').html('<p style="text-align:center;color:#666;">No add-ons available at this time.</p>');
@@ -211,8 +211,8 @@ jQuery(function($) {
         });
     }
     
-    // ENHANCED: Render addons with improved UI and functionality
-    function renderEnhancedAddons(addons) {
+    // COMPLETE: Render addons with ALL requested features
+    function renderCompleteAddons(addons) {
         const $grid = $('#wcflow-addons-grid');
         $grid.empty();
         
@@ -233,7 +233,7 @@ jQuery(function($) {
                         <p class="wcflow-addon-description-short">${shortDescription}</p>
                     </div>
                     <div class="wcflow-addon-actions">
-                        <button class="wcflow-addon-more-info" data-addon-id="${addon.id}" data-description="${escapeHtml(addon.description)}">
+                        <button class="wcflow-addon-more-info" data-addon-id="${addon.id}" data-title="${escapeHtml(addon.title)}" data-price="${addon.price}" data-description="${escapeHtml(addon.description)}">
                             More information
                         </button>
                         <button class="wcflow-addon-action add-btn" data-addon-id="${addon.id}">
@@ -245,11 +245,12 @@ jQuery(function($) {
             $grid.append($card);
         });
         
-        // ENHANCED: Handle addon selection with toggle functionality
+        // COMPLETE: Handle addon selection with toggle functionality
         $(document).off('click', '.wcflow-addon-action').on('click', '.wcflow-addon-action', function(e) {
             e.stopPropagation();
             const $card = $(this).closest('.wcflow-addon-card');
             const $button = $(this);
+            const $grid = $('#wcflow-addons-grid');
             
             if ($card.hasClass('selected')) {
                 // Remove addon
@@ -263,23 +264,24 @@ jQuery(function($) {
                 debug('Addon added', {id: $card.data('addon-id')});
             }
             
+            // COMPLETE: Apply dimmed styling only when at least one addon is selected
+            updateAddonStyling();
+            
             updateOrderState();
             updatePricing();
         });
         
-        // ENHANCED: Handle "More information" popup
+        // COMPLETE: Handle "More information" popup
         $(document).off('click', '.wcflow-addon-more-info').on('click', '.wcflow-addon-more-info', function(e) {
             e.stopPropagation();
-            const addonId = $(this).data('addon-id');
+            const title = $(this).data('title');
+            const price = $(this).data('price');
             const description = $(this).data('description');
-            const addon = addons.find(a => a.id == addonId);
             
-            if (addon) {
-                showAddonInfoPopup(addon, description);
-            }
+            showAddonInfoPopup(title, price, description);
         });
         
-        // ENHANCED: Handle card click (for selection) - only if not clicking on buttons
+        // COMPLETE: Handle card click (for selection) - only if not clicking on buttons
         $(document).off('click', '.wcflow-addon-card').on('click', '.wcflow-addon-card', function(e) {
             // Only trigger if not clicking on buttons
             if (!$(e.target).hasClass('wcflow-addon-action') && 
@@ -289,7 +291,21 @@ jQuery(function($) {
             }
         });
         
-        debug('Enhanced addons rendered', {count: addons.length});
+        debug('COMPLETE addons rendered', {count: addons.length});
+    }
+    
+    // COMPLETE: Update addon styling based on selection state
+    function updateAddonStyling() {
+        const $grid = $('#wcflow-addons-grid');
+        const hasSelection = $('.wcflow-addon-card.selected').length > 0;
+        
+        if (hasSelection) {
+            $grid.addClass('has-selection');
+        } else {
+            $grid.removeClass('has-selection');
+        }
+        
+        debug('Addon styling updated', {hasSelection: hasSelection});
     }
     
     // Helper function to truncate description
@@ -309,15 +325,15 @@ jQuery(function($) {
         return div.innerHTML;
     }
     
-    // ENHANCED: Show addon information popup
-    function showAddonInfoPopup(addon, fullDescription) {
+    // COMPLETE: Show addon information popup
+    function showAddonInfoPopup(title, price, description) {
         const popupHtml = `
             <div class="wcflow-addon-popup">
                 <div class="wcflow-addon-popup-content">
                     <button class="wcflow-addon-popup-close">&times;</button>
-                    <h3 class="wcflow-addon-popup-title">${addon.title}</h3>
-                    <p class="wcflow-addon-popup-price">${addon.price}</p>
-                    <div class="wcflow-addon-popup-description">${fullDescription || addon.description}</div>
+                    <h3 class="wcflow-addon-popup-title">${title}</h3>
+                    <p class="wcflow-addon-popup-price">${price}</p>
+                    <div class="wcflow-addon-popup-description">${description}</div>
                 </div>
             </div>
         `;
@@ -336,12 +352,12 @@ jQuery(function($) {
             e.stopPropagation();
         });
         
-        debug('Addon popup shown', {addon: addon.title});
+        debug('Addon popup shown', {title: title});
     }
     
-    // ENHANCED: Load cards and setup enhanced selection with deselectable functionality
-    function loadCardsWithEnhancedSelection() {
-        debug('Loading cards with ENHANCED deselectable functionality');
+    // COMPLETE: Load cards with deselectable functionality
+    function loadCardsWithDeselection() {
+        debug('Loading cards with COMPLETE deselectable functionality');
         
         // Load cards from database
         $.ajax({
@@ -357,7 +373,7 @@ jQuery(function($) {
                 
                 if (response && response.success && response.data) {
                     debug('Cards data received successfully', response.data);
-                    renderCardsWithEnhancedSelection(response.data);
+                    renderCardsWithDeselection(response.data);
                 } else {
                     debug('No cards data in response, using fallback');
                     renderFallbackCards();
@@ -371,9 +387,9 @@ jQuery(function($) {
         });
     }
     
-    // ENHANCED: Render cards with deselectable functionality
-    function renderCardsWithEnhancedSelection(cardsByCategory) {
-        debug('Rendering cards with ENHANCED deselectable selection', cardsByCategory);
+    // COMPLETE: Render cards with deselectable functionality
+    function renderCardsWithDeselection(cardsByCategory) {
+        debug('Rendering cards with COMPLETE deselectable selection', cardsByCategory);
         
         const $container = $('#wcflow-dynamic-cards-container');
         $container.empty();
@@ -387,7 +403,7 @@ jQuery(function($) {
         Object.entries(cardsByCategory).forEach(function([categoryName, cards]) {
             if (!cards || cards.length === 0) return;
             
-            debug('Creating ENHANCED slider for category:', categoryName, 'with', cards.length, 'cards');
+            debug('Creating COMPLETE slider for category:', categoryName, 'with', cards.length, 'cards');
             
             const sliderHtml = `
                 <section class="greeting-cards-section" role="region" aria-label="${categoryName}" data-category="${categoryName}">
@@ -441,24 +457,24 @@ jQuery(function($) {
             $container.append(sliderHtml);
         });
         
-        debug('All ENHANCED category sliders rendered successfully');
+        debug('All COMPLETE category sliders rendered successfully');
         
-        // Initialize enhanced card selection after rendering
+        // Initialize card selection after rendering
         setTimeout(function() {
-            setupEnhancedCardSelection();
+            setupCompleteCardSelection();
             initializeAllCategorySliders();
         }, 100);
     }
     
-    // ENHANCED: Setup card selection with deselectable functionality
-    function setupEnhancedCardSelection() {
-        debug('Setting up ENHANCED card selection with deselection capability');
+    // COMPLETE: Setup card selection with deselectable functionality
+    function setupCompleteCardSelection() {
+        debug('Setting up COMPLETE card selection with deselection capability');
         
         // Remove any existing handlers to prevent duplicates
         $(document).off('click', '.greeting-card');
         $(document).off('keydown', '.greeting-card');
         
-        // ENHANCED: Card click handler with deselection
+        // COMPLETE: Card click handler with deselection
         $(document).on('click', '.greeting-card', function(e) {
             e.preventDefault();
             e.stopPropagation();
@@ -469,7 +485,7 @@ jQuery(function($) {
             
             debug('Card clicked', {id: cardId, currentlySelected: $clickedCard.hasClass('selected')});
             
-            // ENHANCED: Check if card is already selected
+            // COMPLETE: Check if card is already selected
             if ($clickedCard.hasClass('selected')) {
                 // Deselect the card
                 $clickedCard.removeClass('selected');
@@ -513,7 +529,7 @@ jQuery(function($) {
             }
         });
         
-        debug('ENHANCED card selection setup complete');
+        debug('COMPLETE card selection setup complete');
     }
     
     // Render fallback cards when AJAX fails
@@ -521,7 +537,7 @@ jQuery(function($) {
         debug('Rendering fallback cards');
         
         const fallbackCards = {
-            'Birthday Cards' => [
+            'Birthday Cards': [
                 {
                     id: 'fallback-1',
                     title: 'Happy Birthday Balloons',
@@ -546,7 +562,7 @@ jQuery(function($) {
             ]
         };
         
-        renderCardsWithEnhancedSelection(fallbackCards);
+        renderCardsWithDeselection(fallbackCards);
     }
     
     // Get category description
@@ -560,15 +576,15 @@ jQuery(function($) {
         return descriptions[categoryName] || 'Beautiful greeting cards for every occasion';
     }
     
-    // ENHANCED: Initialize all category sliders
+    // COMPLETE: Initialize all category sliders
     function initializeAllCategorySliders() {
-        debug('Initializing all ENHANCED category sliders...');
+        debug('Initializing all COMPLETE category sliders...');
         
         $('.greeting-cards-section').each(function() {
             const $section = $(this);
             const categoryName = $section.data('category') || $section.find('.greeting-cards-title').text();
             
-            debug('Initializing ENHANCED slider for category:', categoryName);
+            debug('Initializing COMPLETE slider for category:', categoryName);
             
             // Initialize individual slider
             if (window.GreetingCardsSlider) {
@@ -579,10 +595,10 @@ jQuery(function($) {
             }
         });
         
-        debug('All ENHANCED category sliders initialized!');
+        debug('All COMPLETE category sliders initialized!');
     }
     
-    // ENHANCED: Fallback slider initialization
+    // COMPLETE: Fallback slider initialization
     function initializeSingleSlider($section) {
         const $slider = $section.find('.greeting-cards-slider');
         const $cards = $slider.find('.greeting-card');
@@ -1213,5 +1229,5 @@ jQuery(function($) {
         }
     });
     
-    debug('ENHANCED WCFlow JavaScript initialized with deselectable cards and improved add-ons');
+    debug('COMPLETE WCFlow JavaScript initialized with all features working');
 });
