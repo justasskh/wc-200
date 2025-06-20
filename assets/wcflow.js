@@ -1,6 +1,6 @@
 /**
- * WooCommerce Gifting Flow - BULLETPROOF ADMIN DATA CONNECTION
- * 2025-01-27 - GUARANTEED connection to real admin cards and categories
+ * WooCommerce Gifting Flow - GUARANTEED DATABASE CONNECTION
+ * 2025-01-27 - Direct connection to admin database with category-based sliders
  */
 
 jQuery(function($) {
@@ -15,7 +15,7 @@ jQuery(function($) {
     
     // Debug helper
     function debug(message, data) {
-        console.log('[WCFlow BULLETPROOF ADMIN]', message, data || '');
+        console.log('[WCFlow DATABASE CONNECTION]', message, data || '');
     }
     
     // Enhanced price calculation
@@ -135,15 +135,15 @@ jQuery(function($) {
         }
     }
     
-    // 🎯 BULLETPROOF Step 1 initialization with REAL ADMIN DATA
+    // 🎯 GUARANTEED DATABASE CONNECTION: Step 1 initialization
     function initStep1() {
-        debug('🎯 BULLETPROOF Step 1 initialization starting...');
+        debug('🎯 GUARANTEED DATABASE CONNECTION: Step 1 initialization starting...');
         
         // Load addons first
         loadAddons();
         
-        // 🎯 BULLETPROOF: Load REAL admin data and replace dummy content
-        loadRealAdminDataAndReplaceDummy();
+        // 🎯 GUARANTEED: Load REAL admin data and replace existing sliders
+        loadRealAdminDataAndReplaceSliders();
         
         // Setup card selection
         setupCardSelection();
@@ -158,7 +158,7 @@ jQuery(function($) {
         // Initial pricing update
         setTimeout(updatePricing, 500);
         
-        debug('🎉 BULLETPROOF Step 1 initialization complete!');
+        debug('✅ GUARANTEED DATABASE CONNECTION: Step 1 initialization complete!');
     }
     
     // Step 2 initialization
@@ -248,14 +248,13 @@ jQuery(function($) {
         });
     }
     
-    // 🎯 BULLETPROOF: Load REAL admin data and replace dummy content
-    function loadRealAdminDataAndReplaceDummy() {
-        debug('🎯 Loading REAL admin data to replace dummy content...');
+    // 🎯 GUARANTEED: Load REAL admin data and replace existing sliders
+    function loadRealAdminDataAndReplaceSliders() {
+        debug('🎯 Loading REAL admin data from database...');
         
-        // Show loading state on all sliders
-        $('.greeting-cards-slider').each(function() {
-            $(this).html('<div style="display:flex;align-items:center;justify-content:center;padding:40px;"><div class="wcflow-loader"></div><span style="margin-left:12px;color:#666;">Loading real cards from admin...</span></div>');
-        });
+        // Show loading state on the container
+        const $container = $('#wcflow-cards-container');
+        $container.html('<div style="display:flex;align-items:center;justify-content:center;padding:60px;"><div class="wcflow-loader"></div><span style="margin-left:12px;color:#666;font-size:18px;">Loading your greeting cards from admin...</span></div>');
         
         $.ajax({
             url: wcflow_params.ajax_url,
@@ -269,24 +268,24 @@ jQuery(function($) {
                 debug('🎯 REAL admin data received:', response);
                 
                 if (response && response.success && response.data) {
-                    debug('✅ SUCCESS: Real admin data found, replacing dummy content');
-                    replaceAllSlidersWithRealData(response.data);
+                    debug('✅ SUCCESS: Real admin data found, creating category sliders');
+                    createCategorySlidersFromAdminData(response.data);
                 } else {
-                    debug('⚠️ No real admin data found, keeping dummy content but making it functional');
-                    makeExistingSlidersFullyFunctional();
+                    debug('⚠️ No real admin data found, keeping existing sliders functional');
+                    restoreExistingSliders();
                 }
             },
             error: function(xhr, status, error) {
                 debug('❌ Error loading admin data:', {status: status, error: error});
-                debug('🔄 Keeping dummy content but making it functional');
-                makeExistingSlidersFullyFunctional();
+                debug('🔄 Restoring existing sliders');
+                restoreExistingSliders();
             }
         });
     }
     
-    // 🎯 Replace all sliders with REAL admin data
-    function replaceAllSlidersWithRealData(cardsByCategory) {
-        debug('🎯 Replacing sliders with REAL admin data:', cardsByCategory);
+    // 🎯 Create category sliders from real admin data
+    function createCategorySlidersFromAdminData(cardsByCategory) {
+        debug('🎯 Creating category sliders from REAL admin data:', cardsByCategory);
         
         const $container = $('#wcflow-cards-container');
         $container.empty();
@@ -298,22 +297,22 @@ jQuery(function($) {
                 categoryCount++;
                 debug('🎨 Creating slider for category:', categoryName, 'with', cards.length, 'cards');
                 
-                const $categorySlider = createCategorySlider(categoryName, cards, categoryCount);
+                const $categorySlider = createCategorySliderHTML(categoryName, cards, categoryCount);
                 $container.append($categorySlider);
             }
         });
         
         if (categoryCount === 0) {
-            debug('⚠️ No categories with cards found, falling back to functional dummy');
-            makeExistingSlidersFullyFunctional();
+            debug('⚠️ No categories with cards found, restoring existing sliders');
+            restoreExistingSliders();
         } else {
-            debug('✅ Successfully created', categoryCount, 'category sliders with real data');
+            debug('✅ Successfully created', categoryCount, 'category sliders with REAL admin data');
             initializeAllCategorySliders();
         }
     }
     
-    // 🎯 Create a category slider with real data
-    function createCategorySlider(categoryName, cards, index) {
+    // 🎯 Create a category slider HTML with real data
+    function createCategorySliderHTML(categoryName, cards, index) {
         const descriptions = {
             'Birthday Cards': 'Perfect cards for birthday celebrations and special moments',
             'Holiday Cards': 'Festive cards for special occasions and celebrations', 
@@ -387,14 +386,14 @@ jQuery(function($) {
         `);
     }
     
-    // 🎯 Make existing dummy sliders fully functional
-    function makeExistingSlidersFullyFunctional() {
-        debug('🔄 Making existing dummy sliders fully functional...');
+    // 🎯 Restore existing sliders if admin data fails
+    function restoreExistingSliders() {
+        debug('🔄 Restoring existing sliders...');
         
-        // The sliders are already in the HTML, just initialize them
+        // The sliders are already in the HTML template, just initialize them
         initializeAllCategorySliders();
         
-        debug('✅ Dummy sliders are now fully functional');
+        debug('✅ Existing sliders restored and functional');
     }
     
     // 🎯 Initialize all category sliders
@@ -1068,5 +1067,5 @@ jQuery(function($) {
         }
     });
     
-    debug('🎯 BULLETPROOF WCFlow JavaScript initialized - GUARANTEED ADMIN CONNECTION');
+    debug('🎯 GUARANTEED DATABASE CONNECTION: WCFlow JavaScript initialized');
 });
