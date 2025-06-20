@@ -1,6 +1,6 @@
 /**
- * WooCommerce Gifting Flow - DATABASE CONNECTED INTERFACE
- * 2025-01-27 - Real database connection with category-based sliders
+ * WooCommerce Gifting Flow - ENHANCED INTERFACE WITH DESELECTABLE CARDS
+ * 2025-01-27 - Fixed greeting card deselection and enhanced add-ons functionality
  */
 
 jQuery(function($) {
@@ -15,7 +15,7 @@ jQuery(function($) {
     
     // Debug helper
     function debug(message, data) {
-        console.log('[WCFlow DATABASE]', message, data || '');
+        console.log('[WCFlow ENHANCED]', message, data || '');
     }
     
     // Enhanced price calculation
@@ -135,11 +135,11 @@ jQuery(function($) {
         }
     }
     
-    // Step 1 initialization with database connection
+    // ENHANCED: Step 1 initialization with improved add-ons and deselectable cards
     function initStep1() {
-        debug('Initializing DATABASE CONNECTED step 1');
+        debug('Initializing ENHANCED step 1');
         
-        // Load addons with enhanced functionality
+        // Load enhanced addons
         loadEnhancedAddons();
         
         // Setup enhanced card selection (deselectable)
@@ -211,7 +211,7 @@ jQuery(function($) {
         });
     }
     
-    // ENHANCED: Render addons with improved UI
+    // ENHANCED: Render addons with improved UI and functionality
     function renderEnhancedAddons(addons) {
         const $grid = $('#wcflow-addons-grid');
         $grid.empty();
@@ -228,17 +228,23 @@ jQuery(function($) {
                     <div class="wcflow-addon-content">
                         <h3 class="wcflow-addon-title">${addon.title}</h3>
                         <p class="wcflow-addon-price">${addon.price}</p>
-                        <p class="wcflow-addon-description">${addon.description}</p>
+                        <p class="wcflow-addon-description-short">${truncateDescription(addon.description)}</p>
                     </div>
-                    <button class="wcflow-addon-more-info" data-addon-id="${addon.id}">More information</button>
-                    <button class="wcflow-addon-action add-btn" data-addon-id="${addon.id}">Add</button>
+                    <div class="wcflow-addon-actions">
+                        <button class="wcflow-addon-more-info" data-addon-id="${addon.id}" data-description="${escapeHtml(addon.description)}">
+                            More information
+                        </button>
+                        <button class="wcflow-addon-action add-btn" data-addon-id="${addon.id}">
+                            Add
+                        </button>
+                    </div>
                 </div>
             `);
             $grid.append($card);
         });
         
         // ENHANCED: Handle addon selection with toggle functionality
-        $(document).on('click', '.wcflow-addon-action', function(e) {
+        $(document).off('click', '.wcflow-addon-action').on('click', '.wcflow-addon-action', function(e) {
             e.stopPropagation();
             const $card = $(this).closest('.wcflow-addon-card');
             const $button = $(this);
@@ -247,10 +253,12 @@ jQuery(function($) {
                 // Remove addon
                 $card.removeClass('selected');
                 $button.removeClass('remove-btn').addClass('add-btn').text('Add');
+                debug('Addon removed', {id: $card.data('addon-id')});
             } else {
                 // Add addon
                 $card.addClass('selected');
                 $button.removeClass('add-btn').addClass('remove-btn').text('Remove');
+                debug('Addon added', {id: $card.data('addon-id')});
             }
             
             updateOrderState();
@@ -258,34 +266,56 @@ jQuery(function($) {
         });
         
         // ENHANCED: Handle "More information" popup
-        $(document).on('click', '.wcflow-addon-more-info', function(e) {
+        $(document).off('click', '.wcflow-addon-more-info').on('click', '.wcflow-addon-more-info', function(e) {
             e.stopPropagation();
             const addonId = $(this).data('addon-id');
+            const description = $(this).data('description');
             const addon = addons.find(a => a.id == addonId);
             
             if (addon) {
-                showAddonInfoPopup(addon);
+                showAddonInfoPopup(addon, description);
             }
         });
         
-        // ENHANCED: Handle card click (for selection)
-        $(document).on('click', '.wcflow-addon-card', function(e) {
+        // ENHANCED: Handle card click (for selection) - only if not clicking on buttons
+        $(document).off('click', '.wcflow-addon-card').on('click', '.wcflow-addon-card', function(e) {
             // Only trigger if not clicking on buttons
-            if (!$(e.target).hasClass('wcflow-addon-action') && !$(e.target).hasClass('wcflow-addon-more-info')) {
+            if (!$(e.target).hasClass('wcflow-addon-action') && 
+                !$(e.target).hasClass('wcflow-addon-more-info') &&
+                !$(e.target).closest('.wcflow-addon-actions').length) {
                 $(this).find('.wcflow-addon-action').click();
             }
         });
+        
+        debug('Enhanced addons rendered', {count: addons.length});
+    }
+    
+    // Helper function to truncate description
+    function truncateDescription(description) {
+        if (!description) return 'No description available';
+        const words = description.split(' ');
+        if (words.length > 15) {
+            return words.slice(0, 15).join(' ') + '...';
+        }
+        return description;
+    }
+    
+    // Helper function to escape HTML
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
     }
     
     // ENHANCED: Show addon information popup
-    function showAddonInfoPopup(addon) {
+    function showAddonInfoPopup(addon, fullDescription) {
         const popupHtml = `
             <div class="wcflow-addon-popup">
                 <div class="wcflow-addon-popup-content">
                     <button class="wcflow-addon-popup-close">&times;</button>
                     <h3 class="wcflow-addon-popup-title">${addon.title}</h3>
                     <p class="wcflow-addon-popup-price">${addon.price}</p>
-                    <div class="wcflow-addon-popup-description">${addon.description}</div>
+                    <div class="wcflow-addon-popup-description">${fullDescription || addon.description}</div>
                 </div>
             </div>
         `;
@@ -293,17 +323,33 @@ jQuery(function($) {
         $('body').append(popupHtml);
         
         // Close popup handlers
-        $(document).on('click', '.wcflow-addon-popup-close, .wcflow-addon-popup', function(e) {
+        $(document).off('click', '.wcflow-addon-popup-close, .wcflow-addon-popup').on('click', '.wcflow-addon-popup-close, .wcflow-addon-popup', function(e) {
             if (e.target === this) {
                 $('.wcflow-addon-popup').remove();
             }
         });
+        
+        // Prevent popup content clicks from closing
+        $(document).off('click', '.wcflow-addon-popup-content').on('click', '.wcflow-addon-popup-content', function(e) {
+            e.stopPropagation();
+        });
+        
+        debug('Addon popup shown', {addon: addon.title});
     }
     
     // ENHANCED: Setup card selection with deselectable functionality
     function setupEnhancedCardSelection() {
-        $(document).on('click', '.greeting-card', function() {
+        debug('Setting up enhanced card selection with deselection capability');
+        
+        $(document).off('click', '.greeting-card').on('click', '.greeting-card', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
             const $clickedCard = $(this);
+            const cardId = $clickedCard.data('card-id');
+            const cardPrice = $clickedCard.data('price-value');
+            
+            debug('Card clicked', {id: cardId, currentlySelected: $clickedCard.hasClass('selected')});
             
             // ENHANCED: Check if card is already selected
             if ($clickedCard.hasClass('selected')) {
@@ -319,7 +365,7 @@ jQuery(function($) {
                 orderState.card_id = null;
                 orderState.card_message = '';
                 
-                debug('Card deselected');
+                debug('Card deselected', {id: cardId});
             } else {
                 // Remove selection from all other cards
                 $('.greeting-card').removeClass('selected');
@@ -331,15 +377,25 @@ jQuery(function($) {
                 $('#wcflow-card-message').prop('disabled', false);
                 $('.wcflow-message-note').hide();
                 
-                debug('Card selected', {
-                    id: $clickedCard.data('card-id'),
-                    price: $clickedCard.data('price-value')
-                });
+                // Update order state
+                orderState.card_id = cardId;
+                
+                debug('Card selected', {id: cardId, price: cardPrice});
             }
             
             updateOrderState();
             updatePricing();
         });
+        
+        // Also handle keyboard events for accessibility
+        $(document).off('keydown', '.greeting-card').on('keydown', '.greeting-card', function(e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                $(this).click();
+            }
+        });
+        
+        debug('Enhanced card selection setup complete');
     }
     
     // Initialize floating labels
@@ -921,5 +977,5 @@ jQuery(function($) {
         }
     });
     
-    debug('DATABASE CONNECTED WCFlow JavaScript initialized');
+    debug('ENHANCED WCFlow JavaScript initialized with deselectable cards and improved add-ons');
 });

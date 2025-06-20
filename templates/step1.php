@@ -1,7 +1,7 @@
 <?php
 /**
- * WooCommerce Gifting Flow Step 1 - DATABASE CONNECTED with Category Sliders
- * Updated: 2025-01-27 - Real database connection with separate sliders per category
+ * WooCommerce Gifting Flow Step 1 - ENHANCED with Deselectable Cards and Improved Add-ons
+ * Updated: 2025-01-27 - Fixed greeting card deselection and enhanced add-ons functionality
  */
 ?>
 <div class="wcflow-modal wcflow-fullscreen" data-step="1">
@@ -39,7 +39,7 @@
             <h2 class="wcflow-main-title">They're going to love it</h2>
             <p class="wcflow-subtitle">Add some extras to make your gift even more special</p>
             
-            <!-- ENHANCED: Add-ons Gallery with improved spacing -->
+            <!-- ENHANCED: Add-ons Gallery with improved spacing and functionality -->
             <div class="wcflow-addons-gallery">
                 <div id="wcflow-addons-grid" class="wcflow-addons-grid">
                     <div class="wcflow-loader"></div>
@@ -101,9 +101,9 @@
 </div>
 
 <script>
-// DATABASE CONNECTION: Load cards dynamically from admin dashboard
+// ENHANCED: Load cards dynamically from admin dashboard with deselectable functionality
 jQuery(document).ready(function($) {
-    console.log('🎯 Loading cards from database...');
+    console.log('🎯 Loading ENHANCED cards from database...');
     
     // Load cards from database via AJAX
     $.ajax({
@@ -140,9 +140,9 @@ jQuery(document).ready(function($) {
         }
     });
     
-    // Render category sliders dynamically
+    // ENHANCED: Render category sliders dynamically with deselectable cards
     function renderDynamicCategorySliders(cardsByCategory) {
-        console.log('🎨 Rendering category sliders:', Object.keys(cardsByCategory));
+        console.log('🎨 Rendering ENHANCED category sliders:', Object.keys(cardsByCategory));
         
         const $container = $('#wcflow-dynamic-cards-container');
         $container.empty();
@@ -160,7 +160,7 @@ jQuery(document).ready(function($) {
         Object.entries(cardsByCategory).forEach(function([categoryName, cards]) {
             if (!cards || cards.length === 0) return;
             
-            console.log('🎴 Creating slider for category:', categoryName, 'with', cards.length, 'cards');
+            console.log('🎴 Creating ENHANCED slider for category:', categoryName, 'with', cards.length, 'cards');
             
             const categorySlug = categoryName.toLowerCase().replace(/[^a-z0-9]/g, '-');
             
@@ -216,7 +216,7 @@ jQuery(document).ready(function($) {
             $container.append(sliderHtml);
         });
         
-        console.log('✅ All category sliders rendered successfully');
+        console.log('✅ All ENHANCED category sliders rendered successfully');
         
         // Initialize sliders after rendering
         setTimeout(function() {
@@ -237,15 +237,15 @@ jQuery(document).ready(function($) {
         return descriptions[categoryName] || 'Beautiful greeting cards for every occasion';
     }
     
-    // Initialize all category sliders
+    // ENHANCED: Initialize all category sliders with deselectable functionality
     function initializeAllCategorySliders() {
-        console.log('🔧 Initializing all category sliders...');
+        console.log('🔧 Initializing all ENHANCED category sliders...');
         
         $('.greeting-cards-section').each(function() {
             const $section = $(this);
             const categoryName = $section.data('category') || $section.find('.greeting-cards-title').text();
             
-            console.log('🎛️ Initializing slider for category:', categoryName);
+            console.log('🎛️ Initializing ENHANCED slider for category:', categoryName);
             
             // Initialize individual slider
             if (window.GreetingCardsSlider) {
@@ -256,10 +256,10 @@ jQuery(document).ready(function($) {
             }
         });
         
-        console.log('✅ All category sliders initialized!');
+        console.log('✅ All ENHANCED category sliders initialized!');
     }
     
-    // Fallback slider initialization
+    // ENHANCED: Fallback slider initialization with deselectable cards
     function initializeSingleSlider($section) {
         const $slider = $section.find('.greeting-cards-slider');
         const $cards = $slider.find('.greeting-card');
