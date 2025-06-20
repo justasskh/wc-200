@@ -6,13 +6,6 @@
 
 if (!defined('ABSPATH')) exit;
 
-// Debug logging helper
-function wcflow_log($message) {
-    if (get_option('wcflow_enable_debug') === 'yes' || (defined('WP_DEBUG') && WP_DEBUG)) {
-        error_log('[WooCommerce Gifting Flow] ' . $message);
-    }
-}
-
 // FIXED: Start flow with proper WooCommerce shipping calculation
 function wcflow_start_flow() {
     try {
