@@ -1,6 +1,6 @@
 /**
  * WooCommerce Gifting Flow - ENHANCED USER INTERFACE
- * 2025-01-27 - Deselectable cards, enhanced add-ons, removed side arrows
+ * 2025-01-27 - Deselectable cards, enhanced add-ons, improved functionality
  */
 
 jQuery(function($) {
@@ -45,9 +45,9 @@ jQuery(function($) {
         $('#wcflow-dynamic-total').text(currencySymbol + total.toFixed(2));
         
         if (shippingPrice > 0) {
-            $('#wcflow-shipping-details').text('Įskaičiuotas ' + currencySymbol + shippingPrice.toFixed(2) + ' pristatymo mokestis');
+            $('#wcflow-shipping-details').text('Including ' + currencySymbol + shippingPrice.toFixed(2) + ' delivery');
         } else {
-            $('#wcflow-shipping-details').text('Nemokamas pristatymas');
+            $('#wcflow-shipping-details').text('Free delivery included');
         }
         
         // Store in order state
@@ -142,11 +142,11 @@ jQuery(function($) {
         // Load addons with enhanced functionality
         loadEnhancedAddons();
         
-        // Load cards and initialize slider (without side arrows)
-        loadCardsWithSlider();
-        
         // Setup enhanced card selection (deselectable)
         setupEnhancedCardSelection();
+        
+        // Initialize all category sliders
+        initializeAllCategorySliders();
         
         // Message textarea functionality
         $(document).on('input', '#wcflow-card-message', function() {
@@ -303,165 +303,6 @@ jQuery(function($) {
         });
     }
     
-    // Load cards with slider (no side arrows)
-    function loadCardsWithSlider() {
-        const $slider = $('#wcflow-cards-slider');
-        if ($slider.length) {
-            $slider.html('<div class="wcflow-loader"></div>');
-        }
-        
-        debug('Starting to load cards...');
-        
-        $.ajax({
-            url: wcflow_params.ajax_url,
-            type: 'POST',
-            data: {
-                action: 'wcflow_get_cards',
-                nonce: wcflow_params.nonce
-            },
-            timeout: 15000,
-            success: function(response) {
-                debug('Cards AJAX response received', response);
-                
-                if (response && response.success && response.data) {
-                    debug('Cards data received successfully', response.data);
-                    renderCardsInSlider(response.data);
-                    setTimeout(initializeAllCategorySliders, 200);
-                } else {
-                    debug('No cards data in response, using fallback');
-                    renderFallbackCards();
-                }
-            },
-            error: function(xhr, status, error) {
-                debug('Cards loading failed', {status: status, error: error, xhr: xhr});
-                console.error('Cards AJAX Error:', xhr.responseText);
-                renderFallbackCards();
-            }
-        });
-    }
-    
-    // Render fallback cards when AJAX fails
-    function renderFallbackCards() {
-        debug('Rendering fallback cards');
-        
-        const fallbackCards = {
-            'Birthday Cards': [
-                {
-                    id: 'fallback-1',
-                    title: 'Happy Birthday Balloons',
-                    price: 'FREE',
-                    price_value: 0,
-                    img: 'https://images.pexels.com/photos/1666065/pexels-photo-1666065.jpeg?auto=compress&cs=tinysrgb&w=400'
-                },
-                {
-                    id: 'fallback-2',
-                    title: 'Birthday Cake Celebration',
-                    price: '€1.50',
-                    price_value: 1.50,
-                    img: 'https://images.pexels.com/photos/1040173/pexels-photo-1040173.jpeg?auto=compress&cs=tinysrgb&w=400'
-                },
-                {
-                    id: 'fallback-3',
-                    title: 'Birthday Wishes',
-                    price: '€2.50',
-                    price_value: 2.50,
-                    img: 'https://images.pexels.com/photos/1729931/pexels-photo-1729931.jpeg?auto=compress&cs=tinysrgb&w=400'
-                }
-            ]
-        };
-        
-        renderCardsInSlider(fallbackCards);
-        setTimeout(initializeAllCategorySliders, 200);
-    }
-    
-    // Render cards in slider format
-    function renderCardsInSlider(cardsByCategory) {
-        const $container = $('#wcflow-cards-container');
-        if (!$container.length) return;
-        
-        $container.empty();
-        
-        debug('Rendering cards in slider', cardsByCategory);
-        
-        if (!cardsByCategory || Object.keys(cardsByCategory).length === 0) {
-            $container.html('<p style="text-align:center;color:#666;padding:40px;">No cards available at this time.</p>');
-            return;
-        }
-        
-        // Render each category as a separate slider
-        Object.entries(cardsByCategory).forEach(function([categoryName, cards], index) {
-            if (cards && cards.length > 0) {
-                const $categorySlider = createCategorySliderHTML(categoryName, cards, index);
-                $container.append($categorySlider);
-            }
-        });
-        
-        debug('Cards rendered successfully');
-    }
-    
-    // Create a category slider HTML
-    function createCategorySliderHTML(categoryName, cards, index) {
-        const descriptions = {
-            'Birthday Cards': 'Perfect cards for birthday celebrations and special moments',
-            'Holiday Cards': 'Festive cards for special occasions and celebrations', 
-            'Thank You Cards': 'Express your gratitude with these beautiful cards'
-        };
-        
-        const description = descriptions[categoryName] || `Beautiful ${categoryName.toLowerCase()} for every occasion`;
-        
-        let cardsHtml = '';
-        cards.forEach(function(card) {
-            cardsHtml += `
-                <div class="greeting-card" data-card-id="${card.id}" data-price-value="${card.price_value}" role="listitem" tabindex="0">
-                    <img src="${card.img}" alt="${card.title}" class="greeting-card-image" loading="lazy">
-                    <div class="greeting-card-content">
-                        <h4 class="greeting-card-title">${card.title}</h4>
-                        <p class="greeting-card-price ${card.price_value == 0 ? 'free' : ''}">${card.price}</p>
-                    </div>
-                </div>
-            `;
-        });
-        
-        return $(`
-            <section class="greeting-cards-section" role="region" aria-label="${categoryName}" data-category="${categoryName}">
-                <div class="greeting-cards-container">
-                    <div class="greeting-cards-header">
-                        <h2 class="greeting-cards-title">${categoryName}</h2>
-                        <a href="#" class="greeting-cards-see-all">See all</a>
-                    </div>
-                    
-                    <p class="greeting-cards-description">${description}</p>
-                    
-                    <div class="greeting-cards-slider-wrapper">
-                        <div class="greeting-cards-slider" role="list">
-                            ${cardsHtml}
-                        </div>
-                    </div>
-                    
-                    <div class="slider-controls">
-                        <div class="slider-progress-container">
-                            <div class="slider-progress-bar" role="progressbar" aria-label="Slider progress">
-                                <div class="slider-progress-fill"></div>
-                            </div>
-                        </div>
-                        <div class="slider-nav-controls">
-                            <button class="slider-nav slider-nav-prev" aria-label="Previous" type="button">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M15 18l-6-6 6-6"/>
-                                </svg>
-                            </button>
-                            <button class="slider-nav slider-nav-next" aria-label="Next" type="button">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M9 18l6-6-6-6"/>
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </section>
-        `);
-    }
-    
     // Initialize all category sliders
     function initializeAllCategorySliders() {
         debug('Initializing all category sliders...');
@@ -478,7 +319,7 @@ jQuery(function($) {
         debug('All category sliders initialized!');
     }
     
-    // Initialize a single slider (without side arrows)
+    // Initialize a single slider
     function initializeSingleSlider($section) {
         const $slider = $section.find('.greeting-cards-slider');
         const $cards = $slider.find('.greeting-card');
@@ -498,7 +339,7 @@ jQuery(function($) {
             const translateX = -currentIndex * cardWidth;
             $slider.css('transform', `translateX(${translateX}px)`);
             
-            // Update navigation (only progress bar controls)
+            // Update navigation
             $section.find('.slider-nav-prev').toggleClass('disabled', currentIndex === 0);
             $section.find('.slider-nav-next').toggleClass('disabled', currentIndex >= maxIndex);
             
@@ -507,7 +348,7 @@ jQuery(function($) {
             $section.find('.slider-progress-fill').css('width', progress + '%');
         }
         
-        // Navigation handlers (only for progress bar controls)
+        // Navigation handlers
         $section.find('.slider-nav-prev').on('click', function() {
             if (currentIndex > 0) {
                 currentIndex--;
@@ -678,11 +519,11 @@ jQuery(function($) {
         debug('Loading shipping methods for Step 2...');
         
         // Show loading state
-        $valueSpan.text('Kraunami pristatymo būdai...');
+        $valueSpan.text('Loading shipping methods...');
         
         // Set timeout for loading state
         const loadingTimeout = setTimeout(function() {
-            $valueSpan.text('Užtrunka ilgiau nei tikėtasi...');
+            $valueSpan.text('Taking longer than expected...');
         }, 8000);
         
         $.ajax({
@@ -720,13 +561,13 @@ jQuery(function($) {
                         cost: firstMethod.cost_with_tax
                     });
                 } else {
-                    $valueSpan.text('Pristatymo būdai neprieinami');
+                    $valueSpan.text('No shipping methods available');
                     debug('No shipping methods available in response');
                 }
             },
             error: function(xhr, status, error) {
                 clearTimeout(loadingTimeout);
-                $valueSpan.text('Nepavyko įkelti pristatymo būdų');
+                $valueSpan.text('Failed to load shipping methods');
                 debug('Shipping methods loading failed', {status: status, error: error});
                 console.error('Shipping methods error:', xhr.responseText);
             }
@@ -737,7 +578,7 @@ jQuery(function($) {
     function showShippingMethodsPopup(methods) {
         let html = '<div class="wcflow-popup-content wcflow-shipping-popup">';
         html += '<button class="wcflow-popup-close">&times;</button>';
-        html += '<h3>Pasirinkite pristatymo būdą</h3>';
+        html += '<h3>Select Shipping Method</h3>';
         
         const currencySymbol = wcflow_params.currency_symbol || '€';
         
@@ -751,7 +592,7 @@ jQuery(function($) {
                 <div style="display:flex;justify-content:space-between;align-items:center;">
                     <div>
                         <strong style="font-size:16px;color:#333;">${method.label}</strong>
-                        <div style="font-size:14px;color:#666;margin-top:4px;">Pristatymo kaina</div>
+                        <div style="font-size:14px;color:#666;margin-top:4px;">Delivery cost</div>
                     </div>
                     <div style="text-align:right;">
                         <div style="font-size:18px;font-weight:bold;color:#007cba;">${currencySymbol}${method.cost_with_tax}</div>
@@ -806,7 +647,7 @@ jQuery(function($) {
             
             dateOptions.push({
                 value: date.toISOString().split('T')[0],
-                label: date.toLocaleDateString('lt-LT', { 
+                label: date.toLocaleDateString('en-US', { 
                     weekday: 'long', 
                     month: 'long', 
                     day: 'numeric' 
@@ -816,7 +657,7 @@ jQuery(function($) {
         
         let html = '<div class="wcflow-popup-content wcflow-calendar-popup">';
         html += '<button class="wcflow-popup-close">&times;</button>';
-        html += '<h3>Pasirinkite pristatymo datą</h3>';
+        html += '<h3>Select Delivery Date</h3>';
         
         dateOptions.forEach(function(option) {
             html += `<div class="wcflow-date-option" data-date="${option.value}" style="padding:12px;border:1px solid #ddd;margin:8px 0;cursor:pointer;border-radius:4px;">${option.label}</div>`;
