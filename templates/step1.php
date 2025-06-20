@@ -1,7 +1,7 @@
 <?php
 /**
- * WooCommerce Gifting Flow Step 1 - Category-Based Sliders
- * Updated: 2025-01-27 - Multiple sliders for different card categories
+ * WooCommerce Gifting Flow Step 1 - SIMPLIFIED SINGLE SLIDER
+ * Updated: 2025-01-27 - Back to working single slider approach
  */
 ?>
 <div class="wcflow-modal wcflow-fullscreen" data-step="1">
@@ -46,7 +46,7 @@
             </div>
         </div>
         
-        <!-- FIXED: Container for multiple category-based sliders -->
+        <!-- SIMPLIFIED: Single container for simple slider -->
         <div id="wcflow-cards-container" class="wcflow-cards-container">
             <div class="wcflow-loader"></div>
         </div>
