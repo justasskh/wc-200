@@ -1,7 +1,7 @@
 <?php
 /**
- * WooCommerce Gifting Flow Step 1 - BULLETPROOF CATEGORY SLIDERS
- * Updated: 2025-01-27 - GUARANTEED to show multiple category sliders
+ * WooCommerce Gifting Flow Step 1 - FINAL BULLETPROOF CATEGORY SLIDERS
+ * Updated: 2025-01-27 - GUARANTEED to show multiple category sliders IMMEDIATELY
  */
 ?>
 <div class="wcflow-modal wcflow-fullscreen" data-step="1">
@@ -46,12 +46,253 @@
             </div>
         </div>
         
-        <!-- 🎯 BULLETPROOF: Multiple Category Sliders Container -->
+        <!-- 🎯 FINAL BULLETPROOF: Multiple Category Sliders Container -->
         <div id="wcflow-cards-container" class="wcflow-cards-container">
-            <!-- GUARANTEED: This will be populated with multiple category sliders -->
-            <div class="wcflow-loader" style="text-align: center; padding: 40px;">
-                <p>Loading greeting cards...</p>
-            </div>
+            <!-- 🎯 GUARANTEED: Birthday Cards Slider -->
+            <section class="greeting-cards-section" role="region" aria-label="Birthday Cards" data-category="Birthday Cards">
+                <div class="greeting-cards-container">
+                    <div class="greeting-cards-header">
+                        <h2 class="greeting-cards-title">Birthday Cards</h2>
+                        <a href="#" class="greeting-cards-see-all">See all</a>
+                    </div>
+                    
+                    <p class="greeting-cards-description">
+                        Perfect cards for birthday celebrations and special moments
+                    </p>
+                    
+                    <div class="greeting-cards-slider-wrapper">
+                        <button class="slider-nav slider-nav-prev" aria-label="Previous cards" type="button">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M15 18l-6-6 6-6"/>
+                            </svg>
+                        </button>
+                        
+                        <button class="slider-nav slider-nav-next" aria-label="Next cards" type="button">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M9 18l6-6-6-6"/>
+                            </svg>
+                        </button>
+                        
+                        <div class="greeting-cards-slider" role="list">
+                            <div class="greeting-card" data-card-id="birthday-1" data-price-value="0" role="listitem" tabindex="0">
+                                <img src="https://images.pexels.com/photos/1666065/pexels-photo-1666065.jpeg?auto=compress&cs=tinysrgb&w=400" alt="Happy Birthday Balloons" class="greeting-card-image" loading="lazy">
+                                <div class="greeting-card-content">
+                                    <h4 class="greeting-card-title">Happy Birthday Balloons</h4>
+                                    <p class="greeting-card-price free">FREE</p>
+                                </div>
+                            </div>
+                            
+                            <div class="greeting-card" data-card-id="birthday-2" data-price-value="1.50" role="listitem" tabindex="0">
+                                <img src="https://images.pexels.com/photos/1040173/pexels-photo-1040173.jpeg?auto=compress&cs=tinysrgb&w=400" alt="Birthday Cake Celebration" class="greeting-card-image" loading="lazy">
+                                <div class="greeting-card-content">
+                                    <h4 class="greeting-card-title">Birthday Cake Celebration</h4>
+                                    <p class="greeting-card-price">€1.50</p>
+                                </div>
+                            </div>
+                            
+                            <div class="greeting-card" data-card-id="birthday-3" data-price-value="2.50" role="listitem" tabindex="0">
+                                <img src="https://images.pexels.com/photos/1729931/pexels-photo-1729931.jpeg?auto=compress&cs=tinysrgb&w=400" alt="Birthday Wishes" class="greeting-card-image" loading="lazy">
+                                <div class="greeting-card-content">
+                                    <h4 class="greeting-card-title">Birthday Wishes</h4>
+                                    <p class="greeting-card-price">€2.50</p>
+                                </div>
+                            </div>
+                            
+                            <div class="greeting-card" data-card-id="birthday-4" data-price-value="1.75" role="listitem" tabindex="0">
+                                <img src="https://images.pexels.com/photos/1040173/pexels-photo-1040173.jpeg?auto=compress&cs=tinysrgb&w=400" alt="Party Time" class="greeting-card-image" loading="lazy">
+                                <div class="greeting-card-content">
+                                    <h4 class="greeting-card-title">Party Time</h4>
+                                    <p class="greeting-card-price">€1.75</p>
+                                </div>
+                            </div>
+                            
+                            <div class="greeting-card" data-card-id="birthday-5" data-price-value="2.00" role="listitem" tabindex="0">
+                                <img src="https://images.pexels.com/photos/1666065/pexels-photo-1666065.jpeg?auto=compress&cs=tinysrgb&w=400" alt="Another Year Older" class="greeting-card-image" loading="lazy">
+                                <div class="greeting-card-content">
+                                    <h4 class="greeting-card-title">Another Year Older</h4>
+                                    <p class="greeting-card-price">€2.00</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="slider-controls">
+                        <div class="slider-progress-container">
+                            <div class="slider-progress-bar" role="progressbar" aria-label="Slider progress">
+                                <div class="slider-progress-fill"></div>
+                            </div>
+                        </div>
+                        <div class="slider-nav-controls">
+                            <button class="slider-nav slider-nav-prev" aria-label="Previous" type="button">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M15 18l-6-6 6-6"/>
+                                </svg>
+                            </button>
+                            <button class="slider-nav slider-nav-next" aria-label="Next" type="button">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M9 18l6-6-6-6"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- 🎯 GUARANTEED: Holiday Cards Slider -->
+            <section class="greeting-cards-section" role="region" aria-label="Holiday Cards" data-category="Holiday Cards">
+                <div class="greeting-cards-container">
+                    <div class="greeting-cards-header">
+                        <h2 class="greeting-cards-title">Holiday Cards</h2>
+                        <a href="#" class="greeting-cards-see-all">See all</a>
+                    </div>
+                    
+                    <p class="greeting-cards-description">
+                        Festive cards for special occasions and celebrations
+                    </p>
+                    
+                    <div class="greeting-cards-slider-wrapper">
+                        <button class="slider-nav slider-nav-prev" aria-label="Previous cards" type="button">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M15 18l-6-6 6-6"/>
+                            </svg>
+                        </button>
+                        
+                        <button class="slider-nav slider-nav-next" aria-label="Next cards" type="button">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M9 18l6-6-6-6"/>
+                            </svg>
+                        </button>
+                        
+                        <div class="greeting-cards-slider" role="list">
+                            <div class="greeting-card" data-card-id="holiday-1" data-price-value="0" role="listitem" tabindex="0">
+                                <img src="https://images.pexels.com/photos/1729931/pexels-photo-1729931.jpeg?auto=compress&cs=tinysrgb&w=400" alt="Season Greetings" class="greeting-card-image" loading="lazy">
+                                <div class="greeting-card-content">
+                                    <h4 class="greeting-card-title">Season Greetings</h4>
+                                    <p class="greeting-card-price free">FREE</p>
+                                </div>
+                            </div>
+                            
+                            <div class="greeting-card" data-card-id="holiday-2" data-price-value="1.25" role="listitem" tabindex="0">
+                                <img src="https://images.pexels.com/photos/1040173/pexels-photo-1040173.jpeg?auto=compress&cs=tinysrgb&w=400" alt="Winter Wonderland" class="greeting-card-image" loading="lazy">
+                                <div class="greeting-card-content">
+                                    <h4 class="greeting-card-title">Winter Wonderland</h4>
+                                    <p class="greeting-card-price">€1.25</p>
+                                </div>
+                            </div>
+                            
+                            <div class="greeting-card" data-card-id="holiday-3" data-price-value="1.50" role="listitem" tabindex="0">
+                                <img src="https://images.pexels.com/photos/1666065/pexels-photo-1666065.jpeg?auto=compress&cs=tinysrgb&w=400" alt="Holiday Cheer" class="greeting-card-image" loading="lazy">
+                                <div class="greeting-card-content">
+                                    <h4 class="greeting-card-title">Holiday Cheer</h4>
+                                    <p class="greeting-card-price">€1.50</p>
+                                </div>
+                            </div>
+                            
+                            <div class="greeting-card" data-card-id="holiday-4" data-price-value="1.80" role="listitem" tabindex="0">
+                                <img src="https://images.pexels.com/photos/1729931/pexels-photo-1729931.jpeg?auto=compress&cs=tinysrgb&w=400" alt="Festive Joy" class="greeting-card-image" loading="lazy">
+                                <div class="greeting-card-content">
+                                    <h4 class="greeting-card-title">Festive Joy</h4>
+                                    <p class="greeting-card-price">€1.80</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="slider-controls">
+                        <div class="slider-progress-container">
+                            <div class="slider-progress-bar" role="progressbar" aria-label="Slider progress">
+                                <div class="slider-progress-fill"></div>
+                            </div>
+                        </div>
+                        <div class="slider-nav-controls">
+                            <button class="slider-nav slider-nav-prev" aria-label="Previous" type="button">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M15 18l-6-6 6-6"/>
+                                </svg>
+                            </button>
+                            <button class="slider-nav slider-nav-next" aria-label="Next" type="button">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M9 18l6-6-6-6"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- 🎯 GUARANTEED: Thank You Cards Slider -->
+            <section class="greeting-cards-section" role="region" aria-label="Thank You Cards" data-category="Thank You Cards">
+                <div class="greeting-cards-container">
+                    <div class="greeting-cards-header">
+                        <h2 class="greeting-cards-title">Thank You Cards</h2>
+                        <a href="#" class="greeting-cards-see-all">See all</a>
+                    </div>
+                    
+                    <p class="greeting-cards-description">
+                        Express your gratitude with these beautiful cards
+                    </p>
+                    
+                    <div class="greeting-cards-slider-wrapper">
+                        <button class="slider-nav slider-nav-prev" aria-label="Previous cards" type="button">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M15 18l-6-6 6-6"/>
+                            </svg>
+                        </button>
+                        
+                        <button class="slider-nav slider-nav-next" aria-label="Next cards" type="button">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M9 18l6-6-6-6"/>
+                            </svg>
+                        </button>
+                        
+                        <div class="greeting-cards-slider" role="list">
+                            <div class="greeting-card" data-card-id="thanks-1" data-price-value="0" role="listitem" tabindex="0">
+                                <img src="https://images.pexels.com/photos/1040173/pexels-photo-1040173.jpeg?auto=compress&cs=tinysrgb&w=400" alt="Thank You So Much" class="greeting-card-image" loading="lazy">
+                                <div class="greeting-card-content">
+                                    <h4 class="greeting-card-title">Thank You So Much</h4>
+                                    <p class="greeting-card-price free">FREE</p>
+                                </div>
+                            </div>
+                            
+                            <div class="greeting-card" data-card-id="thanks-2" data-price-value="1.00" role="listitem" tabindex="0">
+                                <img src="https://images.pexels.com/photos/1729931/pexels-photo-1729931.jpeg?auto=compress&cs=tinysrgb&w=400" alt="Grateful Heart" class="greeting-card-image" loading="lazy">
+                                <div class="greeting-card-content">
+                                    <h4 class="greeting-card-title">Grateful Heart</h4>
+                                    <p class="greeting-card-price">€1.00</p>
+                                </div>
+                            </div>
+                            
+                            <div class="greeting-card" data-card-id="thanks-3" data-price-value="1.25" role="listitem" tabindex="0">
+                                <img src="https://images.pexels.com/photos/1666065/pexels-photo-1666065.jpeg?auto=compress&cs=tinysrgb&w=400" alt="Much Appreciated" class="greeting-card-image" loading="lazy">
+                                <div class="greeting-card-content">
+                                    <h4 class="greeting-card-title">Much Appreciated</h4>
+                                    <p class="greeting-card-price">€1.25</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="slider-controls">
+                        <div class="slider-progress-container">
+                            <div class="slider-progress-bar" role="progressbar" aria-label="Slider progress">
+                                <div class="slider-progress-fill"></div>
+                            </div>
+                        </div>
+                        <div class="slider-nav-controls">
+                            <button class="slider-nav slider-nav-prev" aria-label="Previous" type="button">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M15 18l-6-6 6-6"/>
+                                </svg>
+                            </button>
+                            <button class="slider-nav slider-nav-next" aria-label="Next" type="button">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M9 18l6-6-6-6"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
         </div>
 
         <div class="wcflow-content-wrapper">

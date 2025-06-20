@@ -142,8 +142,11 @@ jQuery(function($) {
         // Load addons first
         loadAddons();
         
-        // 🎯 BULLETPROOF: IMMEDIATELY show category sliders - NO WAITING
-        showImmediateCategorySliders();
+        // 🎯 BULLETPROOF: Initialize all category sliders that are already in the HTML
+        initializeAllCategorySliders();
+        
+        // Setup card selection
+        setupCardSelection();
         
         // Message textarea functionality
         $(document).on('input', '#wcflow-card-message', function() {
@@ -154,6 +157,8 @@ jQuery(function($) {
         
         // Initial pricing update
         setTimeout(updatePricing, 500);
+        
+        debug('🎉 FINAL BULLETPROOF Step 1 initialization complete!');
     }
     
     // Step 2 initialization
@@ -243,310 +248,81 @@ jQuery(function($) {
         });
     }
     
-    // 🎯 FINAL BULLETPROOF: Show category sliders IMMEDIATELY - NO AJAX DELAYS
-    function showImmediateCategorySliders() {
-        const $container = $('#wcflow-cards-container');
+    // 🎯 BULLETPROOF: Initialize all category sliders that are already in the HTML
+    function initializeAllCategorySliders() {
+        debug('🎯 Initializing all category sliders...');
         
-        debug('🎯 FINAL BULLETPROOF: Showing category sliders IMMEDIATELY');
-        
-        // STEP 1: IMMEDIATELY show guaranteed sliders
-        renderFinalBulletproofSliders($container);
-        
-        // STEP 2: Try to enhance with database data (but don't wait)
-        setTimeout(function() {
-            tryEnhanceWithDatabaseData($container);
-        }, 100);
-    }
-    
-    // 🎯 RENDER FINAL BULLETPROOF SLIDERS - GUARANTEED TO WORK
-    function renderFinalBulletproofSliders($container) {
-        debug('🎨 Rendering FINAL BULLETPROOF category sliders');
-        
-        // Clear any loader
-        $container.empty();
-        
-        // Get guaranteed data
-        const categoriesData = getFinalGuaranteedData();
-        
-        // Create separate slider for each category
-        Object.entries(categoriesData).forEach(function([categoryName, categoryInfo]) {
-            const cards = categoryInfo.cards;
-            const description = categoryInfo.description;
-            
-            debug('🎨 Creating FINAL slider for:', categoryName, 'with', cards.length, 'cards');
-            
-            // Build cards HTML
-            let cardsHtml = '';
-            cards.forEach(function(card) {
-                cardsHtml += `
-                    <div class="greeting-card" data-card-id="${card.id}" data-price-value="${card.price_value}" role="listitem" tabindex="0">
-                        <img src="${card.img}" alt="${card.title}" class="greeting-card-image" loading="lazy">
-                        <div class="greeting-card-content">
-                            <h4 class="greeting-card-title">${card.title}</h4>
-                            <p class="greeting-card-price ${card.price_value == 0 ? 'free' : ''}">${card.price}</p>
-                        </div>
-                    </div>
-                `;
-            });
-            
-            // Create complete category slider HTML
-            const sliderHtml = `
-                <section class="greeting-cards-section" role="region" aria-label="${categoryName}" data-category="${categoryName}">
-                    <div class="greeting-cards-container">
-                        <div class="greeting-cards-header">
-                            <h2 class="greeting-cards-title">${categoryName}</h2>
-                            <a href="#" class="greeting-cards-see-all">See all</a>
-                        </div>
-                        
-                        <p class="greeting-cards-description">
-                            ${description}
-                        </p>
-                        
-                        <div class="greeting-cards-slider-wrapper">
-                            <button class="slider-nav slider-nav-prev" aria-label="Previous cards" type="button">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M15 18l-6-6 6-6"/>
-                                </svg>
-                            </button>
-                            
-                            <button class="slider-nav slider-nav-next" aria-label="Next cards" type="button">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M9 18l6-6-6-6"/>
-                                </svg>
-                            </button>
-                            
-                            <div class="greeting-cards-slider" role="list">
-                                ${cardsHtml}
-                            </div>
-                        </div>
-                        
-                        <div class="slider-controls">
-                            <div class="slider-progress-container">
-                                <div class="slider-progress-bar" role="progressbar" aria-label="Slider progress">
-                                    <div class="slider-progress-fill"></div>
-                                </div>
-                            </div>
-                            <div class="slider-nav-controls">
-                                <button class="slider-nav slider-nav-prev" aria-label="Previous" type="button">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M15 18l-6-6 6-6"/>
-                                    </svg>
-                                </button>
-                                <button class="slider-nav slider-nav-next" aria-label="Next" type="button">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M9 18l6-6-6-6"/>
-                                    </svg>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-            `;
-            
-            $container.append(sliderHtml);
-            debug('✅ FINAL slider created for category:', categoryName);
-        });
-        
-        // Initialize all sliders immediately
-        initializeAllFinalSliders();
-        setupFinalCardSelection();
-        
-        debug('🎉 FINAL BULLETPROOF category sliders rendered and working!');
-    }
-    
-    // Try to enhance with database data (optional)
-    function tryEnhanceWithDatabaseData($container) {
-        debug('🔄 Trying to enhance with database data...');
-        
-        $.ajax({
-            url: wcflow_params.ajax_url,
-            type: 'POST',
-            data: {
-                action: 'wcflow_get_cards',
-                nonce: wcflow_params.nonce
-            },
-            timeout: 3000, // Short timeout
-            success: function(response) {
-                debug('📦 Database enhancement response:', response);
-                
-                if (response && response.success && response.data && Object.keys(response.data).length > 0) {
-                    debug('✅ Database cards found - enhancing sliders');
-                    // Re-render with database data
-                    renderFinalBulletproofSliders($container, response.data);
-                } else {
-                    debug('⚠️ No database enhancement - keeping guaranteed sliders');
-                }
-            },
-            error: function() {
-                debug('❌ Database enhancement failed - keeping guaranteed sliders');
-            }
-        });
-    }
-    
-    // 🎯 FINAL GUARANTEED data that will ALWAYS work
-    function getFinalGuaranteedData() {
-        return {
-            'Birthday Cards': {
-                description: 'Perfect cards for birthday celebrations and special moments',
-                cards: [
-                    {
-                        id: 'final-birthday-1',
-                        title: 'Happy Birthday Balloons',
-                        price: 'FREE',
-                        price_value: 0,
-                        img: 'https://images.pexels.com/photos/1666065/pexels-photo-1666065.jpeg?auto=compress&cs=tinysrgb&w=400'
-                    },
-                    {
-                        id: 'final-birthday-2',
-                        title: 'Birthday Cake Celebration',
-                        price: '€1.50',
-                        price_value: 1.50,
-                        img: 'https://images.pexels.com/photos/1040173/pexels-photo-1040173.jpeg?auto=compress&cs=tinysrgb&w=400'
-                    },
-                    {
-                        id: 'final-birthday-3',
-                        title: 'Birthday Wishes',
-                        price: '€2.50',
-                        price_value: 2.50,
-                        img: 'https://images.pexels.com/photos/1729931/pexels-photo-1729931.jpeg?auto=compress&cs=tinysrgb&w=400'
-                    },
-                    {
-                        id: 'final-birthday-4',
-                        title: 'Party Time',
-                        price: '€1.75',
-                        price_value: 1.75,
-                        img: 'https://images.pexels.com/photos/1040173/pexels-photo-1040173.jpeg?auto=compress&cs=tinysrgb&w=400'
-                    },
-                    {
-                        id: 'final-birthday-5',
-                        title: 'Another Year Older',
-                        price: '€2.00',
-                        price_value: 2.00,
-                        img: 'https://images.pexels.com/photos/1666065/pexels-photo-1666065.jpeg?auto=compress&cs=tinysrgb&w=400'
-                    }
-                ]
-            },
-            'Holiday Cards': {
-                description: 'Festive cards for special occasions and celebrations',
-                cards: [
-                    {
-                        id: 'final-holiday-1',
-                        title: 'Season Greetings',
-                        price: 'FREE',
-                        price_value: 0,
-                        img: 'https://images.pexels.com/photos/1729931/pexels-photo-1729931.jpeg?auto=compress&cs=tinysrgb&w=400'
-                    },
-                    {
-                        id: 'final-holiday-2',
-                        title: 'Winter Wonderland',
-                        price: '€1.25',
-                        price_value: 1.25,
-                        img: 'https://images.pexels.com/photos/1040173/pexels-photo-1040173.jpeg?auto=compress&cs=tinysrgb&w=400'
-                    },
-                    {
-                        id: 'final-holiday-3',
-                        title: 'Holiday Cheer',
-                        price: '€1.50',
-                        price_value: 1.50,
-                        img: 'https://images.pexels.com/photos/1666065/pexels-photo-1666065.jpeg?auto=compress&cs=tinysrgb&w=400'
-                    },
-                    {
-                        id: 'final-holiday-4',
-                        title: 'Festive Joy',
-                        price: '€1.80',
-                        price_value: 1.80,
-                        img: 'https://images.pexels.com/photos/1729931/pexels-photo-1729931.jpeg?auto=compress&cs=tinysrgb&w=400'
-                    }
-                ]
-            },
-            'Thank You Cards': {
-                description: 'Express your gratitude with these beautiful cards',
-                cards: [
-                    {
-                        id: 'final-thanks-1',
-                        title: 'Thank You So Much',
-                        price: 'FREE',
-                        price_value: 0,
-                        img: 'https://images.pexels.com/photos/1040173/pexels-photo-1040173.jpeg?auto=compress&cs=tinysrgb&w=400'
-                    },
-                    {
-                        id: 'final-thanks-2',
-                        title: 'Grateful Heart',
-                        price: '€1.00',
-                        price_value: 1.00,
-                        img: 'https://images.pexels.com/photos/1729931/pexels-photo-1729931.jpeg?auto=compress&cs=tinysrgb&w=400'
-                    },
-                    {
-                        id: 'final-thanks-3',
-                        title: 'Much Appreciated',
-                        price: '€1.25',
-                        price_value: 1.25,
-                        img: 'https://images.pexels.com/photos/1666065/pexels-photo-1666065.jpeg?auto=compress&cs=tinysrgb&w=400'
-                    }
-                ]
-            }
-        };
-    }
-    
-    // Initialize all final category sliders
-    function initializeAllFinalSliders() {
         $('.greeting-cards-section').each(function() {
             const $section = $(this);
-            const $slider = $section.find('.greeting-cards-slider');
-            const $cards = $slider.find('.greeting-card');
+            const categoryName = $section.data('category');
             
-            if ($cards.length === 0) return;
+            debug('🎨 Initializing slider for category:', categoryName);
             
-            let currentIndex = 0;
-            const cardWidth = 256; // 240px + 16px gap
-            const containerWidth = $section.find('.greeting-cards-slider-wrapper').width();
-            const visibleCards = Math.floor(containerWidth / cardWidth);
-            const maxIndex = Math.max(0, $cards.length - visibleCards);
-            
-            function updateSlider() {
-                const translateX = -currentIndex * cardWidth;
-                $slider.css('transform', `translateX(${translateX}px)`);
-                
-                // Update navigation
-                $section.find('.slider-nav-prev').toggleClass('disabled', currentIndex === 0);
-                $section.find('.slider-nav-next').toggleClass('disabled', currentIndex >= maxIndex);
-                
-                // Update progress
-                const progress = maxIndex > 0 ? (currentIndex / maxIndex) * 100 : 100;
-                $section.find('.slider-progress-fill').css('width', progress + '%');
-            }
-            
-            // Navigation handlers
-            $section.find('.slider-nav-prev').on('click', function() {
-                if (currentIndex > 0) {
-                    currentIndex--;
-                    updateSlider();
-                }
-            });
-            
-            $section.find('.slider-nav-next').on('click', function() {
-                if (currentIndex < maxIndex) {
-                    currentIndex++;
-                    updateSlider();
-                }
-            });
-            
-            // See all toggle
-            $section.find('.greeting-cards-see-all').on('click', function(e) {
-                e.preventDefault();
-                $section.toggleClass('grid-view');
-                $(this).text($section.hasClass('grid-view') ? 'See less' : 'See all');
-            });
-            
-            // Initial update
-            updateSlider();
-            
-            debug('✅ FINAL slider initialized for category:', $section.data('category'));
+            initializeSingleSlider($section);
         });
+        
+        debug('✅ All category sliders initialized!');
     }
     
-    // Setup final card selection
-    function setupFinalCardSelection() {
+    // Initialize a single slider
+    function initializeSingleSlider($section) {
+        const $slider = $section.find('.greeting-cards-slider');
+        const $cards = $slider.find('.greeting-card');
+        
+        if ($cards.length === 0) {
+            debug('⚠️ No cards found in slider');
+            return;
+        }
+        
+        let currentIndex = 0;
+        const cardWidth = 256; // 240px + 16px gap
+        const containerWidth = $section.find('.greeting-cards-slider-wrapper').width();
+        const visibleCards = Math.floor(containerWidth / cardWidth);
+        const maxIndex = Math.max(0, $cards.length - visibleCards);
+        
+        function updateSlider() {
+            const translateX = -currentIndex * cardWidth;
+            $slider.css('transform', `translateX(${translateX}px)`);
+            
+            // Update navigation
+            $section.find('.slider-nav-prev').toggleClass('disabled', currentIndex === 0);
+            $section.find('.slider-nav-next').toggleClass('disabled', currentIndex >= maxIndex);
+            
+            // Update progress
+            const progress = maxIndex > 0 ? (currentIndex / maxIndex) * 100 : 100;
+            $section.find('.slider-progress-fill').css('width', progress + '%');
+        }
+        
+        // Navigation handlers
+        $section.find('.slider-nav-prev').on('click', function() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                updateSlider();
+            }
+        });
+        
+        $section.find('.slider-nav-next').on('click', function() {
+            if (currentIndex < maxIndex) {
+                currentIndex++;
+                updateSlider();
+            }
+        });
+        
+        // See all toggle
+        $section.find('.greeting-cards-see-all').on('click', function(e) {
+            e.preventDefault();
+            $section.toggleClass('grid-view');
+            $(this).text($section.hasClass('grid-view') ? 'See less' : 'See all');
+        });
+        
+        // Initial update
+        updateSlider();
+        
+        debug('✅ Slider initialized for category:', $section.data('category'));
+    }
+    
+    // Setup card selection
+    function setupCardSelection() {
         $(document).on('click', '.greeting-card', function() {
             // Remove selection from all cards
             $('.greeting-card').removeClass('selected');
@@ -561,7 +337,7 @@ jQuery(function($) {
             updateOrderState();
             updatePricing();
             
-            debug('🎯 FINAL card selected', {
+            debug('🎯 Card selected', {
                 id: $(this).data('card-id'),
                 price: $(this).data('price-value')
             });
