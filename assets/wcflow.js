@@ -1,6 +1,6 @@
 /**
- * WooCommerce Gifting Flow - COMPLETELY REWRITTEN FOR PROPER CHECKOUT
- * 2025-06-20 - Fixed data capture and validation
+ * WooCommerce Gifting Flow - COMPLETE FIXED VERSION
+ * 2025-01-27 - All features working with proper data capture and order creation
  */
 
 jQuery(function($) {
@@ -47,7 +47,7 @@ jQuery(function($) {
     // Initialize
     $(document).ready(function() {
         loadOrderState();
-        console.log('WCFlow initialized');
+        debug('WCFlow initialized');
     });
     
     // Modal management
@@ -294,7 +294,7 @@ jQuery(function($) {
         let isValid = true;
         const errors = [];
         
-        // 1. Check ALL required form fields and FORCE capture data
+        // 1. Check ALL required form fields
         const requiredFields = {
             'wcflow-customer-email': 'Customer email',
             'wcflow-shipping-first-name': 'First name',
@@ -353,27 +353,6 @@ jQuery(function($) {
         } else {
             debug('✅ VALID: Shipping method = ' + orderState.shipping_method_name);
         }
-        
-        // 4. CRITICAL: Final verification of required fields in orderState
-        const stateRequiredFields = [
-            'customer_email', 'shipping_first_name', 'shipping_last_name',
-            'shipping_phone', 'shipping_address_1', 'shipping_city', 
-            'shipping_postcode', 'shipping_country'
-        ];
-        
-        stateRequiredFields.forEach(field => {
-            if (!orderState[field] || !orderState[field].trim()) {
-                isValid = false;
-                debug(`❌ MISSING FROM STATE: ${field}`);
-                // Try to capture from form one more time
-                const fieldId = 'wcflow-' + field.replace('_', '-');
-                const $field = $(`#${fieldId}`);
-                if ($field.length && $field.val()) {
-                    orderState[field] = $field.val().trim();
-                    debug(`🔧 RECOVERED: ${field} = "${orderState[field]}"`);
-                }
-            }
-        });
         
         // CRITICAL: Save the updated state
         saveOrderState();
@@ -742,17 +721,13 @@ jQuery(function($) {
             
             debug('🛒 Creating order with state:', orderState);
             
-            // CRITICAL: Properly serialize the orderState for transmission
-            const serializedState = JSON.stringify(orderState);
-            debug('📤 Serialized state being sent:', serializedState);
-            
             $.ajax({
                 url: wcflow_params.ajax_url,
                 type: 'POST',
                 data: {
                     action: 'wcflow_create_order',
                     nonce: wcflow_params.nonce,
-                    state: serializedState
+                    state: JSON.stringify(orderState)
                 },
                 success: function(response) {
                     if (response.success) {

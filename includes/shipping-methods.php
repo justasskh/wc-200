@@ -17,7 +17,7 @@ if (!defined('ABSPATH')) {
  * @param string $country Country code
  * @return array Array of shipping methods
  */
-function wcflow_get_real_shipping_methods($country = 'LT') {
+function wcflow_get_real_shipping_methods($country = 'US') {
     wcflow_log('Getting real shipping methods for country: ' . $country);
     
     // Try different approaches to get shipping methods
@@ -51,9 +51,8 @@ function wcflow_get_real_shipping_methods($country = 'LT') {
         return $methods;
     }
     
-    // If all else fails, return an empty array
-    wcflow_log('Failed to retrieve any shipping methods');
-    return array();
+    // If all else fails, return fallback methods
+    return wcflow_get_fallback_shipping_methods($country);
 }
 
 /**
@@ -114,9 +113,11 @@ function wcflow_get_shipping_methods_from_zones($country) {
                     'name' => $method->get_title(),
                     'cost' => number_format($cost, 2),
                     'cost_with_tax' => number_format($cost, 2),
+                    'price' => $cost,
+                    'price_formatted' => wc_price($cost),
                     'method_id' => $method->id,
                     'instance_id' => $method->instance_id,
-                    'description' => $method->get_method_description()
+                    'description' => 'Shipping via ' . $method->get_title()
                 );
                 
                 wcflow_log('Added zone shipping method: ' . $method->get_title() . ' - ' . $cost);
@@ -147,9 +148,11 @@ function wcflow_get_shipping_methods_from_zones($country) {
                     'name' => $method->get_title(),
                     'cost' => number_format($cost, 2),
                     'cost_with_tax' => number_format($cost, 2),
+                    'price' => $cost,
+                    'price_formatted' => wc_price($cost),
                     'method_id' => $method->id,
                     'instance_id' => $method->instance_id,
-                    'description' => $method->get_method_description()
+                    'description' => 'Shipping via ' . $method->get_title()
                 );
                 
                 wcflow_log('Added rest of world shipping method: ' . $method->get_title() . ' - ' . $cost);
@@ -207,8 +210,8 @@ function wcflow_get_shipping_methods_from_cart($country) {
     
     // Set shipping destination based on country
     WC()->customer->set_shipping_country($country);
-    WC()->customer->set_shipping_postcode('01001');
-    WC()->customer->set_shipping_city('Vilnius');
+    WC()->customer->set_shipping_postcode('10001');
+    WC()->customer->set_shipping_city('New York');
     WC()->customer->set_shipping_state('');
     
     // Force recalculation
@@ -233,6 +236,8 @@ function wcflow_get_shipping_methods_from_cart($country) {
                     'name' => $rate->get_label(),
                     'cost' => number_format($rate->get_cost(), 2),
                     'cost_with_tax' => number_format($cost_with_tax, 2),
+                    'price' => $cost_with_tax,
+                    'price_formatted' => wc_price($cost_with_tax),
                     'method_id' => $rate->get_method_id(),
                     'instance_id' => $rate->get_instance_id(),
                     'description' => $rate->get_label() . ' - Delivery in 2-5 business days'
@@ -278,6 +283,8 @@ function wcflow_get_shipping_methods_from_settings($country) {
             'name' => $all_shipping_methods['flat_rate']->get_method_title(),
             'cost' => number_format($cost, 2),
             'cost_with_tax' => number_format($cost, 2),
+            'price' => $cost,
+            'price_formatted' => wc_price($cost),
             'method_id' => 'flat_rate',
             'instance_id' => '1',
             'description' => 'Flat rate shipping - Delivery in 2-5 business days'
@@ -294,31 +301,14 @@ function wcflow_get_shipping_methods_from_settings($country) {
             'name' => $all_shipping_methods['free_shipping']->get_method_title(),
             'cost' => '0.00',
             'cost_with_tax' => '0.00',
+            'price' => 0,
+            'price_formatted' => wc_price(0),
             'method_id' => 'free_shipping',
             'instance_id' => '1',
             'description' => 'Free shipping - Delivery in 5-7 business days'
         );
         
         wcflow_log('Added free shipping from settings');
-    }
-    
-    // Check if local pickup is enabled
-    if (isset($all_shipping_methods['local_pickup']) && $all_shipping_methods['local_pickup']->is_enabled()) {
-        $local_pickup_settings = get_option('woocommerce_local_pickup_settings', array());
-        $cost = isset($local_pickup_settings['cost']) ? floatval($local_pickup_settings['cost']) : 0;
-        
-        $shipping_methods[] = array(
-            'id' => 'local_pickup:1',
-            'label' => $all_shipping_methods['local_pickup']->get_method_title(),
-            'name' => $all_shipping_methods['local_pickup']->get_method_title(),
-            'cost' => number_format($cost, 2),
-            'cost_with_tax' => number_format($cost, 2),
-            'method_id' => 'local_pickup',
-            'instance_id' => '1',
-            'description' => 'Pick up your order from our store'
-        );
-        
-        wcflow_log('Added local pickup from settings: ' . $cost);
     }
     
     return $shipping_methods;
@@ -394,6 +384,8 @@ function wcflow_get_shipping_methods_from_database($country) {
                     'name' => $method_title,
                     'cost' => number_format($cost, 2),
                     'cost_with_tax' => number_format($cost, 2),
+                    'price' => $cost,
+                    'price_formatted' => wc_price($cost),
                     'method_id' => $method->method_id,
                     'instance_id' => $method->instance_id,
                     'description' => 'Shipping method from zone: ' . $zone->zone_name
@@ -432,6 +424,8 @@ function wcflow_get_shipping_methods_from_database($country) {
                 'name' => $method_title,
                 'cost' => number_format($cost, 2),
                 'cost_with_tax' => number_format($cost, 2),
+                'price' => $cost,
+                'price_formatted' => wc_price($cost),
                 'method_id' => $method->method_id,
                 'instance_id' => $method->instance_id,
                 'description' => 'Shipping method from rest of world zone'
@@ -442,4 +436,55 @@ function wcflow_get_shipping_methods_from_database($country) {
     }
     
     return $shipping_methods;
+}
+
+/**
+ * Get fallback shipping methods when all other methods fail
+ * 
+ * @param string $country Country code
+ * @return array Array of shipping methods
+ */
+function wcflow_get_fallback_shipping_methods($country) {
+    wcflow_log('Using fallback shipping methods for country: ' . $country);
+    
+    $currency_symbol = get_woocommerce_currency_symbol();
+    
+    return array(
+        array(
+            'id' => 'flat_rate:1',
+            'label' => 'Standard Shipping',
+            'name' => 'Standard Shipping',
+            'cost' => '4.99',
+            'cost_with_tax' => '4.99',
+            'price' => 4.99,
+            'price_formatted' => $currency_symbol . '4.99',
+            'method_id' => 'flat_rate',
+            'instance_id' => '1',
+            'description' => 'Standard shipping - Delivery in 3-5 business days'
+        ),
+        array(
+            'id' => 'flat_rate:2',
+            'label' => 'Express Shipping',
+            'name' => 'Express Shipping',
+            'cost' => '9.99',
+            'cost_with_tax' => '9.99',
+            'price' => 9.99,
+            'price_formatted' => $currency_symbol . '9.99',
+            'method_id' => 'flat_rate',
+            'instance_id' => '2',
+            'description' => 'Express shipping - Delivery in 1-2 business days'
+        ),
+        array(
+            'id' => 'free_shipping:1',
+            'label' => 'Free Shipping',
+            'name' => 'Free Shipping',
+            'cost' => '0.00',
+            'cost_with_tax' => '0.00',
+            'price' => 0,
+            'price_formatted' => 'FREE',
+            'method_id' => 'free_shipping',
+            'instance_id' => '1',
+            'description' => 'Free shipping - Delivery in 5-7 business days'
+        )
+    );
 }

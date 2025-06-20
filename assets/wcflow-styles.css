@@ -1,240 +1,921 @@
-/* WooCommerce Gifting Flow - Main Styles */
+/* WooCommerce Gifting Flow - COMPLETE FIXED STYLES */
 
-/* FIXED: Safe modal container with error-free animations */
+/* Reset and base styles */
+* {
+    box-sizing: border-box;
+}
+
+/* Modal Container - FIXED positioning */
 .wcflow-modal-container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: 999999;
-    display: none;
-    overflow-y: auto;
-    opacity: 0;
-    transition: opacity 0.3s ease;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    background: rgba(0, 0, 0, 0.8) !important;
+    z-index: 999999 !important;
+    display: none !important;
+    overflow: hidden !important;
 }
 
 .wcflow-modal-container.visible {
-    display: block;
-    opacity: 1;
+    display: block !important;
 }
 
-/* Prevent jQuery animation conflicts */
-.wcflow-modal-container * {
-    animation-fill-mode: both;
-}
-
+/* Prevent body scroll when modal is open */
 body.wcflow-modal-open {
-    overflow: hidden;
-}
-
-.wcflow-modal {
-    position: relative;
-    background-color: #fff;
-    margin: 30px auto;
-    max-width: 900px;
-    width: 90%;
-    border-radius: 8px;
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
-    overflow: hidden;
-}
-
-/* Step 2 specific styling - boxed layout */
-.wcflow-modal[data-step="2"] .wcflow-form-wrapper {
-    max-width: 600px !important;
-    margin: 0 auto !important;
-    padding: 30px 20px !important;
-    width: 600px !important;
-    box-sizing: border-box !important;
-}
-
-/* Fix for two-columns layout in step 2 */
-.wcflow-modal[data-step="2"] .wcflow-form-row.two-columns {
-    display: flex !important;
-    gap: 20px !important;
+    overflow: hidden !important;
+    position: fixed !important;
     width: 100% !important;
+    height: 100% !important;
+    top: 0 !important;
+    left: 0 !important;
 }
 
-.wcflow-modal[data-step="2"] .wcflow-form-row.two-columns > div {
-    flex: 1 !important;
-    width: calc(50% - 10px) !important;
+/* Modal - Full screen overlay */
+.wcflow-modal {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    background: #fff !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow-y: auto !important;
 }
 
-/* Override any conflicting styles */
-.wcflow-modal[data-step="2"] .wcflow-content-wrapper {
-    max-width: 600px !important;
-    width: 600px !important;
-    margin: 0 auto !important;
+.wcflow-modal.wcflow-fullscreen {
+    position: fixed !important;
+    z-index: 1000000 !important;
 }
 
-.wcflow-modal-header {
-    padding: 20px;
-    border-bottom: 1px solid #f0f0f0;
-    position: relative;
+/* Header */
+.wcflow-header {
+    position: sticky;
+    top: 0;
+    background: #fff;
+    border-bottom: 1px solid #e0e0e0;
+    z-index: 10;
+    padding: 20px 0;
+    flex-shrink: 0;
 }
 
-.wcflow-modal-close {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    background: none;
-    border: none;
-    font-size: 24px;
-    line-height: 1;
-    cursor: pointer;
-    color: #666;
-}
-
-.wcflow-modal-title {
-    margin: 0;
-    font-size: 24px;
-    color: #333;
-}
-
-.wcflow-modal-content {
-    padding: 20px;
-}
-
-.wcflow-modal-footer {
-    padding: 20px;
-    border-top: 1px solid #f0f0f0;
+.wcflow-header-inner {
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
-.wcflow-btn {
-    padding: 10px 20px;
-    border-radius: 4px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
+.wcflow-back-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: none;
     border: none;
-}
-
-.wcflow-btn-primary {
-    background-color: #007cba;
-    color: #fff;
-}
-
-.wcflow-btn-primary:hover {
-    background-color: #006ba1;
-}
-
-.wcflow-btn-secondary {
-    background-color: #f0f0f0;
     color: #333;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 8px 16px;
+    border-radius: 6px;
+    transition: background 0.2s ease;
 }
 
-.wcflow-btn-secondary:hover {
-    background-color: #e0e0e0;
+.wcflow-back-btn:hover {
+    background: #f5f5f5;
 }
 
-.wcflow-btn-prev {
-    margin-right: auto;
+.wcflow-secure-checkout {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #666;
+    font-size: 14px;
 }
 
-.wcflow-btn-next {
-    margin-left: auto;
+/* Content wrapper */
+.wcflow-content-wrapper {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    width: 100%;
 }
 
-/* Loading indicator */
+/* Modal Body */
+.wcflow-modal-body {
+    flex: 1;
+    padding: 40px 0;
+    overflow-y: auto;
+    position: relative;
+}
+
+/* Main Title */
+.wcflow-main-title {
+    font-size: 32px;
+    font-weight: 700;
+    color: #333;
+    margin: 0 0 12px 0;
+    text-align: center;
+}
+
+.wcflow-subtitle {
+    font-size: 18px;
+    color: #666;
+    margin: 0 0 40px 0;
+    text-align: center;
+}
+
+/* Loading */
 .wcflow-loader {
+    width: 40px;
+    height: 40px;
     border: 4px solid #f3f3f3;
     border-top: 4px solid #007cba;
     border-radius: 50%;
-    width: 30px;
-    height: 30px;
-    animation: wcflow-spin 1s linear infinite;
-    margin: 0 auto;
+    animation: spin 1s linear infinite;
+    margin: 20px auto;
 }
 
-@keyframes wcflow-spin {
+@keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
 
-/* Popup overlay */
+.wcflow-loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+}
+
+/* Bottom Bar */
+.wcflow-bottom-bar {
+    position: sticky;
+    bottom: 0;
+    background: #fff;
+    border-top: 1px solid #e0e0e0;
+    padding: 20px 0;
+    z-index: 10;
+    flex-shrink: 0;
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.wcflow-bottom-bar-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+}
+
+.wcflow-order-summary {
+    flex: 1;
+}
+
+.wcflow-order-total-line {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+.wcflow-order-label {
+    font-size: 16px;
+    color: #333;
+    font-weight: 500;
+}
+
+.wcflow-order-amount {
+    font-size: 20px;
+    font-weight: 700;
+    color: #333;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    letter-spacing: -0.5px;
+}
+
+.wcflow-order-details {
+    font-size: 14px;
+    color: #666;
+}
+
+.wcflow-bottom-bar-btn {
+    background: #007cba;
+    color: #fff;
+    border: none;
+    padding: 16px 32px;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    min-width: 200px;
+}
+
+.wcflow-bottom-bar-btn:hover {
+    background: #005a87;
+    transform: translateY(-1px);
+}
+
+.wcflow-bottom-bar-btn:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Step 1 Styles */
+.wcflow-step1-body {
+    padding-bottom: 100px;
+}
+
+/* Add-ons Gallery */
+.wcflow-addons-gallery {
+    margin-bottom: 80px;
+}
+
+.wcflow-addons-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+    margin-top: 32px;
+}
+
+/* Add-ons with ALL functionality */
+.wcflow-addon-card {
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    background: #fff;
+    position: relative;
+    opacity: 1;
+    transform: scale(1);
+}
+
+.wcflow-addons-grid.has-selection .wcflow-addon-card:not(.selected) {
+    opacity: 0.5;
+    transform: scale(0.95);
+}
+
+.wcflow-addon-card:hover {
+    border-color: #007cba;
+    transform: translateY(-2px) scale(0.98);
+    box-shadow: 0 8px 25px rgba(0, 124, 186, 0.15);
+}
+
+.wcflow-addon-card.selected {
+    border-color: #007cba;
+    background: #f0f8ff;
+    opacity: 1 !important;
+    transform: scale(1) !important;
+}
+
+.wcflow-addon-card.selected:hover {
+    transform: translateY(-2px) scale(1.02) !important;
+}
+
+.wcflow-addon-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.wcflow-addon-content {
+    padding: 20px;
+    padding-bottom: 10px;
+}
+
+.wcflow-addon-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+    margin: 0 0 8px 0;
+}
+
+.wcflow-addon-price {
+    font-size: 16px;
+    font-weight: 700;
+    color: #007cba;
+    margin: 0 0 12px 0;
+}
+
+.wcflow-addon-description-short {
+    font-size: 14px;
+    color: #666;
+    line-height: 1.4;
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.wcflow-addon-actions {
+    padding: 0 20px 20px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.wcflow-addon-action {
+    padding: 10px 16px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+}
+
+.wcflow-addon-action.add-btn {
+    background: #007cba;
+    color: #fff;
+}
+
+.wcflow-addon-action.add-btn:hover {
+    background: #005a87;
+}
+
+.wcflow-addon-action.remove-btn {
+    background: #dc3545;
+    color: #fff;
+}
+
+.wcflow-addon-action.remove-btn:hover {
+    background: #c82333;
+}
+
+/* Cards Container */
+.wcflow-cards-container {
+    margin: 80px 0 60px 0;
+    position: relative;
+}
+
+/* Greeting Cards Section */
+.greeting-cards-section {
+    margin: 60px 0;
+    position: relative;
+}
+
+.greeting-cards-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding-left: 20px;
+    position: relative;
+}
+
+.greeting-cards-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-right: 20px;
+}
+
+.greeting-cards-title {
+    font-size: 32px;
+    font-weight: 700;
+    color: #333;
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.greeting-cards-see-all {
+    color: #333;
+    text-decoration: underline;
+    font-weight: 500;
+    font-size: 16px;
+    transition: color 0.2s ease;
+    cursor: pointer;
+}
+
+.greeting-cards-see-all:hover {
+    color: #007cba;
+}
+
+.greeting-cards-description {
+    color: #666;
+    font-size: 16px;
+    line-height: 1.5;
+    margin: 0 0 32px 0;
+    padding-right: 20px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.greeting-cards-slider-wrapper {
+    position: relative;
+    overflow: hidden;
+    width: calc(100vw - ((100vw - 1200px) / 2) - 20px);
+    margin-right: calc(-1 * ((100vw - 1200px) / 2));
+}
+
+@media (max-width: 1240px) {
+    .greeting-cards-container {
+        padding-left: 20px;
+    }
+    
+    .greeting-cards-slider-wrapper {
+        width: calc(100vw - 20px);
+        margin-right: -20px;
+    }
+}
+
+.greeting-cards-slider {
+    display: flex;
+    gap: 16px;
+    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    padding-bottom: 20px;
+    padding-right: 20px;
+    min-width: 100%;
+}
+
+.greeting-card {
+    flex: 0 0 auto;
+    width: 240px;
+    background: #fff;
+    border: none;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: none;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+}
+
+.greeting-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.greeting-card.selected {
+    border: 3px solid #007cba;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 124, 186, 0.25);
+}
+
+.greeting-card.selected::after {
+    content: '✓';
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 24px;
+    height: 24px;
+    background: #007cba;
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: bold;
+    z-index: 2;
+}
+
+.greeting-card-image {
+    width: 100%;
+    height: 300px;
+    object-fit: cover;
+    display: block;
+    border-radius: 12px 12px 0 0;
+}
+
+.greeting-card-content {
+    padding: 16px;
+    background: #fff;
+    border-radius: 0 0 12px 12px;
+}
+
+.greeting-card-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    margin: 0 0 8px 0;
+    line-height: 1.3;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.greeting-card-price {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.greeting-card-price.free {
+    color: #333;
+}
+
+/* Slider Controls */
+.slider-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 24px;
+    padding-right: 20px;
+}
+
+.slider-progress-container {
+    flex: 1;
+    margin-right: 20px;
+}
+
+.slider-progress-bar {
+    width: 100%;
+    height: 4px;
+    background: #e0e0e0;
+    border-radius: 2px;
+    overflow: hidden;
+    position: relative;
+}
+
+.slider-progress-fill {
+    height: 100%;
+    background: #333;
+    border-radius: 2px;
+    transition: width 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    width: 0%;
+}
+
+.slider-nav-controls {
+    display: flex;
+    gap: 8px;
+}
+
+.slider-nav-controls .slider-nav {
+    position: static;
+    transform: none;
+    width: 40px;
+    height: 40px;
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.slider-nav-controls .slider-nav:hover {
+    border-color: #333;
+    background: #f8f9fa;
+    transform: scale(1.05);
+}
+
+.slider-nav-controls .slider-nav:active {
+    transform: scale(0.95);
+}
+
+.slider-nav-controls .slider-nav.disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.slider-nav-controls .slider-nav svg {
+    width: 16px;
+    height: 16px;
+    color: #333;
+    transition: color 0.3s ease;
+}
+
+/* Message Section */
+.wcflow-message-section {
+    margin-top: 60px;
+}
+
+.wcflow-section-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: #333;
+    margin: 0 0 12px 0;
+    text-align: center;
+}
+
+.wcflow-message-subheading {
+    font-size: 16px;
+    color: #666;
+    margin: 0 0 24px 0;
+    text-align: center;
+}
+
+.wcflow-message-wrapper {
+    max-width: 600px;
+    margin: 0 auto 12px auto;
+}
+
+.wcflow-message-textarea {
+    width: 100%;
+    min-height: 120px;
+    padding: 16px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 16px;
+    font-family: inherit;
+    resize: vertical;
+    transition: border-color 0.3s ease;
+}
+
+.wcflow-message-textarea:focus {
+    outline: none;
+    border-color: #007cba;
+}
+
+.wcflow-message-textarea:disabled {
+    background: #f5f5f5;
+    color: #999;
+    cursor: not-allowed;
+}
+
+.wc-message-count {
+    text-align: center;
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 8px;
+}
+
+.wcflow-message-note {
+    text-align: center;
+    font-size: 14px;
+    color: #999;
+    margin: 0;
+}
+
+/* Step 2 Styles */
+.wcflow-form-wrapper {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.wcflow-form-subtitle {
+    font-size: 16px;
+    color: #666;
+    margin: 0 0 40px 0;
+    text-align: center;
+}
+
+.wcflow-login-prompt {
+    text-align: center;
+    margin-bottom: 40px;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.wcflow-login-prompt a {
+    color: #007cba;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.wcflow-login-prompt a:hover {
+    text-decoration: underline;
+}
+
+.wcflow-welcome-back {
+    text-align: center;
+    margin-bottom: 40px;
+    padding: 20px;
+    background: #e8f5e8;
+    border-radius: 8px;
+    color: #2d5a2d;
+}
+
+.wcflow-form-section {
+    margin-bottom: 40px;
+}
+
+.wcflow-form-section-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: #333;
+    margin: 0 0 20px 0;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+.wcflow-form-row {
+    margin-bottom: 20px;
+}
+
+.wcflow-form-row.two-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.wcflow-form-group {
+    position: relative;
+}
+
+.wcflow-form-group.error input,
+.wcflow-form-group.error select,
+.wcflow-form-group.error .selectable-box {
+    border-color: #dc3545;
+}
+
+.wcflow-field-error {
+    display: block;
+    color: #dc3545;
+    font-size: 12px;
+    margin-top: 4px;
+    min-height: 16px;
+}
+
+/* Floating Labels */
+.floating-label {
+    position: relative;
+}
+
+.floating-label input,
+.floating-label select {
+    width: 100%;
+    padding: 16px 12px 8px 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 16px;
+    background: #fff;
+    transition: all 0.3s ease;
+}
+
+.floating-label input:focus,
+.floating-label select:focus {
+    outline: none;
+    border-color: #007cba;
+}
+
+.floating-label label {
+    position: absolute;
+    left: 12px;
+    top: 16px;
+    font-size: 16px;
+    color: #666;
+    pointer-events: none;
+    transition: all 0.3s ease;
+    background: #fff;
+    padding: 0 4px;
+}
+
+.floating-label.has-value label,
+.floating-label input:focus + label,
+.floating-label select:focus + label {
+    top: -8px;
+    font-size: 12px;
+    color: #007cba;
+    font-weight: 600;
+}
+
+.floating-label.country-select select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 12px center;
+    background-repeat: no-repeat;
+    background-size: 16px;
+    padding-right: 40px;
+}
+
+/* Selectable Boxes */
+.selectable-box {
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: #fff;
+    position: relative;
+    overflow: hidden;
+}
+
+.selectable-box:hover {
+    border-color: #007cba;
+    box-shadow: 0 2px 8px rgba(0, 124, 186, 0.1);
+}
+
+.selectable-box.loading {
+    pointer-events: none;
+}
+
+.selectable-box.loading::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(0, 124, 186, 0.1), transparent);
+    animation: loading-shimmer 1.5s infinite;
+}
+
+@keyframes loading-shimmer {
+    0% { left: -100%; }
+    100% { left: 100%; }
+}
+
+.selectable-box-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px;
+}
+
+.selectable-box-value {
+    font-size: 16px;
+    color: #333;
+    font-weight: 500;
+    flex: 1;
+}
+
+.selectable-box-arrow {
+    color: #666;
+    margin-left: 12px;
+    transition: transform 0.3s ease;
+}
+
+.selectable-box:hover .selectable-box-arrow {
+    transform: translateY(2px);
+}
+
+/* Popups */
 .wcflow-popup-overlay {
     position: fixed;
     top: 0;
     left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: 10000;
-    display: none;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000001;
+    display: flex;
     align-items: center;
     justify-content: center;
+    padding: 20px;
+    backdrop-filter: blur(4px);
 }
 
 .wcflow-popup-content {
-    position: relative;
-    background-color: #fff;
-    border-radius: 8px;
-    padding: 20px;
-    max-width: 90%;
-    width: 500px;
-    max-height: 90vh;
+    background: #fff;
+    border-radius: 12px;
+    max-width: 600px;
+    width: 100%;
+    max-height: 80vh;
     overflow-y: auto;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    position: relative;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    animation: popup-appear 0.3s ease-out;
+}
+
+@keyframes popup-appear {
+    from {
+        opacity: 0;
+        transform: scale(0.9) translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
 }
 
 .wcflow-popup-close {
     position: absolute;
-    top: 15px;
-    right: 15px;
+    top: 16px;
+    right: 16px;
     background: none;
     border: none;
     font-size: 24px;
     cursor: pointer;
     color: #666;
-}
-
-/* Calendar popup styling */
-.wcflow-calendar-popup {
-    padding: 0;
-    overflow: hidden;
-}
-
-.wcflow-calendar-header {
-    background-color: #f5f5f5;
-    padding: 15px;
+    width: 32px;
+    height: 32px;
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    border-bottom: 1px solid #ddd;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background 0.2s ease;
+    z-index: 10;
 }
 
-.wcflow-calendar-title {
-    font-size: 18px;
-    font-weight: 600;
+.wcflow-popup-close:hover {
+    background: #f5f5f5;
+}
+
+/* Calendar Popup */
+.wcflow-calendar-popup {
+    padding: 24px;
+}
+
+.wcflow-calendar-popup h3 {
+    margin: 0 0 20px 0;
+    font-size: 24px;
     color: #333;
-    margin: 0;
-}
-
-.wcflow-calendar-nav {
-    display: flex;
-    gap: 10px;
-}
-
-.wcflow-calendar-nav-btn {
-    background: none;
-    border: none;
-    color: #333;
-    cursor: pointer;
-    font-size: 16px;
-    padding: 5px;
-    border-radius: 4px;
-}
-
-.wcflow-calendar-nav-btn:hover {
-    background-color: #eee;
-}
-
-.wcflow-calendar-grid {
-    padding: 15px;
+    text-align: center;
+    padding-right: 40px;
 }
 
 .wcflow-calendar-weekdays {
@@ -276,40 +957,38 @@ body.wcflow-modal-open {
     cursor: not-allowed;
 }
 
-.wcflow-calendar-day.today {
-    border: 1px solid #007cba;
-}
-
 .wcflow-calendar-footer {
-    padding: 15px;
-    border-top: 1px solid #ddd;
+    padding-top: 20px;
     display: flex;
     justify-content: flex-end;
 }
 
-/* Shipping method popup styling */
+/* Shipping Popup */
 .wcflow-shipping-popup {
-    padding: 20px;
+    padding: 24px;
 }
 
 .wcflow-shipping-popup-title {
-    font-size: 18px;
+    font-size: 24px;
     font-weight: 600;
     color: #333;
-    margin: 0 0 15px 0;
+    margin: 0 0 20px 0;
+    text-align: center;
 }
 
 .wcflow-shipping-options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
     margin-bottom: 20px;
 }
 
 .wcflow-shipping-option {
-    padding: 15px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    margin-bottom: 10px;
+    padding: 16px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -317,12 +996,12 @@ body.wcflow-modal-open {
 
 .wcflow-shipping-option:hover {
     border-color: #007cba;
-    background-color: #f9f9f9;
+    background: #f9f9f9;
 }
 
 .wcflow-shipping-option.selected {
     border-color: #007cba;
-    background-color: #f0f8ff;
+    background: #f0f8ff;
 }
 
 .wcflow-shipping-option-info {
@@ -332,7 +1011,7 @@ body.wcflow-modal-open {
 .wcflow-shipping-option-name {
     font-weight: 600;
     color: #333;
-    margin-bottom: 5px;
+    margin-bottom: 4px;
 }
 
 .wcflow-shipping-option-description {
@@ -341,670 +1020,142 @@ body.wcflow-modal-open {
 }
 
 .wcflow-shipping-option-price {
-    font-weight: 600;
+    font-weight: 700;
     color: #007cba;
-    margin-left: 15px;
-}
-
-.wcflow-shipping-option-price.free {
-    color: #28a745;
+    font-size: 18px;
+    margin-left: 16px;
 }
 
 .wcflow-shipping-popup-footer {
-    padding-top: 15px;
-    border-top: 1px solid #ddd;
     display: flex;
     justify-content: flex-end;
 }
 
-/* Add-on styling and popup window styles */
-.wcflow-addon-card {
-    position: relative;
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    overflow: hidden;
-    margin-bottom: 20px;
-    background-color: #fff;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    transition: opacity 0.3s ease, transform 0.3s ease;
-}
-
-.wcflow-addon-card.selected {
-    opacity: 1 !important;
-    transform: scale(1) !important;
-    border-color: #007cba;
-    box-shadow: 0 2px 8px rgba(0,124,186,0.2);
-}
-
-.wcflow-addon-image {
-    width: 100%;
-    height: 200px;
-    object-fit: cover;
-}
-
-.wcflow-addon-content {
-    padding: 15px;
-}
-
-.wcflow-addon-title {
-    font-size: 18px;
-    margin: 0 0 5px 0;
-    color: #333;
-}
-
-.wcflow-addon-price {
-    font-weight: bold;
-    font-size: 16px;
-    color: #007cba;
-    margin: 0 0 10px 0;
-}
-
-.wcflow-addon-description-short {
-    color: #666;
-    margin: 0 0 15px 0;
-    line-height: 1.5;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-}
-
-.wcflow-addon-actions {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 10px;
-}
-
-.wcflow-addon-more-info {
-    background: none;
-    border: none;
-    color: #007cba;
-    cursor: pointer;
-    font-size: 14px;
-    padding: 5px 0;
-    text-decoration: underline;
-}
-
-.wcflow-addon-action {
-    background-color: #f0f0f0;
-    border: none;
-    border-radius: 4px;
-    color: #333;
-    cursor: pointer;
-    font-weight: 600;
-    padding: 5px 15px;
-    transition: all 0.2s ease;
-}
-
-.wcflow-addon-action.add-btn {
-    background-color: #e6f7ff;
-    color: #007cba;
-}
-
-.wcflow-addon-action.remove-btn {
-    background-color: #ffeeee;
-    color: #d32f2f;
-}
-
-/* Popup styling */
-.wcflow-addon-popup {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0,0,0,0.5);
-    z-index: 10000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.wcflow-addon-popup-content {
-    position: relative;
-    background-color: #fff;
-    border-radius: 8px;
-    padding: 25px;
-    max-width: 90%;
-    width: 500px;
-    max-height: 90vh;
-    overflow-y: auto;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-}
-
-.wcflow-addon-popup-close {
-    position: absolute;
-    top: 15px;
-    right: 15px;
-    background: none;
-    border: none;
-    font-size: 24px;
-    cursor: pointer;
-    color: #666;
-}
-
-.wcflow-addon-popup-title {
-    font-size: 20px;
-    margin-bottom: 10px;
-    color: #333;
-}
-
-.wcflow-addon-popup-price {
-    font-weight: bold;
-    color: #007cba;
-    margin-bottom: 15px;
-}
-
-.wcflow-addon-popup-description {
-    color: #333;
-    line-height: 1.5;
-}
-
-/* Greeting Cards section spacing */
-.wcflow-cards-container {
-    margin-top: 60px;
-    padding-top: 20px;
-    border-top: 1px solid #f0f0f0;
-}
-
-/* Greeting cards styling */
-.greeting-cards-slider-wrapper {
-    position: relative;
-    overflow: hidden;
-    margin: 20px 0;
-}
-
-#wcflow-cards-slider {
-    display: flex;
-    transition: transform 0.3s ease;
-}
-
-.greeting-card {
-    flex: 0 0 200px;
-    margin-right: 20px;
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    overflow: hidden;
-    background-color: #fff;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    cursor: pointer;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.greeting-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-}
-
-.greeting-card.selected {
-    border-color: #007cba;
-    box-shadow: 0 2px 8px rgba(0,124,186,0.2);
-}
-
-.greeting-card-image {
-    width: 100%;
-    height: 150px;
-    object-fit: cover;
-}
-
-.greeting-card-content {
-    padding: 10px;
-}
-
-.greeting-card-title {
-    font-size: 14px;
-    margin: 0 0 5px 0;
-    color: #333;
-}
-
-.greeting-card-price {
-    font-weight: bold;
-    font-size: 12px;
-    color: #007cba;
-    margin: 0;
-}
-
-.greeting-card-price.free {
-    color: #28a745;
-}
-
-.slider-navigation {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 15px;
-}
-
-.slider-nav-btn {
-    background-color: #f0f0f0;
-    border: none;
-    border-radius: 4px;
-    color: #333;
-    cursor: pointer;
-    padding: 5px 15px;
-    transition: all 0.2s ease;
-}
-
-.slider-nav-btn:hover {
-    background-color: #e0e0e0;
-}
-
-.slider-nav-btn.disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-.slider-progress {
-    height: 4px;
-    background-color: #f0f0f0;
-    border-radius: 2px;
-    margin-top: 15px;
-    overflow: hidden;
-}
-
-.slider-progress-fill {
-    height: 100%;
-    background-color: #007cba;
-    width: 0;
-    transition: width 0.3s ease;
-}
-
-/* Message textarea styling */
-.wcflow-message-section {
-    margin-top: 40px;
-    margin-bottom: 60px;
-}
-
-.wcflow-message-wrapper {
-    position: relative;
-    margin-top: 20px;
-    margin-bottom: 10px;
-}
-
-#wcflow-card-message {
-    width: 100%;
-    height: 250px;
-    padding: 20px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    resize: none;
-    font-size: 16px;
-    line-height: 1.5;
-}
-
-#wcflow-card-message:disabled {
-    background-color: #fff;
-    cursor: not-allowed;
-}
-
-.wcflow-message-placeholder {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    text-align: center;
-    color: #666;
-    width: 80%;
-    line-height: 1.5;
-    pointer-events: none;
-    font-size: 16px;
-}
-
-#wcflow-card-message:focus + .wcflow-message-placeholder,
-#wcflow-card-message:not(:disabled):valid + .wcflow-message-placeholder {
-    display: none;
-}
-
-.wcflow-message-note {
-    font-size: 14px;
-    color: #666;
-    margin-top: 10px;
-    text-align: center;
-}
-
-.wcflow-message-count {
-    text-align: center;
-    font-size: 14px;
-    color: #666;
-    margin-top: 10px;
-}
-
-.wcflow-section-title {
-    font-size: 28px;
-    margin-bottom: 20px;
-    color: #333;
-    text-align: center;
-}
-
-/* Grid layout for add-ons */
-.wcflow-addons-grid {
+/* Step 3 Styles */
+.wcflow-step3-layout {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 20px;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
-/* Form styling */
-.wcflow-form-group {
-    margin-bottom: 20px;
+.wcflow-left-column,
+.wcflow-right-column {
+    background: #fff;
 }
 
-.wcflow-form-label {
-    display: block;
-    margin-bottom: 5px;
+/* Discount Section */
+.wcflow-discount-section {
+    margin-bottom: 40px;
+    padding: 24px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+}
+
+.wcflow-discount-section h3 {
+    margin: 0 0 12px 0;
+    font-size: 20px;
+    color: #333;
+}
+
+.wcflow-discount-desc {
+    margin: 0 0 16px 0;
+    color: #666;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.wcflow-discount-form {
+    display: flex;
+    gap: 12px;
+}
+
+.wcflow-discount-input {
+    flex: 1;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.wcflow-apply-btn {
+    background: #007cba;
+    color: #fff;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
     font-weight: 600;
+    transition: background 0.2s ease;
 }
 
-.wcflow-form-input {
+.wcflow-apply-btn:hover {
+    background: #005a87;
+}
+
+/* Basket Section */
+.wcflow-basket-section {
+    padding: 24px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+}
+
+.wcflow-basket-section h3 {
+    margin: 0 0 20px 0;
+    font-size: 20px;
+    color: #333;
+}
+
+/* Payment Section */
+.wcflow-payment-section {
+    padding: 24px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+}
+
+.wcflow-payment-section h3 {
+    margin: 0 0 20px 0;
+    font-size: 20px;
+    color: #333;
+}
+
+/* Place Order Section */
+.wcflow-place-order-section {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #e0e0e0;
+}
+
+.wcflow-place-order-button {
     width: 100%;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-}
-
-.wcflow-form-group.has-error .wcflow-form-input {
-    border-color: #d32f2f;
-}
-
-.wcflow-field-error {
-    color: #d32f2f;
-    font-size: 12px;
-    margin-top: 5px;
-}
-
-/* Floating labels */
-.floating-label {
-    position: relative;
-    margin-bottom: 20px;
-}
-
-.floating-label label {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    color: #666;
-    transition: all 0.2s ease;
-    pointer-events: none;
-}
-
-.floating-label.has-value label,
-.floating-label input:focus + label,
-.floating-label select:focus + label,
-.floating-label input:not(:placeholder-shown) + label,
-.floating-label select:not(:placeholder-shown) + label {
-    top: -10px;
-    left: 5px;
-    font-size: 12px;
-    background-color: #fff;
-    padding: 0 5px;
-    color: #007cba;
-}
-
-.floating-label input,
-.floating-label select {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-}
-
-/* Fix for filled inputs */
-.floating-label input:not([value=""]),
-.floating-label input:-webkit-autofill {
-    background-color: #fff !important;
-}
-
-.floating-label input:-webkit-autofill + label,
-.floating-label input:not([value=""]) + label {
-    top: -10px !important;
-    left: 5px !important;
-    font-size: 12px !important;
-    background-color: #fff !important;
-    padding: 0 5px !important;
-    color: #007cba !important;
-}
-
-/* Selectable box - styled like the image */
-.selectable-box {
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    padding: 15px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    background-color: #fff;
-}
-
-.selectable-box:hover {
-    border-color: #007cba;
-}
-
-.selectable-box-label {
-    font-size: 12px;
-    color: #666;
-    margin-bottom: 5px;
-    display: block;
-}
-
-.selectable-box-value {
+    background: #000;
+    color: #fff;
+    border: none;
+    padding: 16px 24px;
+    font-size: 16px;
     font-weight: 600;
-    color: #333;
-    display: block;
-}
-
-.selectable-box-arrow {
-    position: absolute;
-    right: 15px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #666;
-    font-size: 18px;
-}
-
-/* Delivery date and shipping method selectors */
-#wcflow-delivery-date-selector,
-#wcflow-shipping-method-selector {
-    height: 60px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-}
-
-/* Shipping methods */
-.wcflow-shipping-option {
-    padding: 15px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    margin-bottom: 10px;
+    border-radius: 8px;
     cursor: pointer;
     transition: all 0.2s ease;
+    margin-bottom: 12px;
 }
 
-.wcflow-shipping-option:hover {
-    border-color: #007cba;
-    background-color: #f9f9f9;
+.wcflow-place-order-button:hover {
+    background: #333;
+    transform: translateY(-1px);
 }
 
-.wcflow-shipping-option.selected {
-    border-color: #007cba;
-    background-color: #f0f8ff;
+.wcflow-place-order-button:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    transform: none;
 }
 
-/* Payment methods */
-.wcflow-payment-methods {
-    margin-top: 20px;
-}
-
-.wcflow-payment-method {
-    padding: 15px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    margin-bottom: 10px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.wcflow-payment-method:hover {
-    border-color: #007cba;
-    background-color: #f9f9f9;
-}
-
-.wcflow-payment-method.selected {
-    border-color: #007cba;
-    background-color: #f0f8ff;
-}
-
-/* Order summary */
-.wcflow-order-summary {
-    background-color: #f9f9f9;
-    border-radius: 4px;
-    padding: 20px;
-    margin-bottom: 20px;
-}
-
-.wcflow-order-summary-title {
-    font-size: 18px;
-    margin: 0 0 15px 0;
-    color: #333;
-}
-
-.wcflow-order-summary-item {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 10px;
-}
-
-.wcflow-order-summary-label {
-    color: #666;
-}
-
-.wcflow-order-summary-value {
-    font-weight: 600;
-    color: #333;
-}
-
-.wcflow-order-summary-total {
-    border-top: 1px solid #ddd;
-    margin-top: 10px;
-    padding-top: 10px;
-    font-size: 18px;
-}
-
-/* Bottom bar styling */
-.wcflow-bottom-bar {
-    position: fixed !important;
-    bottom: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    background-color: #fff !important;
-    border-top: 1px solid #ddd !important;
-    padding: 15px 0 !important;
-    z-index: 10000 !important;
-    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1) !important;
-    height: auto !important;
-    min-height: 80px !important;
-    display: block !important;
-    width: 100% !important;
-}
-
-.wcflow-bottom-bar-inner {
-    display: flex !important;
-    justify-content: space-between !important;
-    align-items: center !important;
-    flex-wrap: wrap !important;
-    padding: 0 20px !important;
-    max-width: 900px !important;
-    margin: 0 auto !important;
-}
-
-.wcflow-order-total-line {
-    display: flex !important;
-    align-items: center !important;
-    margin-bottom: 5px !important;
-}
-
-.wcflow-order-label {
-    font-weight: 600 !important;
-    color: #333 !important;
-    margin-right: 10px !important;
-}
-
-.wcflow-order-amount {
-    font-weight: 700 !important;
-    font-size: 18px !important;
-    color: #007cba !important;
-}
-
-.wcflow-order-details {
-    font-size: 14px !important;
-    color: #666 !important;
-}
-
-.wcflow-bottom-bar-action {
-    margin-left: 20px !important;
-}
-
-.wcflow-bottom-bar-btn {
-    background-color: #007cba !important;
-    color: #fff !important;
-    border: none !important;
-    border-radius: 4px !important;
-    padding: 12px 24px !important;
-    font-weight: 600 !important;
-    cursor: pointer !important;
-    transition: all 0.2s ease !important;
-}
-
-.wcflow-bottom-bar-btn:hover {
-    background-color: #006ba1 !important;
-}
-
-/* Ensure bottom bar content doesn't get cut off */
-.wcflow-modal[data-step="2"] .wcflow-modal-body {
-    padding-bottom: 150px !important;
-    margin-bottom: 100px !important;
-}
-
-/* Fix for bottom bar in step 2 */
-.wcflow-modal[data-step="2"] .wcflow-bottom-bar .wcflow-content-wrapper {
-    max-width: 900px !important;
-    margin: 0 auto !important;
-    padding: 0 20px !important;
-    width: 100% !important;
-}
-
-/* Fix for bottom bar order summary */
-.wcflow-bottom-bar .wcflow-order-summary {
-    background-color: transparent !important;
-    padding: 0 !important;
-    margin-bottom: 0 !important;
-}
-
-/* Fix for popup overlays */
-.wcflow-popup-overlay {
+/* Remove bottom bar styles from step 3 */
+.wcflow-modal[data-step="3"] .wcflow-bottom-bar {
     display: none !important;
-}
-
-.wcflow-popup-overlay.visible {
-    display: flex !important;
-}
-
-/* Enhanced Form Validation Styles */
-.wcflow-form-group.error input,
-.wcflow-form-group.error select,
-.wcflow-form-group.error.selectable-box {
-    border-color: #d32f2f !important;
-    box-shadow: 0 0 0 2px rgba(211, 47, 47, 0.1) !important;
-}
-
-.wcflow-field-error {
-    color: #d32f2f;
-    font-size: 12px;
-    margin-top: 4px;
-    display: block;
-    min-height: 16px;
-    font-weight: 500;
 }
 
 /* Validation Summary Styles */
@@ -1068,20 +1219,6 @@ body.wcflow-modal-open {
     background-color: rgba(133, 100, 4, 0.1);
 }
 
-/* Error Highlight Animation */
-.wcflow-error-highlight {
-    animation: wcflow-error-pulse 2s ease-in-out;
-}
-
-@keyframes wcflow-error-pulse {
-    0%, 100% {
-        background-color: transparent;
-    }
-    50% {
-        background-color: rgba(211, 47, 47, 0.05);
-    }
-}
-
 @keyframes wcflow-slide-down {
     from {
         opacity: 0;
@@ -1093,526 +1230,124 @@ body.wcflow-modal-open {
     }
 }
 
-/* Enhanced Error States for Selectable Boxes */
-.wcflow-form-group.error .selectable-box {
-    border-color: #d32f2f !important;
-    background-color: rgba(211, 47, 47, 0.02) !important;
-}
-
-.wcflow-form-group.error .selectable-box-label {
-    color: #d32f2f !important;
-}
-
-/* Required Field Indicators */
-.required-field .selectable-box-label::after {
-    content: " *";
-    color: #d32f2f;
-}
-
-/* Smooth Scroll Enhancement */
-html {
-    scroll-behavior: smooth;
-}
-
-/* Focus States for Accessibility */
-.wcflow-form-group input:focus,
-.wcflow-form-group select:focus,
-.selectable-box:focus {
-    outline: 2px solid #007cba;
-    outline-offset: 2px;
-}
-
-/* Responsive adjustments */
-/* Step 3 Styles - Complete Checkout Design */
-.wcflow-modal[data-step="3"] {
-    max-width: 1200px;
-}
-
-.wcflow-step3-layout {
-    display: flex;
-    gap: 40px;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
-}
-
-.wcflow-left-column {
-    flex: 1;
-    max-width: 600px;
-}
-
-.wcflow-right-column {
-    flex: 1;
-    max-width: 500px;
-}
-
-/* Discount Section */
-.wcflow-discount-section {
-    background: #f8f9fa;
-    padding: 20px;
-    border-radius: 8px;
-    margin-bottom: 30px;
-}
-
-.wcflow-discount-section h3 {
-    margin: 0 0 10px 0;
-    font-size: 18px;
-    color: #333;
-    font-weight: 600;
-}
-
-.wcflow-discount-desc {
-    margin: 0 0 15px 0;
-    color: #666;
-    font-size: 14px;
-    line-height: 1.4;
-}
-
-.wcflow-referral-link {
-    color: #007cba;
-    text-decoration: none;
-}
-
-.wcflow-referral-link:hover {
-    text-decoration: underline;
-}
-
-.wcflow-discount-form {
-    display: flex;
-    gap: 10px;
-}
-
-.wcflow-discount-input {
-    flex: 1;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 14px;
-}
-
-.wcflow-apply-btn {
-    padding: 10px 20px;
-    background: #007cba;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 600;
-    transition: background-color 0.3s ease;
-}
-
-.wcflow-apply-btn:hover {
-    background: #005a8b;
-}
-
-/* Basket Section */
-.wcflow-basket-section h3 {
-    margin: 0 0 20px 0;
-    font-size: 20px;
-    color: #333;
-    font-weight: 600;
-}
-
-.wcflow-basket-summary {
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    overflow: hidden;
-    background: #fff;
-}
-
-.wcflow-basket-item {
-    display: flex;
-    align-items: center;
-    padding: 16px;
-    border-bottom: 1px solid #e0e0e0;
-}
-
-.wcflow-basket-item-img {
-    width: 80px;
-    height: 80px;
-    margin-right: 16px;
-    background: #f5f5f5;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-}
-
-.wcflow-basket-item-details {
-    flex: 1;
-}
-
-.wcflow-basket-item-details p:first-child {
-    margin: 0 0 4px 0;
-    font-weight: 600;
-    color: #333;
-    font-size: 16px;
-}
-
-.wcflow-basket-item-details p:last-child {
-    margin: 0;
-    color: #666;
-    font-size: 14px;
-}
-
-.wcflow-basket-item-price {
-    font-weight: 700;
-    color: #007cba;
-    font-size: 16px;
-}
-
-.wcflow-basket-addon,
-.wcflow-basket-card {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px 16px;
-    border-bottom: 1px solid #e0e0e0;
-    background: #f9f9f9;
-}
-
-.wcflow-basket-addon span:first-child,
-.wcflow-basket-card span:first-child {
-    color: #666;
-    font-size: 14px;
-}
-
-.wcflow-basket-addon span:last-child,
-.wcflow-basket-card span:last-child {
-    font-weight: 600;
-    color: #333;
-}
-
-.wcflow-basket-message {
-    padding: 12px 16px;
-    border-bottom: 1px solid #e0e0e0;
-    background: #f0f8ff;
-}
-
-.wcflow-basket-message p:first-child {
-    margin: 0;
-    color: #666;
-    font-size: 14px;
-    font-weight: 600;
-}
-
-.wcflow-basket-message p:last-child {
-    margin: 4px 0 0 0;
-    color: #333;
-    font-style: italic;
-}
-
-.wcflow-basket-recipient,
-.wcflow-basket-delivery {
-    padding: 16px;
-    border-bottom: 1px solid #e0e0e0;
-}
-
-.wcflow-basket-recipient h4,
-.wcflow-basket-delivery h4 {
-    margin: 0 0 8px 0;
-    color: #333;
-    font-size: 16px;
-    font-weight: 600;
-}
-
-.wcflow-basket-recipient p,
-.wcflow-basket-delivery p {
-    margin: 0;
-    color: #666;
-    line-height: 1.4;
-}
-
-.wcflow-basket-subtotal,
-.wcflow-basket-shipping {
-    display: flex;
-    justify-content: space-between;
-    padding: 12px 16px;
-    border-bottom: 1px solid #e0e0e0;
-}
-
-.wcflow-basket-subtotal span:first-child,
-.wcflow-basket-shipping span:first-child {
-    color: #666;
-}
-
-.wcflow-basket-subtotal span:last-child,
-.wcflow-basket-shipping span:last-child {
-    font-weight: 600;
-    color: #333;
-}
-
-.wcflow-basket-total {
-    display: flex;
-    justify-content: space-between;
-    padding: 16px;
-    background: #f8f9fa;
-    font-size: 18px;
-}
-
-.wcflow-basket-total strong:first-child {
-    color: #333;
-}
-
-.wcflow-basket-total strong:last-child {
-    color: #007cba;
-}
-
-/* Payment Section */
-.wcflow-payment-section h3 {
-    margin: 0 0 20px 0;
-    font-size: 20px;
-    color: #333;
-    font-weight: 600;
-}
-
-/* Payment Methods */
-.wcflow-payment-methods {
-    margin: 20px 0;
-}
-
-.wcflow-payment-method {
-    margin-bottom: 16px;
-    padding: 16px;
-    border: 2px solid #e0e0e0;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    background: #fff;
-}
-
-.wcflow-payment-method:hover {
-    border-color: #007cba;
-    background: #f0f8ff;
-}
-
-.wcflow-payment-method.selected {
-    border-color: #007cba;
-    background: #f0f8ff;
-}
-
-.wcflow-payment-method label {
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-    width: 100%;
-    margin: 0;
-}
-
-.wcflow-payment-method input[type="radio"] {
-    margin-right: 12px;
-    width: 18px;
-    height: 18px;
-}
-
-.wcflow-payment-method .wcflow-payment-title {
-    font-weight: 600;
-    color: #333;
-    margin-bottom: 4px;
-}
-
-.wcflow-payment-method .wcflow-payment-description {
-    font-size: 14px;
-    color: #666;
-}
-
-.wcflow-payment-fields {
-    margin-top: 16px;
-    padding-top: 16px;
-    border-top: 1px solid #e0e0e0;
-    display: none;
-}
-
-/* Place Order Button */
-.wcflow-place-order-section {
-    padding-top: 16px;
-    border-top: 1px solid #e0e0e0;
-    margin-top: 20px;
-}
-
-.wcflow-place-order-button {
-    width: 100%;
-    padding: 16px;
-    background: #007cba;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-.wcflow-place-order-button:hover {
-    background: #005a8b;
-}
-
-.wcflow-place-order-button:disabled {
-    background: #ccc;
-    cursor: not-allowed;
-}
-
-/* Billing Form Toggle */
-.wcflow-form-group label[for="wcflow-buyer-same"] {
-    font-weight: bold;
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-    padding: 12px;
-    border: 2px solid #e0e0e0;
-    border-radius: 8px;
-    background: #f9f9f9;
-    margin: 0;
-    transition: all 0.3s ease;
-}
-
-.wcflow-form-group label[for="wcflow-buyer-same"]:hover {
-    border-color: #007cba;
-    background: #f0f8ff;
-}
-
-.wcflow-form-group label[for="wcflow-buyer-same"] input {
-    margin-right: 12px;
-    width: 18px;
-    height: 18px;
-}
-
-#wcflow-billing-form {
-    margin-bottom: 18px;
-    padding: 20px;
-    border: 2px solid #007cba;
-    border-radius: 8px;
-    background: #f0f8ff;
-}
-
-#wcflow-billing-form h4 {
-    margin: 0 0 16px 0;
-    color: #333;
-    font-size: 18px;
-    font-weight: 600;
-}
-
-.wcflow-form-row {
-    display: flex;
-    gap: 12px;
-    margin-bottom: 12px;
-}
-
-.wcflow-form-row .wcflow-form-group {
-    flex: 1;
-    margin-bottom: 0;
-}
-
-#wcflow-billing-form .wcflow-form-group label {
-    display: block;
-    margin-bottom: 4px;
-    font-weight: bold;
-    color: #555;
-}
-
-#wcflow-billing-form .wcflow-form-group input {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 14px;
-    box-sizing: border-box;
-}
-
-/* Responsive Design for Step 3 */
+/* Responsive Design */
 @media (max-width: 768px) {
-    .wcflow-step3-layout {
-        flex-direction: column;
-        gap: 20px;
-        padding: 15px;
+    .wcflow-content-wrapper {
+        padding: 0 16px;
     }
     
-    .wcflow-left-column,
-    .wcflow-right-column {
-        max-width: 100%;
+    .wcflow-main-title {
+        font-size: 24px;
     }
     
-    .wcflow-discount-section {
-        padding: 15px;
-        margin-bottom: 20px;
-    }
-    
-    .wcflow-discount-form {
-        flex-direction: column;
-        gap: 10px;
-    }
-    
-    .wcflow-apply-btn {
-        width: 100%;
-    }
-    
-    .wcflow-basket-item {
-        padding: 12px;
-    }
-    
-    .wcflow-basket-item-img {
-        width: 60px;
-        height: 60px;
-        margin-right: 12px;
-    }
-    
-    .wcflow-form-row {
-        flex-direction: column;
-        gap: 0;
-    }
-    
-    .wcflow-form-row .wcflow-form-group {
-        margin-bottom: 12px;
-    }
-}
-
-@media (max-width: 768px) {
-    .wcflow-modal {
-        width: 95%;
-        margin: 10px auto;
-    }
-    
-    .wcflow-modal-header {
-        padding: 15px;
-    }
-    
-    .wcflow-modal-content {
-        padding: 15px;
-    }
-    
-    .wcflow-modal-footer {
-        padding: 15px;
-        flex-direction: column;
-    }
-    
-    .wcflow-btn-prev {
-        margin-bottom: 10px;
-        order: 2;
-        width: 100%;
-    }
-    
-    .wcflow-btn-next {
-        order: 1;
-        width: 100%;
-        margin-bottom: 10px;
+    .wcflow-subtitle {
+        font-size: 16px;
     }
     
     .wcflow-addons-grid {
         grid-template-columns: 1fr;
+        gap: 16px;
     }
     
-    .wcflow-validation-summary {
-        padding: 12px;
-        margin-bottom: 15px;
+    .greeting-cards-container {
+        padding-left: 16px;
     }
     
-    .wcflow-validation-content h4 {
-        font-size: 14px;
+    .greeting-cards-header {
+        padding-right: 16px;
     }
     
-    .wcflow-validation-content ul {
-        padding-left: 15px;
+    .greeting-cards-description {
+        padding-right: 16px;
+    }
+    
+    .greeting-cards-title {
+        font-size: 24px;
+    }
+    
+    .greeting-card {
+        width: 200px;
+    }
+    
+    .greeting-card-image {
+        height: 250px;
+    }
+    
+    .greeting-cards-slider {
+        gap: 12px;
+    }
+    
+    .slider-controls {
+        padding-right: 16px;
+    }
+    
+    .slider-nav-controls .slider-nav {
+        width: 36px;
+        height: 36px;
+    }
+    
+    .slider-nav-controls .slider-nav svg {
+        width: 14px;
+        height: 14px;
+    }
+    
+    .greeting-cards-slider-wrapper {
+        width: calc(100vw - 16px);
+        margin-right: -16px;
+    }
+    
+    .wcflow-form-row.two-columns {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+    
+    .wcflow-step3-layout {
+        grid-template-columns: 1fr;
+        gap: 24px;
+    }
+    
+    .wcflow-bottom-bar-inner {
+        flex-direction: column;
+        gap: 16px;
+        text-align: center;
+    }
+    
+    .wcflow-bottom-bar-btn {
+        width: 100%;
+        min-width: auto;
+    }
+    
+    .wcflow-order-amount {
+        font-size: 18px;
+    }
+}
+
+@media (max-width: 480px) {
+    .greeting-cards-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    
+    .greeting-card {
+        width: 180px;
+    }
+    
+    .greeting-card-image {
+        height: 220px;
+    }
+    
+    .greeting-cards-slider {
+        gap: 12px;
+    }
+    
+    .slider-controls {
+        flex-direction: column;
+        gap: 16px;
+        align-items: stretch;
+    }
+    
+    .slider-progress-container {
+        margin-right: 0;
     }
 }

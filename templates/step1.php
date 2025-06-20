@@ -1,8 +1,7 @@
 <?php
 /**
- * WooCommerce Gifting Flow Step 1 - ENHANCED with Deselectable Cards and Improved Add-ons
+ * WooCommerce Gifting Flow Step 1 - FIXED VERSION
  * Updated: 2025-01-27 - Fixed greeting card deselection and enhanced add-ons functionality
- * Updated: 2025-06-20 - Added pop-up windows for add-ons and toggle buttons
  */
 ?>
 <div class="wcflow-modal wcflow-fullscreen" data-step="1">
@@ -14,7 +13,7 @@
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                             <path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
-                        Tęsti apsipirkimą
+                        Continue Shopping
                     </button>
                 </div>
                 <div class="wcflow-header-right">
@@ -24,7 +23,7 @@
                             <circle cx="12" cy="16" r="1" fill="currentColor"/>
                             <path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="currentColor" stroke-width="2"/>
                         </svg>
-                        Saugus atsiskaitymas
+                        Secure Checkout
                     </div>
                 </div>
             </div>
@@ -40,7 +39,7 @@
             <h2 class="wcflow-main-title">They're going to love it</h2>
             <p class="wcflow-subtitle">Add some extras to make your gift even more special</p>
             
-            <!-- ENHANCED: Add-ons Gallery with improved spacing and functionality -->
+            <!-- Add-ons Gallery with improved spacing and functionality -->
             <div class="wcflow-addons-gallery">
                 <h2 class="wcflow-section-title">Add-ons</h2>
                 <p class="wcflow-message-subheading">Enhance your gift with these special add-ons</p>
@@ -50,7 +49,7 @@
             </div>
         </div>
         
-        <!-- ENHANCED: Greeting Cards Section with proper heading and sustainability message -->
+        <!-- Greeting Cards Section with proper heading and sustainability message -->
         <div class="wcflow-cards-container">
             <div class="wcflow-content-wrapper">
                 <div style="margin-bottom: 40px;">
@@ -59,11 +58,11 @@
                 </div>
             </div>
             
-            <!-- DATABASE CONNECTED: Dynamic Category Sliders Container -->
+            <!-- Dynamic Category Sliders Container -->
             <div id="wcflow-dynamic-cards-container">
                 <!-- This will be populated by JavaScript with real database data -->
                 <div class="wcflow-loader" style="text-align: center; padding: 40px;">
-                    <p>Loading greeting cards from database...</p>
+                    <p>Loading greeting cards...</p>
                 </div>
             </div>
         </div>
@@ -72,12 +71,12 @@
             <section class="wcflow-message-section">
                 <h2 class="wcflow-section-title">Write your message</h2>
                 <div class="wcflow-message-wrapper">
-                    <textarea id="wcflow-card-message" class="wcflow-message-textarea" disabled maxlength="450" placeholder=""></textarea>
+                    <textarea id="wcflow-card-message" class="wcflow-message-textarea" disabled maxlength="250" placeholder=""></textarea>
                     <div class="wcflow-message-placeholder">
                         A few heartfelt words can mean the world. Remember to include your name so they know it's from you.
                     </div>
                 </div>
-                <div class="wcflow-message-count"><span id="wcflow-message-count">0</span> of 450 characters</div>
+                <div class="wcflow-message-count"><span id="wcflow-message-count">0</span> of 250 characters</div>
                 <p class="wcflow-message-note">Tip: Select a card above to enable the message field</p>
             </section>
         </div>
@@ -88,17 +87,15 @@
             <div class="wcflow-bottom-bar-inner">
                 <div class="wcflow-order-summary">
                     <div class="wcflow-order-total-line">
-                        <span class="wcflow-order-label">Užsakymo suma:</span>
-                        <span class="wcflow-order-amount" id="wcflow-dynamic-total">0.00 €</span>
+                        <span class="wcflow-order-label">Order Total:</span>
+                        <span class="wcflow-order-amount" id="wcflow-dynamic-total">€0.00</span>
                     </div>
                     <div class="wcflow-order-details">
-                        <span class="wcflow-order-breakdown" id="wcflow-shipping-details">Įskaičiuotas 0.00 € pristatymo mokestis</span>
+                        <span class="wcflow-order-breakdown" id="wcflow-shipping-details">Including €0.00 shipping</span>
                     </div>
                 </div>
                 <div class="wcflow-bottom-bar-action">
-                    <button type="button" class="wcflow-btn-next wcflow-bottom-bar-btn">
-                        Pereiti prie pristatymo informacijos
-                    </button>
+                    <button type="button" class="wcflow-btn-next wcflow-bottom-bar-btn">Continue to Shipping</button>
                 </div>
             </div>
         </div>
@@ -106,17 +103,9 @@
 </div>
 
 <script>
-// ENHANCED: Load cards dynamically from admin dashboard with deselectable functionality
+// Load cards dynamically from admin dashboard with deselectable functionality
 jQuery(document).ready(function($) {
-    // Explicitly load add-ons
-    if (typeof window.loadAddons === 'function') {
-        console.log('🎁 Explicitly loading add-ons...');
-        window.loadAddons();
-    } else {
-        console.error('❌ loadAddons function not available');
-    }
-    
-    console.log('🎯 Loading ENHANCED cards from database...');
+    console.log('Loading cards from database...');
     
     // Load cards from database via AJAX
     $.ajax({
@@ -128,12 +117,12 @@ jQuery(document).ready(function($) {
         },
         timeout: 15000,
         success: function(response) {
-            console.log('📦 Database response received:', response);
+            console.log('Database response received');
             
             if (response && response.success && response.data) {
                 renderDynamicCategorySliders(response.data);
             } else {
-                console.log('⚠️ No data received, showing fallback message');
+                console.log('No data received, showing fallback message');
                 $('#wcflow-dynamic-cards-container').html(
                     '<div style="text-align: center; padding: 40px; color: #666;">' +
                     '<p>No greeting cards available at this time.</p>' +
@@ -143,7 +132,7 @@ jQuery(document).ready(function($) {
             }
         },
         error: function(xhr, status, error) {
-            console.error('❌ Failed to load cards:', error);
+            console.error('Failed to load cards:', error);
             $('#wcflow-dynamic-cards-container').html(
                 '<div style="text-align: center; padding: 40px; color: #dc3545;">' +
                 '<p>Failed to load greeting cards.</p>' +
@@ -153,9 +142,9 @@ jQuery(document).ready(function($) {
         }
     });
     
-    // ENHANCED: Render category sliders dynamically with deselectable cards
+    // Render category sliders dynamically with deselectable cards
     function renderDynamicCategorySliders(cardsByCategory) {
-        console.log('🎨 Rendering ENHANCED category sliders:', Object.keys(cardsByCategory));
+        console.log('Rendering category sliders:', Object.keys(cardsByCategory));
         
         const $container = $('#wcflow-dynamic-cards-container');
         $container.empty();
@@ -173,7 +162,7 @@ jQuery(document).ready(function($) {
         Object.entries(cardsByCategory).forEach(function([categoryName, cards]) {
             if (!cards || cards.length === 0) return;
             
-            console.log('🎴 Creating ENHANCED slider for category:', categoryName, 'with', cards.length, 'cards');
+            console.log('Creating slider for category:', categoryName, 'with', cards.length, 'cards');
             
             const categorySlug = categoryName.toLowerCase().replace(/[^a-z0-9]/g, '-');
             
@@ -190,6 +179,18 @@ jQuery(document).ready(function($) {
                         </p>
                         
                         <div class="greeting-cards-slider-wrapper">
+                            <button class="slider-nav slider-nav-prev" aria-label="Previous cards" type="button">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M15 18l-6-6 6-6"/>
+                                </svg>
+                            </button>
+                            
+                            <button class="slider-nav slider-nav-next" aria-label="Next cards" type="button">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M9 18l6-6-6-6"/>
+                                </svg>
+                            </button>
+                            
                             <div class="greeting-cards-slider" role="list">
                                 ${cards.map(card => `
                                     <div class="greeting-card" data-card-id="${card.id}" data-price-value="${card.price_value}" role="listitem" tabindex="0">
@@ -229,7 +230,7 @@ jQuery(document).ready(function($) {
             $container.append(sliderHtml);
         });
         
-        console.log('✅ All ENHANCED category sliders rendered successfully');
+        console.log('All category sliders rendered successfully');
         
         // Initialize sliders after rendering
         setTimeout(function() {
@@ -243,70 +244,36 @@ jQuery(document).ready(function($) {
             'Birthday Cards': 'Perfect cards for birthday celebrations and special moments',
             'Holiday Cards': 'Festive cards for special occasions and celebrations',
             'Thank You Cards': 'Express your gratitude with these beautiful cards',
-            'Gimtadienio ir švenčių atvirukai': 'Šventiniai atvirukai ypatingoms progoms ir šventėms',
-            'Populiariausi atvirukai': 'Mūsų populiariausi ir dažniausiai perkamieji atvirukai'
+            'Birthday': 'Because it wouldn't be a birthday without a card. Pick your fave design, and add your own celebratory note.'
         };
         
         return descriptions[categoryName] || 'Beautiful greeting cards for every occasion';
     }
     
-    // ENHANCED: Initialize all category sliders with deselectable functionality
+    // Initialize all category sliders with deselectable functionality
     function initializeAllCategorySliders() {
-        console.log('🔧 Initializing all ENHANCED category sliders...');
+        console.log('Initializing all category sliders...');
         
         $('.greeting-cards-section').each(function() {
             const $section = $(this);
             const categoryName = $section.data('category') || $section.find('.greeting-cards-title').text();
             
-            console.log('🎛️ Initializing ENHANCED slider for category:', categoryName);
+            console.log('Initializing slider for category:', categoryName);
             
             // Initialize individual slider
-            if (window.GreetingCardsSlider) {
-                new window.GreetingCardsSlider($section[0]);
-                
-                // Add event listener for card selection/deselection
-                $section[0].addEventListener('cardSelected', function(e) {
-                    const isSelected = e.detail.selected;
-                    const cardData = e.detail.cardData;
-                    
-                    console.log('Card selection changed:', {
-                        id: cardData.id,
-                        title: cardData.title,
-                        selected: isSelected
-                    });
-                    
-                    // Enable/disable message textarea based on selection
-                    if (isSelected) {
-                        $('#wcflow-card-message').prop('disabled', false);
-                        $('.wcflow-message-note').hide();
-                    } else {
-                        $('#wcflow-card-message').prop('disabled', true);
-                        $('.wcflow-message-note').show();
-                    }
-                    
-                    // Update order state and pricing
-                    if (window.wcflow && window.wcflow.orderState) {
-                        if (typeof window.updateOrderState === 'function') {
-                            window.updateOrderState();
-                        }
-                        if (typeof window.updatePricing === 'function') {
-                            window.updatePricing();
-                        }
-                    }
-                });
-            } else {
-                // Fallback initialization
-                initializeSingleSlider($section);
-            }
+            initializeSingleSlider($section);
         });
         
-        console.log('✅ All ENHANCED category sliders initialized!');
+        console.log('All category sliders initialized!');
     }
     
-    // ENHANCED: Fallback slider initialization with deselectable cards
+    // Initialize single slider with deselectable cards
     function initializeSingleSlider($section) {
         const $slider = $section.find('.greeting-cards-slider');
         const $cards = $slider.find('.greeting-card');
+        const $prevBtn = $section.find('.slider-nav-prev');
+        const $nextBtn = $section.find('.slider-nav-next');
+        const $progressFill = $section.find('.slider-progress-fill');
         
         if ($cards.length === 0) return;
         
@@ -322,23 +289,23 @@ jQuery(document).ready(function($) {
             $slider.css('transform', `translateX(${translateX}px)`);
             
             // Update navigation
-            $section.find('.slider-nav-prev').toggleClass('disabled', currentIndex === 0);
-            $section.find('.slider-nav-next').toggleClass('disabled', currentIndex >= maxIndex);
+            $prevBtn.toggleClass('disabled', currentIndex === 0);
+            $nextBtn.toggleClass('disabled', currentIndex >= maxIndex);
             
             // Update progress
             const progress = maxIndex > 0 ? (currentIndex / maxIndex) * 100 : 100;
-            $section.find('.slider-progress-fill').css('width', progress + '%');
+            $progressFill.css('width', progress + '%');
         }
         
         // Navigation handlers
-        $section.find('.slider-nav-prev').on('click', function() {
+        $prevBtn.on('click', function() {
             if (currentIndex > 0) {
                 currentIndex--;
                 updateSlider();
             }
         });
         
-        $section.find('.slider-nav-next').on('click', function() {
+        $nextBtn.on('click', function() {
             if (currentIndex < maxIndex) {
                 currentIndex++;
                 updateSlider();
@@ -366,6 +333,12 @@ jQuery(document).ready(function($) {
                     // Disable message textarea
                     $('#wcflow-card-message').prop('disabled', true);
                     $('.wcflow-message-note').show();
+                    
+                    // Update order state
+                    if (window.wcflow && window.wcflow.orderState) {
+                        window.wcflow.orderState.card_id = null;
+                        window.wcflow.orderState.card_price = 0;
+                    }
                 } else {
                     // Remove previous selection
                     if (selectedCard) {
@@ -379,34 +352,17 @@ jQuery(document).ready(function($) {
                     // Enable message textarea
                     $('#wcflow-card-message').prop('disabled', false);
                     $('.wcflow-message-note').hide();
+                    
+                    // Update order state
+                    if (window.wcflow && window.wcflow.orderState) {
+                        window.wcflow.orderState.card_id = $card.data('card-id');
+                        window.wcflow.orderState.card_price = parseFloat($card.data('price-value')) || 0;
+                    }
                 }
                 
-                // Create and dispatch custom event
-                const cardData = {
-                    id: $card.data('card-id'),
-                    title: $card.find('.greeting-card-title').text(),
-                    price: $card.find('.greeting-card-price').text(),
-                    image: $card.find('.greeting-card-image').attr('src')
-                };
-                
-                const event = new CustomEvent('cardSelected', {
-                    detail: {
-                        card: $card[0],
-                        index: $cards.index($card),
-                        selected: selectedCard === this,
-                        cardData: cardData
-                    }
-                });
-                $section[0].dispatchEvent(event);
-                
-                // Update order state and pricing if available
-                if (window.wcflow && window.wcflow.orderState) {
-                    if (typeof window.updateOrderState === 'function') {
-                        window.updateOrderState();
-                    }
-                    if (typeof window.updatePricing === 'function') {
-                        window.updatePricing();
-                    }
+                // Update pricing if available
+                if (typeof window.updatePricing === 'function') {
+                    window.updatePricing();
                 }
             });
         });
