@@ -99,12 +99,12 @@
                 
                 <div class="wcflow-form-row two-columns">
                     <div class="wcflow-form-group floating-label">
-                        <input type="text" id="wcflow-shipping-city" placeholder=" " value="<?php echo esc_attr(WC()->customer->get_shipping_city()); ?>" required autocomplete="address-level2">
+                        <input type="text" id="wcflow-shipping-city" placeholder=" " value="" required autocomplete="address-level2">
                         <label for="wcflow-shipping-city">Miestas (vietovė) *</label>
                         <span class="wcflow-field-error"></span>
                     </div>
                     <div class="wcflow-form-group floating-label">
-                        <input type="text" id="wcflow-shipping-postcode" placeholder=" " value="<?php echo esc_attr(WC()->customer->get_shipping_postcode()); ?>" required autocomplete="postal-code">
+                        <input type="text" id="wcflow-shipping-postcode" placeholder=" " value="" required autocomplete="postal-code">
                         <label for="wcflow-shipping-postcode">Pašto kodas *</label>
                         <span class="wcflow-field-error"></span>
                     </div>
@@ -123,16 +123,17 @@
                 <h3 class="wcflow-form-section-title">Delivery Options</h3>
                 
                 <div class="wcflow-form-row two-columns">
-                    <div class="wcflow-form-group selectable-box" id="wcflow-delivery-date-selector">
+                    <div class="wcflow-form-group selectable-box required-field" id="wcflow-delivery-date-selector" data-required="true">
                         <span class="selectable-box-label">Pristatymo diena *</span>
                         <span class="selectable-box-value">Pasirinkite datą</span>
                         <span class="selectable-box-arrow">→</span>
                         <span class="wcflow-field-error"></span>
                     </div>
-                    <div class="wcflow-form-group selectable-box" id="wcflow-shipping-method-selector">
-                        <span class="selectable-box-label">Pristatymo būdas</span>
+                    <div class="wcflow-form-group selectable-box required-field" id="wcflow-shipping-method-selector" data-required="true">
+                        <span class="selectable-box-label">Pristatymo būdas *</span>
                         <span class="selectable-box-value">Loading...</span>
                         <span class="selectable-box-arrow">→</span>
+                        <span class="wcflow-field-error"></span>
                     </div>
                 </div>
             </div>

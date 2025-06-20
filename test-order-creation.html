@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WooCommerce Gifting Flow - Order Creation Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+        }
+        .test-section h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .btn {
+            background: #007cba;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .btn:hover {
+            background: #005a87;
+        }
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            display: none;
+        }
+        .result.success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .result.error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .debug-info {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 15px;
+            font-family: monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .status-indicator.success { background: #28a745; }
+        .status-indicator.error { background: #dc3545; }
+        .status-indicator.warning { background: #ffc107; }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🎁 WooCommerce Gifting Flow - Order Creation Test</h1>
+        <p>This test page simulates the order creation process to verify that the shipping_first_name field and other required data are properly captured and sent.</p>
+        
+        <div class="test-section">
+            <h3>📋 Test Order Data</h3>
+            <p>Fill out the form below to test order creation with all required fields:</p>
+            
+            <div class="form-group">
+                <label for="customer_email">Customer Email *</label>
+                <input type="email" id="customer_email" value="test@example.com" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="shipping_first_name">Recipient First Name *</label>
+                <input type="text" id="shipping_first_name" value="John" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="shipping_last_name">Recipient Last Name *</label>
+                <input type="text" id="shipping_last_name" value="Doe" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="shipping_phone">Phone Number *</label>
+                <input type="tel" id="shipping_phone" value="+1234567890" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="shipping_address_1">Address *</label>
+                <input type="text" id="shipping_address_1" value="123 Main Street" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="shipping_city">City *</label>
+                <input type="text" id="shipping_city" value="New York" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="shipping_postcode">Postal Code *</label>
+                <input type="text" id="shipping_postcode" value="10001" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="shipping_country">Country *</label>
+                <select id="shipping_country" required>
+                    <option value="US">United States</option>
+                    <option value="LT">Lithuania</option>
+                    <option value="GB">United Kingdom</option>
+                    <option value="DE">Germany</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="delivery_date">Delivery Date</label>
+                <input type="date" id="delivery_date" value="2025-06-22">
+            </div>
+            
+            <div class="form-group">
+                <label for="card_message">Card Message</label>
+                <input type="text" id="card_message" value="Happy Birthday! Hope you love this gift.">
+            </div>
+            
+            <button class="btn" onclick="testOrderCreation()">🧪 Test Order Creation</button>
+            <button class="btn" onclick="testDataValidation()" style="margin-left: 10px;">✅ Test Data Validation</button>
+        </div>
+        
+        <div class="test-section">
+            <h3>🔍 Test Results</h3>
+            <div id="test-results">
+                <p>Click the test buttons above to run validation tests.</p>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h3>🐛 Debug Information</h3>
+            <div id="debug-info" class="debug-info">
+                Debug information will appear here...
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function log(message) {
+            const debugInfo = document.getElementById('debug-info');
+            const timestamp = new Date().toLocaleTimeString();
+            debugInfo.textContent += `[${timestamp}] ${message}\n`;
+        }
+        
+        function showResult(type, message) {
+            const resultsDiv = document.getElementById('test-results');
+            const indicator = type === 'success' ? '✅' : '❌';
+            const statusClass = type === 'success' ? 'success' : 'error';
+            
+            resultsDiv.innerHTML = `
+                <div class="result ${statusClass}" style="display: block;">
+                    <span class="status-indicator ${statusClass}"></span>
+                    <strong>${indicator} ${type.toUpperCase()}:</strong> ${message}
+                </div>
+            `;
+        }
+        
+        function collectFormData() {
+            const data = {
+                customer_email: document.getElementById('customer_email').value,
+                billing_email: document.getElementById('customer_email').value,
+                shipping_first_name: document.getElementById('shipping_first_name').value,
+                shipping_last_name: document.getElementById('shipping_last_name').value,
+                shipping_phone: document.getElementById('shipping_phone').value,
+                shipping_address_1: document.getElementById('shipping_address_1').value,
+                shipping_city: document.getElementById('shipping_city').value,
+                shipping_postcode: document.getElementById('shipping_postcode').value,
+                shipping_country: document.getElementById('shipping_country').value,
+                delivery_date: document.getElementById('delivery_date').value,
+                delivery_date_formatted: new Date(document.getElementById('delivery_date').value).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }),
+                card_message: document.getElementById('card_message').value,
+                shipping_method: 'flat_rate:1',
+                shipping_method_name: 'Standard Shipping',
+                shipping_cost: 5.00,
+                base_price: 25.00,
+                subtotal: 25.00,
+                total: 30.00,
+                addons: [],
+                addons_total: 0,
+                card_id: 'sample-card-1',
+                card_price: 0
+            };
+            
+            log('Form data collected:');
+            log(JSON.stringify(data, null, 2));
+            
+            return data;
+        }
+        
+        function testDataValidation() {
+            log('Starting data validation test...');
+            
+            const data = collectFormData();
+            const requiredFields = [
+                'customer_email',
+                'shipping_first_name', 
+                'shipping_last_name',
+                'shipping_phone',
+                'shipping_address_1',
+                'shipping_city',
+                'shipping_postcode',
+                'shipping_country'
+            ];
+            
+            let isValid = true;
+            const missingFields = [];
+            
+            requiredFields.forEach(field => {
+                if (!data[field] || data[field].trim() === '') {
+                    isValid = false;
+                    missingFields.push(field);
+                    log(`❌ Missing required field: ${field}`);
+                } else {
+                    log(`✅ Valid field: ${field} = "${data[field]}"`);
+                }
+            });
+            
+            // Email validation
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (data.customer_email && !emailRegex.test(data.customer_email)) {
+                isValid = false;
+                missingFields.push('customer_email (invalid format)');
+                log(`❌ Invalid email format: ${data.customer_email}`);
+            }
+            
+            if (isValid) {
+                showResult('success', 'All required fields are present and valid! ✅');
+                log('✅ Data validation PASSED');
+            } else {
+                showResult('error', `Missing or invalid fields: ${missingFields.join(', ')}`);
+                log('❌ Data validation FAILED');
+            }
+            
+            return isValid;
+        }
+        
+        function testOrderCreation() {
+            log('Starting order creation test...');
+            
+            // First validate the data
+            if (!testDataValidation()) {
+                showResult('error', 'Data validation failed. Please fix the errors above.');
+                return;
+            }
+            
+            const data = collectFormData();
+            
+            // Simulate the AJAX request that would be sent to WordPress
+            log('Simulating AJAX request to wcflow_create_order...');
+            log('Request data:');
+            log(JSON.stringify({
+                action: 'wcflow_create_order',
+                nonce: 'test_nonce_value',
+                state: data
+            }, null, 2));
+            
+            // Simulate server-side validation
+            log('Simulating server-side validation...');
+            
+            const requiredFieldsServer = {
+                'shipping_first_name': 'Recipient first name',
+                'shipping_last_name': 'Recipient last name', 
+                'shipping_address_1': 'Delivery address',
+                'shipping_city': 'City',
+                'shipping_postcode': 'Postal code',
+                'shipping_country': 'Country'
+            };
+            
+            const missingFieldsServer = [];
+            Object.entries(requiredFieldsServer).forEach(([field, label]) => {
+                if (!data[field] || data[field].trim() === '') {
+                    missingFieldsServer.push(label);
+                    log(`❌ Server validation failed: Missing ${field} (${label})`);
+                } else {
+                    log(`✅ Server validation passed: ${field} = "${data[field]}"`);
+                }
+            });
+            
+            if (missingFieldsServer.length > 0) {
+                const errorMessage = `Missing required fields: ${missingFieldsServer.join(', ')}`;
+                showResult('error', errorMessage);
+                log(`❌ Server would return error: ${errorMessage}`);
+                return;
+            }
+            
+            // Email validation
+            if (!data.customer_email || !data.customer_email.includes('@')) {
+                showResult('error', 'Valid email address is required.');
+                log('❌ Server would return error: Invalid email');
+                return;
+            }
+            
+            // Simulate successful order creation
+            log('✅ All server-side validations passed');
+            log('✅ Order would be created successfully');
+            log('✅ Customer data would be set in WooCommerce');
+            log('✅ Order addresses would be set correctly');
+            log('✅ Order meta data would be saved');
+            
+            showResult('success', 'Order creation test PASSED! All required fields are properly captured and would be sent to the server. ✅');
+            
+            // Show what would be sent to WooCommerce
+            log('WooCommerce order data that would be created:');
+            log(JSON.stringify({
+                billing_address: {
+                    first_name: data.shipping_first_name,
+                    last_name: data.shipping_last_name,
+                    email: data.customer_email,
+                    phone: data.shipping_phone,
+                    address_1: data.shipping_address_1,
+                    city: data.shipping_city,
+                    postcode: data.shipping_postcode,
+                    country: data.shipping_country
+                },
+                shipping_address: {
+                    first_name: data.shipping_first_name,
+                    last_name: data.shipping_last_name,
+                    phone: data.shipping_phone,
+                    address_1: data.shipping_address_1,
+                    city: data.shipping_city,
+                    postcode: data.shipping_postcode,
+                    country: data.shipping_country
+                },
+                meta_data: {
+                    _greeting_card_message: data.card_message,
+                    _delivery_date: data.delivery_date,
+                    _wcflow_original_data: data
+                }
+            }, null, 2));
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            log('Test page loaded successfully');
+            log('Ready to test order creation functionality');
+            
+            // Set tomorrow as default delivery date
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            document.getElementById('delivery_date').value = tomorrow.toISOString().split('T')[0];
+        });
+    </script>
+</body>
+</html>

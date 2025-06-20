@@ -76,7 +76,9 @@ class WooCommerce_Gifting_Flow {
             'includes/order-handler.php',
             'includes/product-integration.php',
             'includes/security-validation.php',
-            'includes/compatibility.php'
+            'includes/compatibility.php',
+            'includes/shipping-methods.php', // Include shipping methods handler
+            'includes/mock-data.php' // Include mock data for testing
         ];
 
         foreach ($required_files as $file) {
@@ -112,8 +114,21 @@ class WooCommerce_Gifting_Flow {
             return;
         }
         
-        wp_enqueue_style('wcflow-style', WCFLOW_URL . 'assets/wcflow.css', [], WCFLOW_VERSION);
-        wp_enqueue_script('wcflow-script', WCFLOW_URL . 'assets/wcflow.js', ['jquery'], WCFLOW_VERSION, true);
+        wp_enqueue_style('wcflow-style', WCFLOW_URL . 'assets/wcflow-styles.css', [], WCFLOW_VERSION . '.' . time());
+        wp_enqueue_script('wcflow-script', WCFLOW_URL . 'assets/wcflow.js', ['jquery'], WCFLOW_VERSION . '.' . time(), true);
+        wp_enqueue_style('greeting-cards-slider', WCFLOW_URL . 'assets/greeting-cards-slider.css', [], WCFLOW_VERSION . '.' . time());
+        wp_enqueue_script('greeting-cards-slider', WCFLOW_URL . 'assets/greeting-cards-slider.js', ['jquery'], WCFLOW_VERSION . '.' . time(), true);
+        
+        // Add the modal fix script to ensure proper modal display
+        wp_enqueue_script('wcflow-modal-fix', WCFLOW_URL . 'modal-fix.js', ['jquery', 'wcflow-script'], WCFLOW_VERSION . '.' . time(), true);
+        
+        // Add the duplicate nonce fix script
+        wp_enqueue_script('wcflow-nonce-fix', WCFLOW_URL . 'fix-duplicate-nonce.js', ['jquery'], WCFLOW_VERSION . '.' . time(), true);
+        
+        // Add debug script if debugging is enabled
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            wp_enqueue_script('wcflow-debug', WCFLOW_URL . 'debug-order-flow.js', ['jquery', 'wcflow-script'], WCFLOW_VERSION . '.' . time(), true);
+        }
         
         // Enhanced localization with comprehensive data
         $product_price = 0;
@@ -124,9 +139,24 @@ class WooCommerce_Gifting_Flow {
             }
         }
         
+        // Get default shipping method cost
+        $default_shipping_cost = 0;
+        $shipping_methods = WC()->shipping() ? WC()->shipping()->get_shipping_methods() : [];
+        if (!empty($shipping_methods)) {
+            // Get the first shipping method as default
+            $first_method = reset($shipping_methods);
+            if ($first_method && isset($first_method->id)) {
+                $method_id = $first_method->id;
+                $cost_setting = get_option('woocommerce_' . $method_id . '_settings');
+                if ($cost_setting && isset($cost_setting['cost'])) {
+                    $default_shipping_cost = floatval($cost_setting['cost']);
+                }
+            }
+        }
+        
         wp_localize_script('wcflow-script', 'wcflow_params', [
             'ajax_url' => admin_url('admin-ajax.php'),
-            'nonce'    => wp_create_nonce('wcflow_nonce'),
+            'nonce'    => wp_create_nonce('wcflow_frontend_nonce'),
             'locale'   => get_locale(),
             'currency_symbol' => get_woocommerce_currency_symbol(),
             'currency_code' => get_woocommerce_currency(),
@@ -136,6 +166,7 @@ class WooCommerce_Gifting_Flow {
             'version' => WCFLOW_VERSION,
             'debug' => defined('WP_DEBUG') && WP_DEBUG,
             'base_product_price' => $product_price,
+            'default_shipping_cost' => $default_shipping_cost,
             'processing_time' => get_option('wcflow_processing_time', 2),
             'allowed_delivery_days' => get_option('wcflow_allowed_delivery_days', [1,2,3,4,5]),
             'strings' => [

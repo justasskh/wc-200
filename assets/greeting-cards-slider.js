@@ -165,11 +165,14 @@ class GreetingCardsSlider {
     }
     
     handleCardClick(card, index) {
+        console.log('Card clicked:', card, 'Index:', index, 'Currently selected:', this.selectedCard === card);
+        
         // Toggle selection
         if (this.selectedCard === card) {
             // Deselect current card
             card.classList.remove('selected');
             this.selectedCard = null;
+            console.log('Card deselected');
         } else {
             // Remove previous selection
             if (this.selectedCard) {
@@ -179,6 +182,7 @@ class GreetingCardsSlider {
             // Select new card
             card.classList.add('selected');
             this.selectedCard = card;
+            console.log('Card selected');
             
             // Ensure selected card is visible in slider view
             if (!this.isGridView) {
@@ -199,6 +203,7 @@ class GreetingCardsSlider {
             }
         });
         this.container.dispatchEvent(event);
+        console.log('cardSelected event dispatched with selected:', this.selectedCard === card);
     }
     
     getCardData(card) {

@@ -22,20 +22,117 @@ class WCFlow_Order_Handler {
      */
     public function create_order() {
         try {
-            check_ajax_referer('wcflow_nonce', 'nonce');
+            check_ajax_referer('wcflow_frontend_nonce', 'nonce');
             
-            $state = $_POST['state'] ?? array();
+            // CRITICAL FIX: Properly decode the state data
+            $state_raw = $_POST['state'] ?? '';
             
-            if (empty($state)) {
+            if (empty($state_raw)) {
                 wp_send_json_error(['message' => 'No order data provided.']);
             }
             
-            // Validate required fields
-            $required_fields = ['shipping_first_name', 'shipping_last_name', 'shipping_address_1', 'shipping_city', 'shipping_postcode', 'shipping_country'];
-            foreach ($required_fields as $field) {
-                if (empty($state[$field])) {
-                    wp_send_json_error(['message' => "Missing required field: {$field}"]);
+            wcflow_log('Raw state received: ' . print_r($state_raw, true));
+            
+            // ENHANCED: Handle both JSON string and array formats
+            if (is_string($state_raw)) {
+                // Try to decode as JSON first
+                $state = json_decode(stripslashes($state_raw), true);
+                if (json_last_error() !== JSON_ERROR_NONE) {
+                    wcflow_log('JSON decode failed: ' . json_last_error_msg());
+                    // If JSON decode fails, check if it's already an array in string format
+                    if (is_array($state_raw)) {
+                        $state = $state_raw;
+                    } else {
+                        wp_send_json_error(['message' => 'Invalid JSON data format: ' . json_last_error_msg()]);
+                    }
+                } else {
+                    wcflow_log('JSON decoded successfully');
                 }
+            } else if (is_array($state_raw)) {
+                $state = $state_raw;
+                wcflow_log('State received as array');
+            } else {
+                wp_send_json_error(['message' => 'Invalid order data format - not string or array.']);
+            }
+            
+            // Ensure we have an array
+            if (!is_array($state)) {
+                wcflow_log('Final state is not an array: ' . gettype($state));
+                wp_send_json_error(['message' => 'Invalid order data format - final state not array.']);
+            }
+            
+            // Log the received data for debugging
+            wcflow_log('Received order state: ' . print_r($state, true));
+            
+            // ENHANCED: Validate required fields with better error messages and fallbacks
+            $required_fields = [
+                'shipping_first_name' => 'Recipient first name',
+                'shipping_last_name' => 'Recipient last name', 
+                'shipping_address_1' => 'Delivery address',
+                'shipping_city' => 'City',
+                'shipping_postcode' => 'Postal code',
+                'shipping_country' => 'Country'
+            ];
+            
+            $missing_fields = [];
+            foreach ($required_fields as $field => $label) {
+                if (empty($state[$field]) || trim($state[$field]) === '') {
+                    // CRITICAL: Try alternative field names as fallback
+                    $alt_field = str_replace('shipping_', '', $field);
+                    if (!empty($state[$alt_field]) && trim($state[$alt_field]) !== '') {
+                        $state[$field] = trim($state[$alt_field]);
+                        wcflow_log("FALLBACK: Used {$alt_field} for {$field}: " . $state[$field]);
+                    } else {
+                        $missing_fields[] = $label;
+                        wcflow_log("Missing required field: {$field} ({$label})");
+                    }
+                }
+            }
+            
+            // CRITICAL: Additional fallback attempts for common field variations
+            if (empty($state['shipping_first_name']) && !empty($state['first_name'])) {
+                $state['shipping_first_name'] = trim($state['first_name']);
+                wcflow_log("FALLBACK: Used first_name for shipping_first_name");
+            }
+            if (empty($state['shipping_last_name']) && !empty($state['last_name'])) {
+                $state['shipping_last_name'] = trim($state['last_name']);
+                wcflow_log("FALLBACK: Used last_name for shipping_last_name");
+            }
+            if (empty($state['shipping_address_1']) && !empty($state['address_1'])) {
+                $state['shipping_address_1'] = trim($state['address_1']);
+                wcflow_log("FALLBACK: Used address_1 for shipping_address_1");
+            }
+            if (empty($state['shipping_city']) && !empty($state['city'])) {
+                $state['shipping_city'] = trim($state['city']);
+                wcflow_log("FALLBACK: Used city for shipping_city");
+            }
+            if (empty($state['shipping_postcode']) && !empty($state['postcode'])) {
+                $state['shipping_postcode'] = trim($state['postcode']);
+                wcflow_log("FALLBACK: Used postcode for shipping_postcode");
+            }
+            if (empty($state['shipping_country']) && !empty($state['country'])) {
+                $state['shipping_country'] = trim($state['country']);
+                wcflow_log("FALLBACK: Used country for shipping_country");
+            }
+            if (empty($state['shipping_phone']) && !empty($state['phone'])) {
+                $state['shipping_phone'] = trim($state['phone']);
+                wcflow_log("FALLBACK: Used phone for shipping_phone");
+            }
+            
+            // Re-validate after fallbacks
+            $missing_fields = [];
+            foreach ($required_fields as $field => $label) {
+                if (empty($state[$field]) || trim($state[$field]) === '') {
+                    $missing_fields[] = $label;
+                    wcflow_log("FINAL CHECK - Missing required field: {$field} ({$label})");
+                }
+            }
+            
+            if (!empty($missing_fields)) {
+                $error_message = 'Missing required fields: ' . implode(', ', $missing_fields);
+                wcflow_log('Order creation failed: ' . $error_message);
+                wcflow_log('Complete state data: ' . print_r($state, true));
+                wp_send_json_error(['message' => $error_message]);
             }
             
             // Ensure we have an email
@@ -193,6 +290,26 @@ class WCFlow_Order_Handler {
             // Store original flow data
             $order->add_meta_data('_wcflow_original_data', $state);
             
+            // Add order notes for admin
+            $order_note = "WooCommerce Gifting Flow Order\n\n";
+            if (!empty($state['addons'])) {
+                $order_note .= "Add-ons selected: " . count($state['addons']) . "\n";
+            }
+            if (!empty($state['card_id'])) {
+                $card = get_post($state['card_id']);
+                if ($card) {
+                    $order_note .= "Greeting card: " . $card->post_title . "\n";
+                }
+            }
+            if (!empty($state['card_message'])) {
+                $order_note .= "Card message: " . substr($state['card_message'], 0, 100) . "...\n";
+            }
+            if (!empty($state['delivery_date_formatted'])) {
+                $order_note .= "Delivery date: " . $state['delivery_date_formatted'] . "\n";
+            }
+            
+            $order->add_order_note($order_note);
+            
             // Calculate totals
             $order->calculate_totals();
             
@@ -227,7 +344,7 @@ class WCFlow_Order_Handler {
      */
     public function get_checkout_form() {
         try {
-            check_ajax_referer('wcflow_nonce', 'nonce');
+            check_ajax_referer('wcflow_frontend_nonce', 'nonce');
             
             if (WC()->cart->is_empty()) {
                 wp_send_json_error(['message' => 'Cart is empty.']);
@@ -321,7 +438,7 @@ class WCFlow_Order_Handler {
      */
     public function get_cart_summary() {
         try {
-            check_ajax_referer('wcflow_nonce', 'nonce');
+            check_ajax_referer('wcflow_frontend_nonce', 'nonce');
             
             if (WC()->cart->is_empty()) {
                 wp_send_json_error(['message' => 'Cart is empty.']);

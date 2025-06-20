@@ -1,0 +1,1618 @@
+/* WooCommerce Gifting Flow - Main Styles */
+
+/* FIXED: Safe modal container with error-free animations */
+.wcflow-modal-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999999;
+    display: none;
+    overflow-y: auto;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.wcflow-modal-container.visible {
+    display: block;
+    opacity: 1;
+}
+
+/* Prevent jQuery animation conflicts */
+.wcflow-modal-container * {
+    animation-fill-mode: both;
+}
+
+body.wcflow-modal-open {
+    overflow: hidden;
+}
+
+.wcflow-modal {
+    position: relative;
+    background-color: #fff;
+    margin: 30px auto;
+    max-width: 900px;
+    width: 90%;
+    border-radius: 8px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+}
+
+/* Step 2 specific styling - boxed layout */
+.wcflow-modal[data-step="2"] .wcflow-form-wrapper {
+    max-width: 600px !important;
+    margin: 0 auto !important;
+    padding: 30px 20px !important;
+    width: 600px !important;
+    box-sizing: border-box !important;
+}
+
+/* Fix for two-columns layout in step 2 */
+.wcflow-modal[data-step="2"] .wcflow-form-row.two-columns {
+    display: flex !important;
+    gap: 20px !important;
+    width: 100% !important;
+}
+
+.wcflow-modal[data-step="2"] .wcflow-form-row.two-columns > div {
+    flex: 1 !important;
+    width: calc(50% - 10px) !important;
+}
+
+/* Override any conflicting styles */
+.wcflow-modal[data-step="2"] .wcflow-content-wrapper {
+    max-width: 600px !important;
+    width: 600px !important;
+    margin: 0 auto !important;
+}
+
+.wcflow-modal-header {
+    padding: 20px;
+    border-bottom: 1px solid #f0f0f0;
+    position: relative;
+}
+
+.wcflow-modal-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    line-height: 1;
+    cursor: pointer;
+    color: #666;
+}
+
+.wcflow-modal-title {
+    margin: 0;
+    font-size: 24px;
+    color: #333;
+}
+
+.wcflow-modal-content {
+    padding: 20px;
+}
+
+.wcflow-modal-footer {
+    padding: 20px;
+    border-top: 1px solid #f0f0f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.wcflow-btn {
+    padding: 10px 20px;
+    border-radius: 4px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+}
+
+.wcflow-btn-primary {
+    background-color: #007cba;
+    color: #fff;
+}
+
+.wcflow-btn-primary:hover {
+    background-color: #006ba1;
+}
+
+.wcflow-btn-secondary {
+    background-color: #f0f0f0;
+    color: #333;
+}
+
+.wcflow-btn-secondary:hover {
+    background-color: #e0e0e0;
+}
+
+.wcflow-btn-prev {
+    margin-right: auto;
+}
+
+.wcflow-btn-next {
+    margin-left: auto;
+}
+
+/* Loading indicator */
+.wcflow-loader {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #007cba;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    animation: wcflow-spin 1s linear infinite;
+    margin: 0 auto;
+}
+
+@keyframes wcflow-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Popup overlay */
+.wcflow-popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 10000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+
+.wcflow-popup-content {
+    position: relative;
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    max-width: 90%;
+    width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.wcflow-popup-close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #666;
+}
+
+/* Calendar popup styling */
+.wcflow-calendar-popup {
+    padding: 0;
+    overflow: hidden;
+}
+
+.wcflow-calendar-header {
+    background-color: #f5f5f5;
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #ddd;
+}
+
+.wcflow-calendar-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+}
+
+.wcflow-calendar-nav {
+    display: flex;
+    gap: 10px;
+}
+
+.wcflow-calendar-nav-btn {
+    background: none;
+    border: none;
+    color: #333;
+    cursor: pointer;
+    font-size: 16px;
+    padding: 5px;
+    border-radius: 4px;
+}
+
+.wcflow-calendar-nav-btn:hover {
+    background-color: #eee;
+}
+
+.wcflow-calendar-grid {
+    padding: 15px;
+}
+
+.wcflow-calendar-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+    font-weight: 600;
+    color: #666;
+    margin-bottom: 10px;
+}
+
+.wcflow-calendar-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 5px;
+}
+
+.wcflow-calendar-day {
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.wcflow-calendar-day:hover {
+    background-color: #f0f0f0;
+}
+
+.wcflow-calendar-day.selected {
+    background-color: #007cba;
+    color: #fff;
+}
+
+.wcflow-calendar-day.disabled {
+    color: #ccc;
+    cursor: not-allowed;
+}
+
+.wcflow-calendar-day.today {
+    border: 1px solid #007cba;
+}
+
+.wcflow-calendar-footer {
+    padding: 15px;
+    border-top: 1px solid #ddd;
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* Shipping method popup styling */
+.wcflow-shipping-popup {
+    padding: 20px;
+}
+
+.wcflow-shipping-popup-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+    margin: 0 0 15px 0;
+}
+
+.wcflow-shipping-options {
+    margin-bottom: 20px;
+}
+
+.wcflow-shipping-option {
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.wcflow-shipping-option:hover {
+    border-color: #007cba;
+    background-color: #f9f9f9;
+}
+
+.wcflow-shipping-option.selected {
+    border-color: #007cba;
+    background-color: #f0f8ff;
+}
+
+.wcflow-shipping-option-info {
+    flex: 1;
+}
+
+.wcflow-shipping-option-name {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.wcflow-shipping-option-description {
+    font-size: 14px;
+    color: #666;
+}
+
+.wcflow-shipping-option-price {
+    font-weight: 600;
+    color: #007cba;
+    margin-left: 15px;
+}
+
+.wcflow-shipping-option-price.free {
+    color: #28a745;
+}
+
+.wcflow-shipping-popup-footer {
+    padding-top: 15px;
+    border-top: 1px solid #ddd;
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* Add-on styling and popup window styles */
+.wcflow-addon-card {
+    position: relative;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 20px;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.wcflow-addon-card.selected {
+    opacity: 1 !important;
+    transform: scale(1) !important;
+    border-color: #007cba;
+    box-shadow: 0 2px 8px rgba(0,124,186,0.2);
+}
+
+.wcflow-addon-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.wcflow-addon-content {
+    padding: 15px;
+}
+
+.wcflow-addon-title {
+    font-size: 18px;
+    margin: 0 0 5px 0;
+    color: #333;
+}
+
+.wcflow-addon-price {
+    font-weight: bold;
+    font-size: 16px;
+    color: #007cba;
+    margin: 0 0 10px 0;
+}
+
+.wcflow-addon-description-short {
+    color: #666;
+    margin: 0 0 15px 0;
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.wcflow-addon-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.wcflow-addon-more-info {
+    background: none;
+    border: none;
+    color: #007cba;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 5px 0;
+    text-decoration: underline;
+}
+
+.wcflow-addon-action {
+    background-color: #f0f0f0;
+    border: none;
+    border-radius: 4px;
+    color: #333;
+    cursor: pointer;
+    font-weight: 600;
+    padding: 5px 15px;
+    transition: all 0.2s ease;
+}
+
+.wcflow-addon-action.add-btn {
+    background-color: #e6f7ff;
+    color: #007cba;
+}
+
+.wcflow-addon-action.remove-btn {
+    background-color: #ffeeee;
+    color: #d32f2f;
+}
+
+/* Popup styling */
+.wcflow-addon-popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0,0,0,0.5);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.wcflow-addon-popup-content {
+    position: relative;
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 25px;
+    max-width: 90%;
+    width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+.wcflow-addon-popup-close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #666;
+}
+
+.wcflow-addon-popup-title {
+    font-size: 20px;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.wcflow-addon-popup-price {
+    font-weight: bold;
+    color: #007cba;
+    margin-bottom: 15px;
+}
+
+.wcflow-addon-popup-description {
+    color: #333;
+    line-height: 1.5;
+}
+
+/* Greeting Cards section spacing */
+.wcflow-cards-container {
+    margin-top: 60px;
+    padding-top: 20px;
+    border-top: 1px solid #f0f0f0;
+}
+
+/* Greeting cards styling */
+.greeting-cards-slider-wrapper {
+    position: relative;
+    overflow: hidden;
+    margin: 20px 0;
+}
+
+#wcflow-cards-slider {
+    display: flex;
+    transition: transform 0.3s ease;
+}
+
+.greeting-card {
+    flex: 0 0 200px;
+    margin-right: 20px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.greeting-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.greeting-card.selected {
+    border-color: #007cba;
+    box-shadow: 0 2px 8px rgba(0,124,186,0.2);
+}
+
+.greeting-card-image {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+}
+
+.greeting-card-content {
+    padding: 10px;
+}
+
+.greeting-card-title {
+    font-size: 14px;
+    margin: 0 0 5px 0;
+    color: #333;
+}
+
+.greeting-card-price {
+    font-weight: bold;
+    font-size: 12px;
+    color: #007cba;
+    margin: 0;
+}
+
+.greeting-card-price.free {
+    color: #28a745;
+}
+
+.slider-navigation {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
+}
+
+.slider-nav-btn {
+    background-color: #f0f0f0;
+    border: none;
+    border-radius: 4px;
+    color: #333;
+    cursor: pointer;
+    padding: 5px 15px;
+    transition: all 0.2s ease;
+}
+
+.slider-nav-btn:hover {
+    background-color: #e0e0e0;
+}
+
+.slider-nav-btn.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.slider-progress {
+    height: 4px;
+    background-color: #f0f0f0;
+    border-radius: 2px;
+    margin-top: 15px;
+    overflow: hidden;
+}
+
+.slider-progress-fill {
+    height: 100%;
+    background-color: #007cba;
+    width: 0;
+    transition: width 0.3s ease;
+}
+
+/* Message textarea styling */
+.wcflow-message-section {
+    margin-top: 40px;
+    margin-bottom: 60px;
+}
+
+.wcflow-message-wrapper {
+    position: relative;
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+#wcflow-card-message {
+    width: 100%;
+    height: 250px;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    resize: none;
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+#wcflow-card-message:disabled {
+    background-color: #fff;
+    cursor: not-allowed;
+}
+
+.wcflow-message-placeholder {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: #666;
+    width: 80%;
+    line-height: 1.5;
+    pointer-events: none;
+    font-size: 16px;
+}
+
+#wcflow-card-message:focus + .wcflow-message-placeholder,
+#wcflow-card-message:not(:disabled):valid + .wcflow-message-placeholder {
+    display: none;
+}
+
+.wcflow-message-note {
+    font-size: 14px;
+    color: #666;
+    margin-top: 10px;
+    text-align: center;
+}
+
+.wcflow-message-count {
+    text-align: center;
+    font-size: 14px;
+    color: #666;
+    margin-top: 10px;
+}
+
+.wcflow-section-title {
+    font-size: 28px;
+    margin-bottom: 20px;
+    color: #333;
+    text-align: center;
+}
+
+/* Grid layout for add-ons */
+.wcflow-addons-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+/* Form styling */
+.wcflow-form-group {
+    margin-bottom: 20px;
+}
+
+.wcflow-form-label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+
+.wcflow-form-input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.wcflow-form-group.has-error .wcflow-form-input {
+    border-color: #d32f2f;
+}
+
+.wcflow-field-error {
+    color: #d32f2f;
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+/* Floating labels */
+.floating-label {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.floating-label label {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    color: #666;
+    transition: all 0.2s ease;
+    pointer-events: none;
+}
+
+.floating-label.has-value label,
+.floating-label input:focus + label,
+.floating-label select:focus + label,
+.floating-label input:not(:placeholder-shown) + label,
+.floating-label select:not(:placeholder-shown) + label {
+    top: -10px;
+    left: 5px;
+    font-size: 12px;
+    background-color: #fff;
+    padding: 0 5px;
+    color: #007cba;
+}
+
+.floating-label input,
+.floating-label select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+/* Fix for filled inputs */
+.floating-label input:not([value=""]),
+.floating-label input:-webkit-autofill {
+    background-color: #fff !important;
+}
+
+.floating-label input:-webkit-autofill + label,
+.floating-label input:not([value=""]) + label {
+    top: -10px !important;
+    left: 5px !important;
+    font-size: 12px !important;
+    background-color: #fff !important;
+    padding: 0 5px !important;
+    color: #007cba !important;
+}
+
+/* Selectable box - styled like the image */
+.selectable-box {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 15px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    background-color: #fff;
+}
+
+.selectable-box:hover {
+    border-color: #007cba;
+}
+
+.selectable-box-label {
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 5px;
+    display: block;
+}
+
+.selectable-box-value {
+    font-weight: 600;
+    color: #333;
+    display: block;
+}
+
+.selectable-box-arrow {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #666;
+    font-size: 18px;
+}
+
+/* Delivery date and shipping method selectors */
+#wcflow-delivery-date-selector,
+#wcflow-shipping-method-selector {
+    height: 60px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+/* Shipping methods */
+.wcflow-shipping-option {
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.wcflow-shipping-option:hover {
+    border-color: #007cba;
+    background-color: #f9f9f9;
+}
+
+.wcflow-shipping-option.selected {
+    border-color: #007cba;
+    background-color: #f0f8ff;
+}
+
+/* Payment methods */
+.wcflow-payment-methods {
+    margin-top: 20px;
+}
+
+.wcflow-payment-method {
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.wcflow-payment-method:hover {
+    border-color: #007cba;
+    background-color: #f9f9f9;
+}
+
+.wcflow-payment-method.selected {
+    border-color: #007cba;
+    background-color: #f0f8ff;
+}
+
+/* Order summary */
+.wcflow-order-summary {
+    background-color: #f9f9f9;
+    border-radius: 4px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.wcflow-order-summary-title {
+    font-size: 18px;
+    margin: 0 0 15px 0;
+    color: #333;
+}
+
+.wcflow-order-summary-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.wcflow-order-summary-label {
+    color: #666;
+}
+
+.wcflow-order-summary-value {
+    font-weight: 600;
+    color: #333;
+}
+
+.wcflow-order-summary-total {
+    border-top: 1px solid #ddd;
+    margin-top: 10px;
+    padding-top: 10px;
+    font-size: 18px;
+}
+
+/* Bottom bar styling */
+.wcflow-bottom-bar {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    background-color: #fff !important;
+    border-top: 1px solid #ddd !important;
+    padding: 15px 0 !important;
+    z-index: 10000 !important;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1) !important;
+    height: auto !important;
+    min-height: 80px !important;
+    display: block !important;
+    width: 100% !important;
+}
+
+.wcflow-bottom-bar-inner {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    flex-wrap: wrap !important;
+    padding: 0 20px !important;
+    max-width: 900px !important;
+    margin: 0 auto !important;
+}
+
+.wcflow-order-total-line {
+    display: flex !important;
+    align-items: center !important;
+    margin-bottom: 5px !important;
+}
+
+.wcflow-order-label {
+    font-weight: 600 !important;
+    color: #333 !important;
+    margin-right: 10px !important;
+}
+
+.wcflow-order-amount {
+    font-weight: 700 !important;
+    font-size: 18px !important;
+    color: #007cba !important;
+}
+
+.wcflow-order-details {
+    font-size: 14px !important;
+    color: #666 !important;
+}
+
+.wcflow-bottom-bar-action {
+    margin-left: 20px !important;
+}
+
+.wcflow-bottom-bar-btn {
+    background-color: #007cba !important;
+    color: #fff !important;
+    border: none !important;
+    border-radius: 4px !important;
+    padding: 12px 24px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+}
+
+.wcflow-bottom-bar-btn:hover {
+    background-color: #006ba1 !important;
+}
+
+/* Ensure bottom bar content doesn't get cut off */
+.wcflow-modal[data-step="2"] .wcflow-modal-body {
+    padding-bottom: 150px !important;
+    margin-bottom: 100px !important;
+}
+
+/* Fix for bottom bar in step 2 */
+.wcflow-modal[data-step="2"] .wcflow-bottom-bar .wcflow-content-wrapper {
+    max-width: 900px !important;
+    margin: 0 auto !important;
+    padding: 0 20px !important;
+    width: 100% !important;
+}
+
+/* Fix for bottom bar order summary */
+.wcflow-bottom-bar .wcflow-order-summary {
+    background-color: transparent !important;
+    padding: 0 !important;
+    margin-bottom: 0 !important;
+}
+
+/* Fix for popup overlays */
+.wcflow-popup-overlay {
+    display: none !important;
+}
+
+.wcflow-popup-overlay.visible {
+    display: flex !important;
+}
+
+/* Enhanced Form Validation Styles */
+.wcflow-form-group.error input,
+.wcflow-form-group.error select,
+.wcflow-form-group.error.selectable-box {
+    border-color: #d32f2f !important;
+    box-shadow: 0 0 0 2px rgba(211, 47, 47, 0.1) !important;
+}
+
+.wcflow-field-error {
+    color: #d32f2f;
+    font-size: 12px;
+    margin-top: 4px;
+    display: block;
+    min-height: 16px;
+    font-weight: 500;
+}
+
+/* Validation Summary Styles */
+.wcflow-validation-summary {
+    background-color: #fff3cd;
+    border: 1px solid #ffeaa7;
+    border-left: 4px solid #f39c12;
+    border-radius: 4px;
+    padding: 15px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    animation: wcflow-slide-down 0.3s ease-out;
+}
+
+.wcflow-validation-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.wcflow-validation-content {
+    flex: 1;
+}
+
+.wcflow-validation-content h4 {
+    margin: 0 0 10px 0;
+    color: #856404;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.wcflow-validation-content ul {
+    margin: 0;
+    padding-left: 20px;
+    color: #856404;
+}
+
+.wcflow-validation-content li {
+    margin-bottom: 5px;
+}
+
+.wcflow-validation-close {
+    background: none;
+    border: none;
+    color: #856404;
+    cursor: pointer;
+    font-size: 18px;
+    padding: 0;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 2px;
+    transition: background-color 0.2s ease;
+}
+
+.wcflow-validation-close:hover {
+    background-color: rgba(133, 100, 4, 0.1);
+}
+
+/* Error Highlight Animation */
+.wcflow-error-highlight {
+    animation: wcflow-error-pulse 2s ease-in-out;
+}
+
+@keyframes wcflow-error-pulse {
+    0%, 100% {
+        background-color: transparent;
+    }
+    50% {
+        background-color: rgba(211, 47, 47, 0.05);
+    }
+}
+
+@keyframes wcflow-slide-down {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Enhanced Error States for Selectable Boxes */
+.wcflow-form-group.error .selectable-box {
+    border-color: #d32f2f !important;
+    background-color: rgba(211, 47, 47, 0.02) !important;
+}
+
+.wcflow-form-group.error .selectable-box-label {
+    color: #d32f2f !important;
+}
+
+/* Required Field Indicators */
+.required-field .selectable-box-label::after {
+    content: " *";
+    color: #d32f2f;
+}
+
+/* Smooth Scroll Enhancement */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Focus States for Accessibility */
+.wcflow-form-group input:focus,
+.wcflow-form-group select:focus,
+.selectable-box:focus {
+    outline: 2px solid #007cba;
+    outline-offset: 2px;
+}
+
+/* Responsive adjustments */
+/* Step 3 Styles - Complete Checkout Design */
+.wcflow-modal[data-step="3"] {
+    max-width: 1200px;
+}
+
+.wcflow-step3-layout {
+    display: flex;
+    gap: 40px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.wcflow-left-column {
+    flex: 1;
+    max-width: 600px;
+}
+
+.wcflow-right-column {
+    flex: 1;
+    max-width: 500px;
+}
+
+/* Discount Section */
+.wcflow-discount-section {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 30px;
+}
+
+.wcflow-discount-section h3 {
+    margin: 0 0 10px 0;
+    font-size: 18px;
+    color: #333;
+    font-weight: 600;
+}
+
+.wcflow-discount-desc {
+    margin: 0 0 15px 0;
+    color: #666;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.wcflow-referral-link {
+    color: #007cba;
+    text-decoration: none;
+}
+
+.wcflow-referral-link:hover {
+    text-decoration: underline;
+}
+
+.wcflow-discount-form {
+    display: flex;
+    gap: 10px;
+}
+
+.wcflow-discount-input {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.wcflow-apply-btn {
+    padding: 10px 20px;
+    background: #007cba;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: background-color 0.3s ease;
+}
+
+.wcflow-apply-btn:hover {
+    background: #005a8b;
+}
+
+/* Basket Section */
+.wcflow-basket-section h3 {
+    margin: 0 0 20px 0;
+    font-size: 20px;
+    color: #333;
+    font-weight: 600;
+}
+
+.wcflow-basket-summary {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #fff;
+}
+
+.wcflow-basket-item {
+    display: flex;
+    align-items: center;
+    padding: 16px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.wcflow-basket-item-img {
+    width: 80px;
+    height: 80px;
+    margin-right: 16px;
+    background: #f5f5f5;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+}
+
+.wcflow-basket-item-details {
+    flex: 1;
+}
+
+.wcflow-basket-item-details p:first-child {
+    margin: 0 0 4px 0;
+    font-weight: 600;
+    color: #333;
+    font-size: 16px;
+}
+
+.wcflow-basket-item-details p:last-child {
+    margin: 0;
+    color: #666;
+    font-size: 14px;
+}
+
+.wcflow-basket-item-price {
+    font-weight: 700;
+    color: #007cba;
+    font-size: 16px;
+}
+
+.wcflow-basket-addon,
+.wcflow-basket-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid #e0e0e0;
+    background: #f9f9f9;
+}
+
+.wcflow-basket-addon span:first-child,
+.wcflow-basket-card span:first-child {
+    color: #666;
+    font-size: 14px;
+}
+
+.wcflow-basket-addon span:last-child,
+.wcflow-basket-card span:last-child {
+    font-weight: 600;
+    color: #333;
+}
+
+.wcflow-basket-message {
+    padding: 12px 16px;
+    border-bottom: 1px solid #e0e0e0;
+    background: #f0f8ff;
+}
+
+.wcflow-basket-message p:first-child {
+    margin: 0;
+    color: #666;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.wcflow-basket-message p:last-child {
+    margin: 4px 0 0 0;
+    color: #333;
+    font-style: italic;
+}
+
+.wcflow-basket-recipient,
+.wcflow-basket-delivery {
+    padding: 16px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.wcflow-basket-recipient h4,
+.wcflow-basket-delivery h4 {
+    margin: 0 0 8px 0;
+    color: #333;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.wcflow-basket-recipient p,
+.wcflow-basket-delivery p {
+    margin: 0;
+    color: #666;
+    line-height: 1.4;
+}
+
+.wcflow-basket-subtotal,
+.wcflow-basket-shipping {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.wcflow-basket-subtotal span:first-child,
+.wcflow-basket-shipping span:first-child {
+    color: #666;
+}
+
+.wcflow-basket-subtotal span:last-child,
+.wcflow-basket-shipping span:last-child {
+    font-weight: 600;
+    color: #333;
+}
+
+.wcflow-basket-total {
+    display: flex;
+    justify-content: space-between;
+    padding: 16px;
+    background: #f8f9fa;
+    font-size: 18px;
+}
+
+.wcflow-basket-total strong:first-child {
+    color: #333;
+}
+
+.wcflow-basket-total strong:last-child {
+    color: #007cba;
+}
+
+/* Payment Section */
+.wcflow-payment-section h3 {
+    margin: 0 0 20px 0;
+    font-size: 20px;
+    color: #333;
+    font-weight: 600;
+}
+
+/* Payment Methods */
+.wcflow-payment-methods {
+    margin: 20px 0;
+}
+
+.wcflow-payment-method {
+    margin-bottom: 16px;
+    padding: 16px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: #fff;
+}
+
+.wcflow-payment-method:hover {
+    border-color: #007cba;
+    background: #f0f8ff;
+}
+
+.wcflow-payment-method.selected {
+    border-color: #007cba;
+    background: #f0f8ff;
+}
+
+.wcflow-payment-method label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    width: 100%;
+    margin: 0;
+}
+
+.wcflow-payment-method input[type="radio"] {
+    margin-right: 12px;
+    width: 18px;
+    height: 18px;
+}
+
+.wcflow-payment-method .wcflow-payment-title {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 4px;
+}
+
+.wcflow-payment-method .wcflow-payment-description {
+    font-size: 14px;
+    color: #666;
+}
+
+.wcflow-payment-fields {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid #e0e0e0;
+    display: none;
+}
+
+/* Place Order Button */
+.wcflow-place-order-section {
+    padding-top: 16px;
+    border-top: 1px solid #e0e0e0;
+    margin-top: 20px;
+}
+
+.wcflow-place-order-button {
+    width: 100%;
+    padding: 16px;
+    background: #007cba;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.wcflow-place-order-button:hover {
+    background: #005a8b;
+}
+
+.wcflow-place-order-button:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+/* Billing Form Toggle */
+.wcflow-form-group label[for="wcflow-buyer-same"] {
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    padding: 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    background: #f9f9f9;
+    margin: 0;
+    transition: all 0.3s ease;
+}
+
+.wcflow-form-group label[for="wcflow-buyer-same"]:hover {
+    border-color: #007cba;
+    background: #f0f8ff;
+}
+
+.wcflow-form-group label[for="wcflow-buyer-same"] input {
+    margin-right: 12px;
+    width: 18px;
+    height: 18px;
+}
+
+#wcflow-billing-form {
+    margin-bottom: 18px;
+    padding: 20px;
+    border: 2px solid #007cba;
+    border-radius: 8px;
+    background: #f0f8ff;
+}
+
+#wcflow-billing-form h4 {
+    margin: 0 0 16px 0;
+    color: #333;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.wcflow-form-row {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.wcflow-form-row .wcflow-form-group {
+    flex: 1;
+    margin-bottom: 0;
+}
+
+#wcflow-billing-form .wcflow-form-group label {
+    display: block;
+    margin-bottom: 4px;
+    font-weight: bold;
+    color: #555;
+}
+
+#wcflow-billing-form .wcflow-form-group input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+/* Responsive Design for Step 3 */
+@media (max-width: 768px) {
+    .wcflow-step3-layout {
+        flex-direction: column;
+        gap: 20px;
+        padding: 15px;
+    }
+    
+    .wcflow-left-column,
+    .wcflow-right-column {
+        max-width: 100%;
+    }
+    
+    .wcflow-discount-section {
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+    
+    .wcflow-discount-form {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .wcflow-apply-btn {
+        width: 100%;
+    }
+    
+    .wcflow-basket-item {
+        padding: 12px;
+    }
+    
+    .wcflow-basket-item-img {
+        width: 60px;
+        height: 60px;
+        margin-right: 12px;
+    }
+    
+    .wcflow-form-row {
+        flex-direction: column;
+        gap: 0;
+    }
+    
+    .wcflow-form-row .wcflow-form-group {
+        margin-bottom: 12px;
+    }
+}
+
+@media (max-width: 768px) {
+    .wcflow-modal {
+        width: 95%;
+        margin: 10px auto;
+    }
+    
+    .wcflow-modal-header {
+        padding: 15px;
+    }
+    
+    .wcflow-modal-content {
+        padding: 15px;
+    }
+    
+    .wcflow-modal-footer {
+        padding: 15px;
+        flex-direction: column;
+    }
+    
+    .wcflow-btn-prev {
+        margin-bottom: 10px;
+        order: 2;
+        width: 100%;
+    }
+    
+    .wcflow-btn-next {
+        order: 1;
+        width: 100%;
+        margin-bottom: 10px;
+    }
+    
+    .wcflow-addons-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .wcflow-validation-summary {
+        padding: 12px;
+        margin-bottom: 15px;
+    }
+    
+    .wcflow-validation-content h4 {
+        font-size: 14px;
+    }
+    
+    .wcflow-validation-content ul {
+        padding-left: 15px;
+    }
+}

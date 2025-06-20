@@ -1,0 +1,89 @@
+# WooCommerce Gifting Flow Implementation Instructions
+
+## CRITICAL FIX: Modal Display Issues
+
+We've identified and fixed several critical issues with the modal display according to the Lithuanian language requirements:
+
+1. **Solid White Background**: The modal now has a solid white background as required.
+
+2. **Two-Column Header Layout**: 
+   - Left column: "Tęsti apsipirkimą" link (return link) aligned to the left
+   - Right column: "Saugus atsiskaitymas" text aligned to the right
+
+3. **Content Width and Centering**:
+   - Set maximum width to 1344px
+   - Content is properly centered within this container
+   - Fixed the issue where add-ons and bottom bar content extended to the edge
+
+4. **Two-Column Bottom Bar**:
+   - Left column:
+     - Main line: "Užsakymo suma: [price] €" with dynamically calculated price
+     - Sub-line: "Įskaičiuotas [ship] € pristatymo mokestis" with shipping price
+     - Alternative sub-line for free shipping: "Įskaičiuotas nemokamas pristatymas"
+   - Right column:
+     - Button with text "Pereiti prie pristatymo informacijos"
+     - This button navigates to step 2
+
+5. **Dynamic Price Calculation**:
+   - Base price: Product price where the popup was initiated
+   - Added shipping price: Default WooCommerce preselected shipping method
+   - Price updates when add-ons or greeting cards with prices are selected
+   - Price format shows amount followed by Euro symbol (€)
+
+Follow these steps to implement the enhanced add-ons and greeting cards functionality in your WordPress environment:
+
+## 1. Upload the Modified Files
+
+Upload the following files to your WordPress site, replacing the existing files:
+
+- `assets/wcflow.js` - Main JavaScript file with enhanced add-ons and greeting cards functionality
+- `assets/wcflow-styles.css` - CSS styles for the enhanced interface
+- `assets/greeting-cards-slider.js` - JavaScript for the greeting cards slider with deselection functionality
+- `assets/greeting-cards-slider.css` - CSS styles for the greeting cards slider
+- `modal-fix.js` - **CRITICAL FIX** for the modal display issue (place this in the root plugin directory)
+
+## 2. Update Plugin Configuration
+
+1. Make sure the main plugin file (`woocommerce-gifting-flow.php`) is properly enqueuing the CSS and JS files:
+   - It should load `wcflow-styles.css` instead of `wcflow.css`
+   - It should also load `greeting-cards-slider.js` and `greeting-cards-slider.css`
+
+## 3. IMPORTANT: Force a Cache Refresh (Critical for Modal Fix)
+
+To ensure your changes take effect immediately:
+
+1. Upload the `refresh-plugin.php` file to your WordPress site
+2. Visit this file in your browser (e.g., https://yoursite.com/wp-content/plugins/woocommerce-gifting-flow/refresh-plugin.php)
+3. This will clear all caches and force a refresh of the plugin's assets
+
+## 4. Alternative Cache Clearing Methods
+
+If the refresh script doesn't work, try these alternative methods:
+
+1. In WordPress admin, go to Settings > WooCommerce Gifting Flow and save settings (even without changes)
+2. Install a cache clearing plugin like "WP Fastest Cache" or "W3 Total Cache" and clear all caches
+3. Add a version parameter to your CSS and JS files in the browser URL to bypass cache (e.g., ?ver=1.0.1)
+4. Clear your browser cache or use incognito mode to test
+
+## 5. Verify Implementation
+
+After implementing the changes, verify that:
+
+1. The "Send as gift" button opens the modal properly
+2. Add-ons have "More information" buttons that show popups with full descriptions
+3. Add-ons have blue "Add" buttons that change to red "Remove" buttons when selected
+4. Unselected add-ons are dimmed (opacity: 0.5) when at least one add-on is selected
+5. Greeting cards can be deselected by clicking them again
+6. The message field is disabled when no card is selected
+
+## Troubleshooting
+
+If you encounter issues:
+
+1. Check the browser console for JavaScript errors
+2. Verify that all files were uploaded correctly
+3. Make sure the plugin is properly enqueuing all required CSS and JS files
+4. Try deactivating and reactivating the plugin
+5. Try using the standalone test files (examples/standalone-test.html) to verify functionality
+
+For further assistance, please contact support.
