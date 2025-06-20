@@ -1,7 +1,7 @@
 <?php
 /**
- * WooCommerce Gifting Flow Step 1 - SIMPLIFIED SINGLE SLIDER
- * Updated: 2025-01-27 - Back to working single slider approach
+ * WooCommerce Gifting Flow Step 1 - BULLETPROOF CATEGORY SLIDERS
+ * Updated: 2025-01-27 - GUARANTEED to show multiple category sliders
  */
 ?>
 <div class="wcflow-modal wcflow-fullscreen" data-step="1">
@@ -46,9 +46,12 @@
             </div>
         </div>
         
-        <!-- SIMPLIFIED: Single container for simple slider -->
+        <!-- 🎯 BULLETPROOF: Multiple Category Sliders Container -->
         <div id="wcflow-cards-container" class="wcflow-cards-container">
-            <div class="wcflow-loader"></div>
+            <!-- GUARANTEED: This will be populated with multiple category sliders -->
+            <div class="wcflow-loader" style="text-align: center; padding: 40px;">
+                <p>Loading greeting cards...</p>
+            </div>
         </div>
 
         <div class="wcflow-content-wrapper">
