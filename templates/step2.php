@@ -1,9 +1,4 @@
-<?php
-/**
- * WooCommerce Gifting Flow Step 2 - ENHANCED SHIPPING SECTION LAYOUT
- * Updated: 2025-01-27 - Improved shipping section with labels above fields and enhanced date picker
- */
-?>
+<!-- WooCommerce Gifting Flow Step 2 - Updated 2025-06-18 09:46:30 UTC by justasskh -->
 <div class="wcflow-modal wcflow-fullscreen" data-step="2">
     <header class="wcflow-header">
         <div class="wcflow-content-wrapper">
@@ -124,47 +119,26 @@
                 </div>
             </div>
 
-            <!-- ENHANCED: Delivery Options Section with Labels Above Fields -->
             <div class="wcflow-form-section">
                 <h3 class="wcflow-form-section-title">Delivery Options</h3>
                 
                 <div class="wcflow-form-row two-columns">
-                    <!-- ENHANCED: Delivery Date with Label Above -->
-                    <div class="wcflow-form-group">
-                        <label class="wcflow-field-label">Pristatymo diena *</label>
-                        <div class="selectable-box" id="wcflow-delivery-date-selector">
-                            <div class="selectable-box-content">
-                                <span class="selectable-box-value">Pasirinkite datą</span>
-                                <span class="selectable-box-arrow">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M6 9l6 6 6-6"/>
-                                    </svg>
-                                </span>
-                            </div>
-                        </div>
+                    <div class="wcflow-form-group selectable-box" id="wcflow-delivery-date-selector">
+                        <span class="selectable-box-label">Pristatymo diena *</span>
+                        <span class="selectable-box-value">Pasirinkite datą</span>
+                        <span class="selectable-box-arrow">→</span>
                         <span class="wcflow-field-error"></span>
                     </div>
-                    
-                    <!-- ENHANCED: Shipping Methods with Label Above -->
-                    <div class="wcflow-form-group">
-                        <label class="wcflow-field-label">Pristatymo būdas</label>
-                        <div class="selectable-box" id="wcflow-shipping-method-selector">
-                            <div class="selectable-box-content">
-                                <span class="selectable-box-value">Kraunami pristatymo būdai...</span>
-                                <span class="selectable-box-arrow">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M6 9l6 6 6-6"/>
-                                    </svg>
-                                </span>
-                            </div>
-                        </div>
+                    <div class="wcflow-form-group selectable-box" id="wcflow-shipping-method-selector">
+                        <span class="selectable-box-label">Pristatymo būdas</span>
+                        <span class="selectable-box-value">Loading...</span>
+                        <span class="selectable-box-arrow">→</span>
                     </div>
                 </div>
             </div>
         </div>
     </div>
     
-    <!-- ENHANCED: Consistent Bottom Bar with Persistent Pricing -->
     <footer class="wcflow-bottom-bar">
         <div class="wcflow-content-wrapper">
             <div class="wcflow-bottom-bar-inner">
@@ -183,4 +157,43 @@
             </div>
         </div>
     </footer>
+    
+    <!-- Delivery Date Picker Popup -->
+    <div id="wcflow-datepicker-popup" class="wcflow-popup-overlay" style="display:none;">
+        <div class="wcflow-popup-content wcflow-calendar-popup">
+            <!-- Calendar will be populated by JavaScript -->
+        </div>
+    </div>
+    
+    <!-- Shipping Method Popup -->
+    <div id="wcflow-shipping-popup" class="wcflow-popup-overlay" style="display:none;">
+        <div class="wcflow-popup-content wcflow-shipping-popup">
+            <!-- Shipping methods will be populated by JavaScript -->
+        </div>
+    </div>
+    
+    <!-- Login Popup -->
+    <div id="wcflow-login-popup" class="wcflow-popup-overlay" style="display:none;">
+        <div class="wcflow-popup-content wcflow-login-popup-content">
+            <button class="wcflow-popup-close" aria-label="Close">&times;</button>
+            <h3>Prisijungti prie paskyros</h3>
+            <p>Sign in to auto-fill your information and speed up checkout.</p>
+            <form id="wcflow-login-form">
+                <div class="wcflow-form-group floating-label">
+                    <input type="text" id="wcflow-login-username" placeholder=" " required autocomplete="username">
+                    <label for="wcflow-login-username">Naudotojo vardas arba el. paštas</label>
+                </div>
+                <div class="wcflow-form-group floating-label">
+                    <input type="password" id="wcflow-login-password" placeholder=" " required autocomplete="current-password">
+                    <label for="wcflow-login-password">Slaptažodis</label>
+                </div>
+                <div class="wcflow-login-actions">
+                    <button type="submit" class="wcflow-login-btn">Prisijungti</button>
+                </div>
+                <div id="wcflow-login-error" class="wcflow-login-error" style="display:none;"></div>
+            </form>
+        </div>
+    </div>
 </div>
+
+<!-- Step 2 loaded at 2025-06-18 09:46:30 UTC by justasskh -->

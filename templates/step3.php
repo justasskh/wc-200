@@ -1,9 +1,3 @@
-<?php
-/**
- * WooCommerce Gifting Flow Step 3 - ENHANCED with Consistent Pricing Display
- * Updated: 2025-01-27 - Improved layout and persistent pricing
- */
-?>
 <div class="wcflow-modal wcflow-fullscreen" data-step="3">
     <header class="wcflow-header">
         <div class="wcflow-content-wrapper">
@@ -35,9 +29,6 @@
             <div class="wcflow-loader"></div>
         </div>
         <div class="wcflow-content-wrapper">
-            <h2 class="wcflow-main-title">Complete Your Order</h2>
-            <p class="wcflow-subtitle">Review your order and complete payment</p>
-            
             <div class="wcflow-step3-layout">
                 <!-- Left Column - Cart Summary -->
                 <div class="wcflow-left-column">
@@ -51,32 +42,18 @@
                         </div>
                         <div id="wcflow-discount-message" class="wcflow-discount-message" style="display: none;"></div>
                     </div>
-                    
                     <!-- Your Basket Section -->
                     <div class="wcflow-basket-section">
                         <h3>Your basket</h3>
                         <div id="wcflow-basket-summary-container">
                             <div class="wcflow-loader"></div>
                         </div>
-                        
-                        <!-- ENHANCED: Order Total Display -->
-                        <div style="margin-top: 20px; padding-top: 20px; border-top: 2px solid #e0e0e0;">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                                <span style="font-size: 18px; font-weight: 600; color: #333;">Order Total</span>
-                                <span style="font-size: 24px; font-weight: 700; color: #333;" id="wcflow-dynamic-total-step3">0.00 €</span>
-                            </div>
-                            <div style="text-align: right;">
-                                <span style="font-size: 14px; color: #666;" id="wcflow-shipping-details-step3">Įskaičiuotas 0.00 € pristatymo mokestis</span>
-                            </div>
-                        </div>
                     </div>
                 </div>
-                
                 <!-- Right Column - Payment Options -->
                 <div class="wcflow-right-column">
                     <div class="wcflow-payment-section">
                         <h3>Payment options</h3>
-                        
                         <!-- Buyer/Billing Logic -->
                         <div class="wcflow-form-group" style="margin-bottom:18px;">
                             <label style="font-weight:bold;display:flex;align-items:center;cursor:pointer;padding:12px;border:2px solid #e0e0e0;border-radius:8px;background:#f9f9f9;">
@@ -84,7 +61,6 @@
                                 <span style="font-size:16px;">I am the buyer (billing info same as shipping)</span>
                             </label>
                         </div>
-                        
                         <!-- Billing form (hidden unless needed) -->
                         <div id="wcflow-billing-form" style="display:none; margin-bottom:18px; padding:20px; border:2px solid #007cba; border-radius:8px; background:#f0f8ff;">
                             <h4 style="margin:0 0 16px 0; color:#333; font-size:18px;">💳 Billing Information</h4>
@@ -127,11 +103,9 @@
                                 <input type="email" data-wcflow-billing="billing_email" placeholder="Enter email address" class="input-text" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:4px; font-size:14px;">
                             </div>
                         </div>
-                        
                         <div id="wcflow-payment-options-container">
                             <div class="wcflow-loader"></div>
                         </div>
-                        
                         <div class="wcflow-place-order-section" style="padding-top:16px;">
                             <button type="button" id="wcflow-place-order-btn" class="wcflow-place-order-button">
                                 Place an order
@@ -140,44 +114,8 @@
                         </div>
                     </div>
                 </div>
+                <!-- End Right Column -->
             </div>
         </div>
     </div>
 </div>
-
-<script>
-// ENHANCED: Sync pricing display in Step 3
-jQuery(document).ready(function($) {
-    // Update Step 3 pricing displays when pricing changes
-    function updateStep3Pricing() {
-        const totalAmount = $('#wcflow-dynamic-total').text();
-        const shippingDetails = $('#wcflow-shipping-details').text();
-        
-        $('#wcflow-dynamic-total-step3').text(totalAmount);
-        $('#wcflow-shipping-details-step3').text(shippingDetails);
-    }
-    
-    // Monitor for pricing updates
-    const observer = new MutationObserver(function(mutations) {
-        mutations.forEach(function(mutation) {
-            if (mutation.target.id === 'wcflow-dynamic-total' || mutation.target.id === 'wcflow-shipping-details') {
-                updateStep3Pricing();
-            }
-        });
-    });
-    
-    // Start observing
-    const totalElement = document.getElementById('wcflow-dynamic-total');
-    const shippingElement = document.getElementById('wcflow-shipping-details');
-    
-    if (totalElement) {
-        observer.observe(totalElement, { childList: true, subtree: true });
-    }
-    if (shippingElement) {
-        observer.observe(shippingElement, { childList: true, subtree: true });
-    }
-    
-    // Initial sync
-    setTimeout(updateStep3Pricing, 500);
-});
-</script>
