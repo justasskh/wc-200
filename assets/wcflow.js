@@ -1,6 +1,6 @@
 /**
- * WooCommerce Gifting Flow - COMPLETELY FIXED CARDS DISPLAY
- * 2025-01-27 - Bulletproof cards loading with admin connection
+ * WooCommerce Gifting Flow - CATEGORY-BASED SLIDERS
+ * 2025-01-27 - Multiple sliders for different card categories
  */
 
 jQuery(function($) {
@@ -12,7 +12,7 @@ jQuery(function($) {
     
     let orderState = window.wcflow.orderState;
     let currentStep = 1;
-    let sliderInstance = null;
+    let sliderInstances = {}; // Store multiple slider instances
     
     // Debug helper
     function debug(message, data) {
@@ -21,7 +21,7 @@ jQuery(function($) {
         }
     }
     
-    // Enhanced price calculation with real WooCommerce shipping
+    // Enhanced price calculation
     function updatePricing() {
         let basePrice = parseFloat(wcflow_params.base_product_price || 0);
         let addonsTotal = 0;
@@ -35,7 +35,7 @@ jQuery(function($) {
             debug('Addon selected', {id: $(this).data('addon-id'), price: priceValue});
         });
         
-        // Calculate card price
+        // Calculate card price from ANY category slider
         const $selectedCard = $('.greeting-card.selected');
         if ($selectedCard.length) {
             cardPrice = parseFloat($selectedCard.data('price-value') || 0);
@@ -147,8 +147,8 @@ jQuery(function($) {
         // Load addons first
         loadAddons();
         
-        // Load cards and initialize slider
-        loadCardsWithSlider();
+        // Load cards and create category-based sliders
+        loadCardsWithCategorySliders();
         
         // Message textarea functionality
         $(document).on('input', '#wcflow-card-message', function() {
@@ -161,7 +161,7 @@ jQuery(function($) {
         setTimeout(updatePricing, 500);
     }
     
-    // Step 2 initialization with proper shipping methods loading
+    // Step 2 initialization
     function initStep2() {
         debug('Initializing step 2');
         
@@ -174,7 +174,7 @@ jQuery(function($) {
         // Load delivery options
         loadDeliveryOptions();
         
-        // Load shipping methods immediately with proper error handling
+        // Load shipping methods
         loadShippingMethodsForStep2();
     }
     
@@ -248,12 +248,12 @@ jQuery(function($) {
         });
     }
     
-    // COMPLETELY FIXED: Load cards with bulletproof error handling and admin connection
-    function loadCardsWithSlider() {
-        const $slider = $('#wcflow-cards-slider');
-        $slider.html('<div class="wcflow-loader"></div>');
+    // FIXED: Load cards and create separate sliders for each category
+    function loadCardsWithCategorySliders() {
+        const $container = $('#wcflow-cards-container');
+        $container.html('<div class="wcflow-loader"></div>');
         
-        console.log('🎯 === STARTING CARDS LOAD ===');
+        console.log('🎯 === LOADING CARDS FOR CATEGORY SLIDERS ===');
         
         $.ajax({
             url: wcflow_params.ajax_url,
@@ -266,8 +266,6 @@ jQuery(function($) {
             success: function(response) {
                 console.log('🎯 === CARDS AJAX SUCCESS ===');
                 console.log('📦 Raw response:', response);
-                console.log('✅ Response success:', response ? response.success : 'NO RESPONSE');
-                console.log('📋 Response data:', response ? response.data : 'NO DATA');
                 
                 try {
                     if (response && response.success && response.data) {
@@ -275,15 +273,14 @@ jQuery(function($) {
                         console.log('📊 Data type:', typeof response.data);
                         console.log('🗂️ Data keys:', Object.keys(response.data));
                         
-                        renderCardsInSlider(response.data);
-                        setTimeout(initializeSlider, 300);
+                        renderCategorySliders(response.data);
                     } else {
                         console.log('❌ === INVALID RESPONSE - USING FALLBACK ===');
-                        renderFallbackCards();
+                        renderFallbackCategorySliders();
                     }
                 } catch (error) {
                     console.error('💥 === ERROR PROCESSING RESPONSE ===', error);
-                    renderFallbackCards();
+                    renderFallbackCategorySliders();
                 }
             },
             error: function(xhr, status, error) {
@@ -291,60 +288,24 @@ jQuery(function($) {
                 console.log('📊 Status:', status);
                 console.log('⚠️ Error:', error);
                 console.log('📄 Response text:', xhr.responseText);
-                renderFallbackCards();
+                renderFallbackCategorySliders();
             }
         });
     }
     
-    // FIXED: Render fallback cards with proper structure
-    function renderFallbackCards() {
-        console.log('🔄 === RENDERING FALLBACK CARDS ===');
+    // FIXED: Render separate sliders for each category
+    function renderCategorySliders(cardsByCategory) {
+        const $container = $('#wcflow-cards-container');
+        $container.empty();
         
-        const fallbackCards = {
-            'Sample Cards': [
-                {
-                    id: 'fallback-1',
-                    title: 'Sample Birthday Card',
-                    price: 'FREE',
-                    price_value: 0,
-                    img: 'https://images.pexels.com/photos/1666065/pexels-photo-1666065.jpeg?auto=compress&cs=tinysrgb&w=400'
-                },
-                {
-                    id: 'fallback-2',
-                    title: 'Sample Celebration Card',
-                    price: '€1.50',
-                    price_value: 1.50,
-                    img: 'https://images.pexels.com/photos/1040173/pexels-photo-1040173.jpeg?auto=compress&cs=tinysrgb&w=400'
-                },
-                {
-                    id: 'fallback-3',
-                    title: 'Sample Holiday Card',
-                    price: '€2.50',
-                    price_value: 2.50,
-                    img: 'https://images.pexels.com/photos/1729931/pexels-photo-1729931.jpeg?auto=compress&cs=tinysrgb&w=400'
-                }
-            ]
-        };
-        
-        renderCardsInSlider(fallbackCards);
-        setTimeout(initializeSlider, 300);
-    }
-    
-    // COMPLETELY FIXED: Render cards in slider format with bulletproof error handling
-    function renderCardsInSlider(cardsByCategory) {
-        const $slider = $('#wcflow-cards-slider');
-        $slider.empty();
-        
-        console.log('🎨 === RENDER CARDS IN SLIDER ===');
+        console.log('🎨 === RENDER CATEGORY SLIDERS ===');
         console.log('📦 Input data:', cardsByCategory);
         console.log('🔍 Data type:', typeof cardsByCategory);
-        console.log('📊 Is object:', typeof cardsByCategory === 'object');
-        console.log('📋 Is array:', Array.isArray(cardsByCategory));
         
         // Validate input
         if (!cardsByCategory || typeof cardsByCategory !== 'object') {
             console.log('❌ === INVALID INPUT DATA ===');
-            $slider.html('<p style="text-align:center;color:#666;padding:40px;">Invalid card data received.</p>');
+            $container.html('<p style="text-align:center;color:#666;padding:40px;">Invalid card data received.</p>');
             return;
         }
         
@@ -353,108 +314,301 @@ jQuery(function($) {
         
         if (categoryKeys.length === 0) {
             console.log('❌ === NO CATEGORIES FOUND ===');
-            $slider.html('<p style="text-align:center;color:#666;padding:40px;">No card categories available.</p>');
+            $container.html('<p style="text-align:center;color:#666;padding:40px;">No card categories available.</p>');
             return;
         }
         
-        // Get the first category
-        const firstCategoryKey = categoryKeys[0];
-        const categoryData = cardsByCategory[firstCategoryKey];
-        
-        console.log('🎯 === PROCESSING FIRST CATEGORY ===');
-        console.log('📛 Category name:', firstCategoryKey);
-        console.log('📦 Category data:', categoryData);
-        console.log('🔍 Category data type:', typeof categoryData);
-        console.log('📋 Is array:', Array.isArray(categoryData));
-        
-        // Update category title
-        $('.greeting-cards-title').text(firstCategoryKey || 'Choose your card');
-        
-        // FIXED: Extract cards array - SIMPLIFIED LOGIC
-        let cards = [];
-        
-        if (Array.isArray(categoryData)) {
-            // Direct array of cards
-            cards = categoryData;
-            console.log('✅ === CATEGORY DATA IS DIRECT ARRAY ===');
-            console.log('🎴 Cards count:', cards.length);
-        } else {
-            console.log('❌ === UNEXPECTED DATA STRUCTURE ===');
-            console.log('Expected array, got:', typeof categoryData);
-            $slider.html('<p style="text-align:center;color:#666;padding:40px;">Unexpected data structure received.</p>');
-            return;
-        }
-        
-        console.log('🎯 === FINAL CARDS PROCESSING ===');
-        console.log('🎴 Cards array:', cards);
-        console.log('🔢 Cards count:', cards ? cards.length : 0);
-        console.log('📋 Cards is array:', Array.isArray(cards));
-        
-        if (!Array.isArray(cards) || cards.length === 0) {
-            console.log('❌ === NO VALID CARDS FOUND ===');
-            $slider.html('<p style="text-align:center;color:#666;padding:40px;">No cards found in this category.</p>');
-            return;
-        }
-        
-        // Render each card with comprehensive error handling
-        let renderedCount = 0;
-        cards.forEach(function(card, index) {
-            console.log(`🎨 === RENDERING CARD ${index} ===`);
-            console.log('🎴 Card object:', card);
+        // Create a slider for each category
+        categoryKeys.forEach(function(categoryName, categoryIndex) {
+            const categoryData = cardsByCategory[categoryName];
             
-            try {
-                // Ensure card is an object
-                if (!card || typeof card !== 'object') {
-                    console.log('❌ Invalid card object at index', index);
-                    return;
-                }
-                
-                // Extract card properties with fallbacks
-                const cardId = String(card.id || card.ID || `card-${index}`);
-                const cardTitle = String(card.title || card.name || card.post_title || `Card ${index + 1}`);
-                const cardPrice = String(card.price || 'FREE');
-                const cardPriceValue = parseFloat(card.price_value || card.priceValue || 0);
-                const cardImg = String(card.img || card.image || card.thumbnail || 'https://images.pexels.com/photos/1666065/pexels-photo-1666065.jpeg?auto=compress&cs=tinysrgb&w=400');
-                
-                console.log('✅ Card properties extracted:');
-                console.log('🆔 ID:', cardId);
-                console.log('📛 Title:', cardTitle);
-                console.log('💰 Price:', cardPrice);
-                console.log('🔢 Price Value:', cardPriceValue);
-                console.log('🖼️ Image:', cardImg);
-                
-                // Create card HTML
-                const $cardItem = $(`
-                    <div class="greeting-card" data-card-id="${cardId}" data-price-value="${cardPriceValue}" role="listitem" tabindex="0">
-                        <img src="${cardImg}" alt="${cardTitle}" class="greeting-card-image" loading="lazy" onerror="this.src='https://images.pexels.com/photos/1666065/pexels-photo-1666065.jpeg?auto=compress&cs=tinysrgb&w=400'">
-                        <div class="greeting-card-content">
-                            <h4 class="greeting-card-title">${cardTitle}</h4>
-                            <p class="greeting-card-price ${cardPriceValue == 0 ? 'free' : ''}">${cardPrice}</p>
+            console.log('🎯 === PROCESSING CATEGORY ===');
+            console.log('📛 Category name:', categoryName);
+            console.log('📦 Category data:', categoryData);
+            console.log('🔍 Category data type:', typeof categoryData);
+            console.log('📋 Is array:', Array.isArray(categoryData));
+            
+            if (!Array.isArray(categoryData) || categoryData.length === 0) {
+                console.log('❌ === SKIPPING EMPTY CATEGORY ===');
+                return;
+            }
+            
+            // Create unique ID for this category slider
+            const sliderId = 'wcflow-cards-slider-' + categoryIndex;
+            const categorySlug = categoryName.toLowerCase().replace(/[^a-z0-9]/g, '-');
+            
+            // Create slider HTML for this category
+            const sliderHtml = `
+                <section class="greeting-cards-section" role="region" aria-label="${categoryName}" data-category="${categorySlug}">
+                    <div class="greeting-cards-container">
+                        <div class="greeting-cards-header">
+                            <h2 class="greeting-cards-title">${categoryName}</h2>
+                            <a href="#" class="greeting-cards-see-all" data-category="${categorySlug}">See all</a>
+                        </div>
+                        
+                        <p class="greeting-cards-description">
+                            Select a beautiful card from our ${categoryName.toLowerCase()} collection.
+                        </p>
+                        
+                        <div class="greeting-cards-slider-wrapper">
+                            <button class="slider-nav slider-nav-prev" aria-label="Previous ${categoryName}" type="button" data-slider="${sliderId}">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M15 18l-6-6 6-6"/>
+                                </svg>
+                            </button>
+                            
+                            <button class="slider-nav slider-nav-next" aria-label="Next ${categoryName}" type="button" data-slider="${sliderId}">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M9 18l6-6-6-6"/>
+                                </svg>
+                            </button>
+                            
+                            <div id="${sliderId}" class="greeting-cards-slider" role="list" data-category="${categorySlug}">
+                                <!-- Cards will be inserted here -->
+                            </div>
+                        </div>
+                        
+                        <div class="slider-controls">
+                            <div class="slider-progress-container">
+                                <div class="slider-progress-bar" role="progressbar" aria-label="${categoryName} progress">
+                                    <div class="slider-progress-fill" data-slider="${sliderId}"></div>
+                                </div>
+                            </div>
+                            <div class="slider-nav-controls">
+                                <button class="slider-nav slider-nav-prev" aria-label="Previous ${categoryName}" type="button" data-slider="${sliderId}">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M15 18l-6-6 6-6"/>
+                                    </svg>
+                                </button>
+                                <button class="slider-nav slider-nav-next" aria-label="Next ${categoryName}" type="button" data-slider="${sliderId}">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M9 18l6-6-6-6"/>
+                                    </svg>
+                                </button>
+                            </div>
                         </div>
                     </div>
-                `);
+                </section>
+            `;
+            
+            // Add slider to container
+            $container.append(sliderHtml);
+            
+            // Get the slider element
+            const $slider = $('#' + sliderId);
+            
+            // Render cards for this category
+            let renderedCount = 0;
+            categoryData.forEach(function(card, index) {
+                console.log(`🎨 === RENDERING CARD ${index} FOR ${categoryName} ===`);
                 
-                $slider.append($cardItem);
-                renderedCount++;
-                
-                console.log(`✅ Card ${index} rendered successfully`);
-                
-            } catch (cardError) {
-                console.error(`💥 Error rendering card ${index}:`, cardError);
+                try {
+                    // Ensure card is an object
+                    if (!card || typeof card !== 'object') {
+                        console.log('❌ Invalid card object at index', index);
+                        return;
+                    }
+                    
+                    // Extract card properties with fallbacks
+                    const cardId = String(card.id || card.ID || `${categorySlug}-card-${index}`);
+                    const cardTitle = String(card.title || card.name || card.post_title || `Card ${index + 1}`);
+                    const cardPrice = String(card.price || 'FREE');
+                    const cardPriceValue = parseFloat(card.price_value || card.priceValue || 0);
+                    const cardImg = String(card.img || card.image || card.thumbnail || 'https://images.pexels.com/photos/1666065/pexels-photo-1666065.jpeg?auto=compress&cs=tinysrgb&w=400');
+                    
+                    console.log('✅ Card properties extracted:');
+                    console.log('🆔 ID:', cardId);
+                    console.log('📛 Title:', cardTitle);
+                    console.log('💰 Price:', cardPrice);
+                    console.log('🔢 Price Value:', cardPriceValue);
+                    console.log('🖼️ Image:', cardImg);
+                    
+                    // Create card HTML
+                    const $cardItem = $(`
+                        <div class="greeting-card" data-card-id="${cardId}" data-price-value="${cardPriceValue}" data-category="${categorySlug}" role="listitem" tabindex="0">
+                            <img src="${cardImg}" alt="${cardTitle}" class="greeting-card-image" loading="lazy" onerror="this.src='https://images.pexels.com/photos/1666065/pexels-photo-1666065.jpeg?auto=compress&cs=tinysrgb&w=400'">
+                            <div class="greeting-card-content">
+                                <h4 class="greeting-card-title">${cardTitle}</h4>
+                                <p class="greeting-card-price ${cardPriceValue == 0 ? 'free' : ''}">${cardPrice}</p>
+                            </div>
+                        </div>
+                    `);
+                    
+                    $slider.append($cardItem);
+                    renderedCount++;
+                    
+                    console.log(`✅ Card ${index} rendered successfully for ${categoryName}`);
+                    
+                } catch (cardError) {
+                    console.error(`💥 Error rendering card ${index} for ${categoryName}:`, cardError);
+                }
+            });
+            
+            console.log(`🎉 === CATEGORY ${categoryName} COMPLETE ===`);
+            console.log('📊 Cards rendered:', renderedCount);
+            
+            // Initialize slider for this category
+            if (renderedCount > 0) {
+                setTimeout(() => initializeCategorySlider(sliderId, categoryName), 100);
             }
         });
         
-        console.log('🎉 === CARDS RENDERING COMPLETE ===');
-        console.log('📊 Total cards rendered:', renderedCount);
+        // Setup global card selection handling
+        setupGlobalCardSelection();
         
-        if (renderedCount === 0) {
-            $slider.html('<p style="text-align:center;color:#666;padding:40px;">Failed to render any cards.</p>');
+        console.log('🎉 === ALL CATEGORY SLIDERS RENDERED ===');
+    }
+    
+    // FIXED: Render fallback category sliders
+    function renderFallbackCategorySliders() {
+        console.log('🔄 === RENDERING FALLBACK CATEGORY SLIDERS ===');
+        
+        const fallbackData = {
+            'Birthday Cards': [
+                {
+                    id: 'fallback-birthday-1',
+                    title: 'Happy Birthday Balloons',
+                    price: 'FREE',
+                    price_value: 0,
+                    img: 'https://images.pexels.com/photos/1666065/pexels-photo-1666065.jpeg?auto=compress&cs=tinysrgb&w=400'
+                },
+                {
+                    id: 'fallback-birthday-2',
+                    title: 'Birthday Cake Celebration',
+                    price: '€1.50',
+                    price_value: 1.50,
+                    img: 'https://images.pexels.com/photos/1040173/pexels-photo-1040173.jpeg?auto=compress&cs=tinysrgb&w=400'
+                },
+                {
+                    id: 'fallback-birthday-3',
+                    title: 'Birthday Wishes',
+                    price: '€2.50',
+                    price_value: 2.50,
+                    img: 'https://images.pexels.com/photos/1729931/pexels-photo-1729931.jpeg?auto=compress&cs=tinysrgb&w=400'
+                }
+            ],
+            'Holiday Cards': [
+                {
+                    id: 'fallback-holiday-1',
+                    title: 'Season Greetings',
+                    price: 'FREE',
+                    price_value: 0,
+                    img: 'https://images.pexels.com/photos/1729931/pexels-photo-1729931.jpeg?auto=compress&cs=tinysrgb&w=400'
+                },
+                {
+                    id: 'fallback-holiday-2',
+                    title: 'Winter Wonderland',
+                    price: '€1.25',
+                    price_value: 1.25,
+                    img: 'https://images.pexels.com/photos/1040173/pexels-photo-1040173.jpeg?auto=compress&cs=tinysrgb&w=400'
+                }
+            ],
+            'Thank You Cards': [
+                {
+                    id: 'fallback-thanks-1',
+                    title: 'Thank You So Much',
+                    price: 'FREE',
+                    price_value: 0,
+                    img: 'https://images.pexels.com/photos/1666065/pexels-photo-1666065.jpeg?auto=compress&cs=tinysrgb&w=400'
+                }
+            ]
+        };
+        
+        renderCategorySliders(fallbackData);
+    }
+    
+    // FIXED: Initialize individual category slider
+    function initializeCategorySlider(sliderId, categoryName) {
+        const $sliderWrapper = $(`#${sliderId}`).closest('.greeting-cards-slider-wrapper');
+        const $slider = $(`#${sliderId}`);
+        const $prevBtns = $(`[data-slider="${sliderId}"].slider-nav-prev`);
+        const $nextBtns = $(`[data-slider="${sliderId}"].slider-nav-next`);
+        const $progressFill = $(`.slider-progress-fill[data-slider="${sliderId}"]`);
+        
+        if (!$slider.length || $slider.find('.greeting-card').length === 0) {
+            console.log(`❌ Slider ${sliderId} not found or no cards available`);
             return;
         }
         
-        // Handle card selection with toggle functionality
+        let currentIndex = 0;
+        const cardWidth = 256; // 240px + 16px gap
+        const containerWidth = $sliderWrapper.width();
+        const visibleCards = Math.floor(containerWidth / cardWidth);
+        const totalCards = $slider.find('.greeting-card').length;
+        const maxIndex = Math.max(0, totalCards - visibleCards);
+        
+        console.log(`🎯 Slider ${categoryName} initialized:`, {
+            containerWidth: containerWidth,
+            visibleCards: visibleCards,
+            totalCards: totalCards,
+            maxIndex: maxIndex
+        });
+        
+        function updateSlider() {
+            const translateX = -currentIndex * cardWidth;
+            $slider.css('transform', `translateX(${translateX}px)`);
+            
+            // Update navigation
+            $prevBtns.toggleClass('disabled', currentIndex === 0);
+            $nextBtns.toggleClass('disabled', currentIndex >= maxIndex);
+            
+            // Update progress
+            if (maxIndex > 0) {
+                const progress = (currentIndex / maxIndex) * 100;
+                $progressFill.css('width', progress + '%');
+            } else {
+                $progressFill.css('width', '100%');
+            }
+            
+            console.log(`🎯 Slider ${categoryName} updated:`, {currentIndex: currentIndex, translateX: translateX});
+        }
+        
+        // Navigation handlers
+        $prevBtns.off('click').on('click', function() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                updateSlider();
+            }
+        });
+        
+        $nextBtns.off('click').on('click', function() {
+            if (currentIndex < maxIndex) {
+                currentIndex++;
+                updateSlider();
+            }
+        });
+        
+        // Initial update
+        updateSlider();
+        
+        // Store slider instance
+        sliderInstances[sliderId] = {
+            currentIndex: currentIndex,
+            maxIndex: maxIndex,
+            updateSlider: updateSlider,
+            goToSlide: function(index) {
+                currentIndex = Math.max(0, Math.min(index, maxIndex));
+                updateSlider();
+            }
+        };
+        
+        console.log(`✅ Slider ${categoryName} fully initialized`);
+    }
+    
+    // FIXED: Setup global card selection handling across all category sliders
+    function setupGlobalCardSelection() {
+        console.log('🎯 === SETTING UP GLOBAL CARD SELECTION ===');
+        
+        // Handle card selection with toggle functionality across ALL sliders
         $(document).off('click', '.greeting-card').on('click', '.greeting-card', function() {
             const $card = $(this);
+            const cardCategory = $card.data('category');
+            
+            console.log('🎯 Card clicked:', {
+                id: $card.data('card-id'),
+                category: cardCategory,
+                currentlySelected: $card.hasClass('selected')
+            });
             
             // Toggle selection
             if ($card.hasClass('selected')) {
@@ -469,8 +623,10 @@ jQuery(function($) {
                 // Clear card from order state
                 delete orderState.card_id;
                 delete orderState.card_message;
+                
+                console.log('🎯 Card deselected');
             } else {
-                // Remove previous selection
+                // Remove previous selection from ALL sliders
                 $('.greeting-card').removeClass('selected');
                 
                 // Select new card
@@ -479,6 +635,8 @@ jQuery(function($) {
                 // Enable message textarea
                 $('#wcflow-card-message').prop('disabled', false);
                 $('.wcflow-message-note').hide();
+                
+                console.log('🎯 Card selected:', $card.data('card-id'));
             }
             
             updateOrderState();
@@ -486,90 +644,13 @@ jQuery(function($) {
             
             debug('Card selection toggled', {
                 id: $card.data('card-id'),
+                category: cardCategory,
                 selected: $card.hasClass('selected'),
                 price: $card.data('price-value')
             });
         });
         
-        console.log('🎉 === SLIDER SETUP COMPLETE ===');
-    }
-    
-    // Initialize slider functionality with enhanced features
-    function initializeSlider() {
-        const $sliderWrapper = $('.greeting-cards-slider-wrapper');
-        const $slider = $('#wcflow-cards-slider');
-        const $prevBtn = $('.slider-nav-prev');
-        const $nextBtn = $('.slider-nav-next');
-        const $progressFill = $('.slider-progress-fill');
-        
-        if (!$slider.length || $slider.find('.greeting-card').length === 0) {
-            debug('Slider not found or no cards available');
-            return;
-        }
-        
-        let currentIndex = 0;
-        const cardWidth = 256; // 240px + 16px gap
-        const containerWidth = $sliderWrapper.width();
-        const visibleCards = Math.floor(containerWidth / cardWidth);
-        const totalCards = $slider.find('.greeting-card').length;
-        const maxIndex = Math.max(0, totalCards - visibleCards);
-        
-        debug('Slider initialized', {
-            containerWidth: containerWidth,
-            visibleCards: visibleCards,
-            totalCards: totalCards,
-            maxIndex: maxIndex
-        });
-        
-        function updateSlider() {
-            const translateX = -currentIndex * cardWidth;
-            $slider.css('transform', `translateX(${translateX}px)`);
-            
-            // Update navigation
-            $prevBtn.toggleClass('disabled', currentIndex === 0);
-            $nextBtn.toggleClass('disabled', currentIndex >= maxIndex);
-            
-            // Update progress
-            if (maxIndex > 0) {
-                const progress = (currentIndex / maxIndex) * 100;
-                $progressFill.css('width', progress + '%');
-            } else {
-                $progressFill.css('width', '100%');
-            }
-            
-            debug('Slider updated', {currentIndex: currentIndex, translateX: translateX});
-        }
-        
-        // Navigation handlers
-        $prevBtn.off('click').on('click', function() {
-            if (currentIndex > 0) {
-                currentIndex--;
-                updateSlider();
-            }
-        });
-        
-        $nextBtn.off('click').on('click', function() {
-            if (currentIndex < maxIndex) {
-                currentIndex++;
-                updateSlider();
-            }
-        });
-        
-        // Initial update
-        updateSlider();
-        
-        // Store slider instance
-        sliderInstance = {
-            currentIndex: currentIndex,
-            maxIndex: maxIndex,
-            updateSlider: updateSlider,
-            goToSlide: function(index) {
-                currentIndex = Math.max(0, Math.min(index, maxIndex));
-                updateSlider();
-            }
-        };
-        
-        debug('Slider fully initialized and ready');
+        console.log('✅ Global card selection setup complete');
     }
     
     // Initialize floating labels
@@ -665,7 +746,7 @@ jQuery(function($) {
         });
     }
     
-    // Load shipping methods for Step 2 with comprehensive error handling
+    // Load shipping methods for Step 2
     function loadShippingMethodsForStep2() {
         const $selector = $('#wcflow-shipping-method-selector');
         const $valueSpan = $selector.find('.selectable-box-value');
@@ -687,7 +768,7 @@ jQuery(function($) {
                 action: 'wcflow_get_shipping_methods',
                 nonce: wcflow_params.nonce
             },
-            timeout: 15000, // 15 second timeout
+            timeout: 15000,
             success: function(response) {
                 clearTimeout(loadingTimeout);
                 debug('Shipping methods response received', response);
@@ -976,11 +1057,17 @@ jQuery(function($) {
         });
         orderState.addons = selectedAddons;
         
-        // Selected card
+        // Selected card (from ANY category slider)
         const $selectedCard = $('.greeting-card.selected');
         if ($selectedCard.length) {
             orderState.card_id = $selectedCard.data('card-id');
+            orderState.card_category = $selectedCard.data('category');
             orderState.card_message = $('#wcflow-card-message').val();
+        } else {
+            // Clear card data if no card selected
+            delete orderState.card_id;
+            delete orderState.card_category;
+            delete orderState.card_message;
         }
         
         // Payment method
@@ -1013,7 +1100,7 @@ jQuery(function($) {
         }
     });
     
-    // Start flow with proper base price and shipping calculation
+    // Start flow
     $(document).on('click', '.wcflow-start-btn', function(e) {
         e.preventDefault();
         
@@ -1147,5 +1234,5 @@ jQuery(function($) {
         }
     });
     
-    debug('WCFlow JavaScript initialized with bulletproof admin connection');
+    debug('WCFlow JavaScript initialized with category-based sliders');
 });

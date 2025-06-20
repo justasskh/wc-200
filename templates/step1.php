@@ -1,7 +1,7 @@
 <?php
 /**
- * WooCommerce Gifting Flow Step 1 - Complete with progress bar and controls
- * Updated: 2025-01-27 - Dynamic category display from database with fixed layout
+ * WooCommerce Gifting Flow Step 1 - Category-Based Sliders
+ * Updated: 2025-01-27 - Multiple sliders for different card categories
  */
 ?>
 <div class="wcflow-modal wcflow-fullscreen" data-step="1">
@@ -46,59 +46,10 @@
             </div>
         </div>
         
-        <!-- Complete Greeting Cards Slider with dynamic content and fixed layout -->
-        <section class="greeting-cards-section" role="region" aria-label="Greeting Cards">
-            <div class="greeting-cards-container">
-                <div class="greeting-cards-header">
-                    <h2 class="greeting-cards-title">Choose your card</h2>
-                    <a href="#" class="greeting-cards-see-all">See all</a>
-                </div>
-                
-                <p class="greeting-cards-description">
-                    Select a beautiful card to accompany your gift.
-                </p>
-                
-                <div class="greeting-cards-slider-wrapper">
-                    <!-- Main navigation arrows (overlay style) -->
-                    <button class="slider-nav slider-nav-prev" aria-label="Previous cards" type="button">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M15 18l-6-6 6-6"/>
-                        </svg>
-                    </button>
-                    
-                    <button class="slider-nav slider-nav-next" aria-label="Next cards" type="button">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M9 18l6-6-6-6"/>
-                        </svg>
-                    </button>
-                    
-                    <div id="wcflow-cards-slider" class="greeting-cards-slider" role="list">
-                        <div class="wcflow-loader"></div>
-                    </div>
-                </div>
-                
-                <!-- Progress bar and navigation controls as shown in image -->
-                <div class="slider-controls">
-                    <div class="slider-progress-container">
-                        <div class="slider-progress-bar" role="progressbar" aria-label="Slider progress">
-                            <div class="slider-progress-fill"></div>
-                        </div>
-                    </div>
-                    <div class="slider-nav-controls">
-                        <button class="slider-nav slider-nav-prev" aria-label="Previous cards" type="button">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M15 18l-6-6 6-6"/>
-                            </svg>
-                        </button>
-                        <button class="slider-nav slider-nav-next" aria-label="Next cards" type="button">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M9 18l6-6-6-6"/>
-                            </svg>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </section>
+        <!-- FIXED: Container for multiple category-based sliders -->
+        <div id="wcflow-cards-container" class="wcflow-cards-container">
+            <div class="wcflow-loader"></div>
+        </div>
 
         <div class="wcflow-content-wrapper">
             <section class="wcflow-message-section">

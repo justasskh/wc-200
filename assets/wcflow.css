@@ -1,5 +1,5 @@
 /* WooCommerce Gifting Flow - Main Styles */
-/* FIXED: 2025-01-27 - Complete rebuild with proper modal positioning and slider */
+/* FIXED: 2025-01-27 - Category-based sliders with proper spacing */
 
 /* Reset and base styles */
 * {
@@ -292,7 +292,13 @@ body.wcflow-modal-open {
     margin: 0;
 }
 
-/* FIXED: Greeting Cards Slider Styles with proper alignment */
+/* FIXED: Cards Container for Multiple Category Sliders */
+.wcflow-cards-container {
+    margin: 60px 0;
+    position: relative;
+}
+
+/* FIXED: Greeting Cards Slider Styles for Category-Based Display */
 .greeting-cards-section {
     margin: 60px 0;
     position: relative;
